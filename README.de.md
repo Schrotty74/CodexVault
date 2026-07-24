@@ -24,6 +24,8 @@ anpassen.
 - Ein vollständiges lokales ZIP-Backup der erkannten Codex-Daten und der
   konfigurierten Projektordner mit Fortschritt, Prüfung, datierter Kopie und
   `latest`-Kopie erstellen.
+- Mehrere Projektordner zu einer dauerhaft gespeicherten Full-Backup-Liste
+  hinzufügen und einzelne Ordner entfernen, ohne die übrige Auswahl zu ersetzen.
 - Pro Quelle die drei neuesten datierten vollständigen Backups erst nach
   sichtbarer Bestätigung behalten oder ältere löschen; es gibt keine stille
   Bereinigung.
@@ -32,8 +34,17 @@ anpassen.
   entfernen.
 - Vier Darstellungen verwenden: Liquid Glass, Full Glass, Graphite & Lime und
   Midnight.
+- Die App-Oberfläche auf Englisch (Standard) oder Deutsch verwenden. Die
+  gewählte Sprache steuert ebenfalls den KI-Hilfe-Prompt und das geöffnete
+  öffentliche Handbuch.
 - Dev-, Beta- und Final-Builds mit getrennten Bundle-IDs und Datencontainern
   verwenden.
+- Eine Erststart-Ansicht anzeigen, solange noch keine eigene Auswahl,
+  Konfiguration oder Backup-Inhalte vorhanden sind. Die Overview hält diese
+  KI-Hilfe auch nach der Einrichtung dauerhaft bereit: Sie kann das öffentliche
+  Handbuch öffnen oder eine allgemeine, sprachabhängige Hilfefrage kopieren und
+  danach ChatGPT, Google Gemini oder Claude öffnen. App-Inhalte werden nie
+  automatisch gesendet.
 
 ## Dokumentation
 

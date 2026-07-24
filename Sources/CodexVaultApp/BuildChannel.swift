@@ -17,7 +17,7 @@ enum BuildChannel: String {
 
     var displayName: String {
         switch self {
-        case .dev: "Local development"
+        case .dev: CodexVaultLocalization.text("Local development")
         case .beta: "Beta"
         case .final: "Final"
         }

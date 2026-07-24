@@ -169,7 +169,7 @@ struct BackupEngine {
             }
             let start = Double(index) / Double(sources.count)
             let name = profile.url.lastPathComponent == ".codex" ? "Codex" : profile.url.lastPathComponent
-            progress(CompleteBackupProgress(fractionCompleted: start + 0.03, message: "Preparing \(name)…"))
+            progress(CompleteBackupProgress(fractionCompleted: start + 0.03, message: "\(CodexVaultLocalization.text("Preparing")) \(name)…"))
             let zipURL = destination.appendingPathComponent("\(profile.archiveBase)_\(timestamp).zip")
             let latestURL = destination.appendingPathComponent("\(profile.archiveBase)_latest.zip")
             let fileListURL = try makeCompleteBackupFileList(
@@ -178,21 +178,21 @@ struct BackupEngine {
                 copiedByteCount: &copiedByteCount
             )
             defer { try? fileManager.removeItem(at: fileListURL) }
-            progress(CompleteBackupProgress(fractionCompleted: start + 0.15, message: "Creating \(name) ZIP…"))
+            progress(CompleteBackupProgress(fractionCompleted: start + 0.15, message: "\(CodexVaultLocalization.text("Creating")) \(name) ZIP…"))
             try runZip(zipURL: zipURL, sourceRoot: profile.url, fileListURL: fileListURL)
-            progress(CompleteBackupProgress(fractionCompleted: start + 0.35, message: "Verifying \(name) ZIP…"))
+            progress(CompleteBackupProgress(fractionCompleted: start + 0.35, message: "\(CodexVaultLocalization.text("Verifying")) \(name) ZIP…"))
             try runTool("/usr/bin/unzip", arguments: ["-tq", zipURL.path])
             if fileManager.fileExists(atPath: latestURL.path) {
                 try fileManager.removeItem(at: latestURL)
             }
             try fileManager.copyItem(at: zipURL, to: latestURL)
             zipURLs.append(zipURL)
-            progress(CompleteBackupProgress(fractionCompleted: Double(index + 1) / Double(sources.count), message: "\(name) backup completed."))
+            progress(CompleteBackupProgress(fractionCompleted: Double(index + 1) / Double(sources.count), message: "\(name) \(CodexVaultLocalization.text("backup completed."))"))
         }
 
         guard !zipURLs.isEmpty else { throw BackupError.noSources }
 
-        progress(CompleteBackupProgress(fractionCompleted: 1, message: "Complete backup verified."))
+        progress(CompleteBackupProgress(fractionCompleted: 1, message: CodexVaultLocalization.text("Complete backup verified.")))
         return CompleteBackupSummary(
             zipURLs: zipURLs,
             createdAt: createdAt,
@@ -257,8 +257,8 @@ struct BackupEngine {
         for item in items {
             let currentProject = indexedProjectName(for: item.url, in: projectIndex)
                 ?? parentThreadID(in: item.url).flatMap { projectIndex[$0] }
-            let sourceFolder = sessionWorkingFolder(in: item.url) ?? "Unknown local source"
-            let projectName = currentProject ?? "Earlier local work: \(sourceFolder)"
+            let sourceFolder = sessionWorkingFolder(in: item.url) ?? CodexVaultLocalization.text("Unknown local source")
+            let projectName = currentProject ?? "\(CodexVaultLocalization.text("Earlier local work:")) \(sourceFolder)"
             if currentProject == nil {
                 let relativePath = item.url.path.replacingOccurrences(of: sessionsRoot.path + "/", with: "")
                 unassignedRecords.append(UnassignedSessionRecord(
@@ -407,20 +407,20 @@ struct BackupEngine {
 
     private func codexStorageCategory(for firstComponent: String, relativePath: String) -> String {
         return switch firstComponent {
-        case "sessions": "Active sessions"
-        case "archived_sessions": "Archived sessions"
-        case "sqlite": "SQLite databases"
-        case "plugins": "Plugins"
-        case "pet-runs": "Pet runs"
-        case "generated_images": "Generated images"
-        case "pets": "Pets"
-        case ".tmp", "tmp": "Temporary data"
-        case "cache", "caches", "models_cache": "Caches"
+        case "sessions": CodexVaultLocalization.text("Active sessions")
+        case "archived_sessions": CodexVaultLocalization.text("Archived sessions")
+        case "sqlite": CodexVaultLocalization.text("SQLite databases")
+        case "plugins": CodexVaultLocalization.text("Plugins")
+        case "pet-runs": CodexVaultLocalization.text("Pet runs")
+        case "generated_images": CodexVaultLocalization.text("Generated images")
+        case "pets": CodexVaultLocalization.text("Pets")
+        case ".tmp", "tmp": CodexVaultLocalization.text("Temporary data")
+        case "cache", "caches", "models_cache": CodexVaultLocalization.text("Caches")
         default:
             if relativePath.hasSuffix(".sqlite") || relativePath.contains(".sqlite-") {
-                "SQLite databases"
+                CodexVaultLocalization.text("SQLite databases")
             } else {
-                "Other Codex data"
+                CodexVaultLocalization.text("Other Codex data")
             }
         }
     }

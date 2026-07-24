@@ -6,8 +6,8 @@ enum BackupSourceKind: String, Codable, CaseIterable, Sendable {
 
     var title: String {
         switch self {
-        case .project: "Project"
-        case .folder: "Additional folder"
+        case .project: CodexVaultLocalization.text("Project")
+        case .folder: CodexVaultLocalization.text("Additional folder")
         }
     }
 }
@@ -168,12 +168,12 @@ enum BackupError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .noSources: "Choose at least one source before creating a backup."
-        case .destinationUnavailable: "Choose a writable backup destination."
-        case .verificationFailed: "The backup was created but did not pass the integrity check."
-        case .invalidBackup: "This CodexVault package could not be verified."
-        case .noRestoreSelection: "Choose at least one source to restore."
-        case let .completeBackupFailed(reason): "The complete backup could not be created: \(reason)"
+        case .noSources: CodexVaultLocalization.text("Choose at least one source before creating a backup.")
+        case .destinationUnavailable: CodexVaultLocalization.text("Choose a writable backup destination.")
+        case .verificationFailed: CodexVaultLocalization.text("The backup was created but did not pass the integrity check.")
+        case .invalidBackup: CodexVaultLocalization.text("This CodexVault package could not be verified.")
+        case .noRestoreSelection: CodexVaultLocalization.text("Choose at least one source to restore.")
+        case let .completeBackupFailed(reason): "\(CodexVaultLocalization.text("The complete backup could not be created:")) \(reason)"
         }
     }
 }

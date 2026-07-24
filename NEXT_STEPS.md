@@ -7,13 +7,14 @@ Dieses Dokument enthält nur Punkte, die aus dem aktuellen Quellcode oder der be
 ## Priorität 1
 
 - Die Archivansicht persistent machen oder klar als Sitzungsübersicht umbenennen. Derzeit werden frühere Backup-Pakete nach einem Neustart nicht erneut eingelesen.
-- Die sichtbaren UI-Texte konsistent lokalisieren; die Oberfläche ist aktuell überwiegend Englisch.
-- Den Normal- und Full-Backup-Ablauf mit realistischen, künstlichen Testdaten manuell durchtesten, insbesondere Wiederherstellung und die Auswahl mehrerer Projektordner. Ein aktuelles Ergebnis ist nicht dokumentiert.
+- Die deutsche und englische Oberfläche mit einem manuellen Durchgang aller Ansichten und Dateiauswahl-Dialoge prüfen. Ein aktuelles Ergebnis ist nicht dokumentiert.
+- Den Normal- und Full-Backup-Ablauf mit realistischen, künstlichen Testdaten manuell durchtesten, insbesondere Wiederherstellung und Verwaltung der konfigurierten Projektliste. Ein aktuelles Ergebnis ist nicht dokumentiert.
 
 ## Priorität 2
 
 - Die Projekterkennung für vollständige Backups mit transparenten Regeln und einer verständlichen Vorschau erweitern.
 - Die Testabdeckung für Wiederherstellung, ältere Manifest-Schemata, Aufbewahrung und die ausgewählte Entfernung nicht zugeordneter lokaler Datensätze ausbauen.
+- Die Erststart-Ansicht manuell mit einer leeren lokalen Konfiguration testen, einschließlich fehlender konfigurierter Projektpfade, Logo-Darstellung, Zwischenablage und der sichtbaren Bestätigung vor dem Öffnen eines externen Dienstes. Ein Ergebnis ist nicht dokumentiert.
 
 ## Nicht entschieden oder nicht implementiert
 

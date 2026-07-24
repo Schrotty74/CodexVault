@@ -3,6 +3,79 @@ import XCTest
 @testable import CodexVaultApp
 
 final class BackupEngineTests: XCTestCase {
+    func testSelectedAppLanguageControlsManualPromptAndLocalizedText() {
+        let defaults = UserDefaults.standard
+        let previous = defaults.object(forKey: CodexVaultLanguage.storageKey)
+        defer {
+            if let previous {
+                defaults.set(previous, forKey: CodexVaultLanguage.storageKey)
+            } else {
+                defaults.removeObject(forKey: CodexVaultLanguage.storageKey)
+            }
+        }
+
+        defaults.set(CodexVaultLanguage.english.rawValue, forKey: CodexVaultLanguage.storageKey)
+        XCTAssertEqual(CodexVaultLanguage.current, .english)
+        XCTAssertTrue(CodexVaultHelpLinks.manualURL(for: .english).absoluteString.hasSuffix("CodexVault-Manual-EN.pdf"))
+
+        defaults.set(CodexVaultLanguage.german.rawValue, forKey: CodexVaultLanguage.storageKey)
+        XCTAssertEqual(CodexVaultLanguage.current, .german)
+        XCTAssertEqual(CodexVaultLocalization.text("Settings"), "Einstellungen")
+        XCTAssertTrue(CodexVaultHelpLinks.aiPrompt(for: .german).contains("Ich habe CodexVault"))
+    }
+
+    func testAIHelpUsesOnlyTheThreeExpectedServiceURLs() {
+        let expectedHosts = ["chatgpt.com", "gemini.google.com", "claude.ai"]
+        XCTAssertEqual(CodexVaultAIHelpService.allCases.compactMap(\.url.host), expectedHosts)
+        XCTAssertEqual(CodexVaultAIHelpService.allCases.compactMap(\.url.scheme), ["https", "https", "https"])
+    }
+
+    func testAIHelpPromptIsGeneralAndDoesNotContainLocalOrSensitiveData() {
+        for language in CodexVaultLanguage.allCases {
+            let prompt = CodexVaultHelpLinks.aiPrompt(for: language)
+            XCTAssertTrue(prompt.contains(CodexVaultHelpLinks.manualURL(for: language).absoluteString))
+            XCTAssertTrue(prompt.contains("CodexVault"))
+            XCTAssertTrue(prompt.localizedCaseInsensitiveContains("do not invent") || prompt.localizedCaseInsensitiveContains("erfinde keine"))
+            XCTAssertTrue(prompt.localizedCaseInsensitiveContains(language == .german ? "lokale macOS" : "local macOS"))
+            for prohibitedFragment in ["/Users/", "~/.codex", "token", "password", "credential", "license"] {
+                XCTAssertFalse(prompt.localizedCaseInsensitiveContains(prohibitedFragment))
+            }
+        }
+    }
+
+    func testAIHelpUsesTheManualForTheSelectedLanguage() {
+        XCTAssertTrue(CodexVaultHelpLinks.manualURL(for: .german).absoluteString.hasSuffix("CodexVault-Handbuch-DE.pdf"))
+        XCTAssertTrue(CodexVaultHelpLinks.manualURL(for: .english).absoluteString.hasSuffix("CodexVault-Manual-EN.pdf"))
+    }
+
+    func testCompleteBackupCreatesOneVerifiedArchiveForEachProjectFolder() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let firstProject = root.appendingPathComponent("FirstProject", isDirectory: true)
+        let secondProject = root.appendingPathComponent("SecondProject", isDirectory: true)
+        let destination = root.appendingPathComponent("destination", isDirectory: true)
+        try FileManager.default.createDirectory(at: firstProject, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: secondProject, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        try Data("first".utf8).write(to: firstProject.appendingPathComponent("first.txt"))
+        try Data("second".utf8).write(to: secondProject.appendingPathComponent("second.txt"))
+
+        let summary = try BackupEngine().createCompleteBackup(
+            sources: [
+                CompleteBackupSource(url: firstProject, archiveBase: "first_project_backup", kind: .ordnung),
+                CompleteBackupSource(url: secondProject, archiveBase: "second_project_backup", kind: .ordnung),
+            ],
+            destination: destination
+        )
+
+        XCTAssertEqual(summary.zipURLs.count, 2)
+        XCTAssertEqual(summary.fileCount, 2)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: destination.appendingPathComponent("first_project_backup_latest.zip").path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: destination.appendingPathComponent("second_project_backup_latest.zip").path))
+    }
+
     func testCompleteBackupCreatesVerifiedZipAndKeepsConfigurationFiles() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)

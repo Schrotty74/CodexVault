@@ -24,11 +24,11 @@ private enum AppSection: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .overview: "Overview"
-        case .backup: "Backup"
-        case .restore: "Restore"
-        case .archive: "Archive"
-        case .settings: "Settings"
+        case .overview: CodexVaultLocalization.text("Overview")
+        case .backup: CodexVaultLocalization.text("Backup")
+        case .restore: CodexVaultLocalization.text("Restore")
+        case .archive: CodexVaultLocalization.text("Archive")
+        case .settings: CodexVaultLocalization.text("Settings")
         }
     }
 
@@ -102,6 +102,11 @@ private struct CodexVaultRootView: View {
     @State private var selectedSection: AppSection? = .overview
     @State private var selectedTheme: DisplayTheme = .liquidGlass
     @State private var backupCoordinator = BackupCoordinator()
+    @AppStorage(CodexVaultLanguage.storageKey) private var selectedLanguageRaw = CodexVaultLanguage.english.rawValue
+
+    private var selectedLanguage: CodexVaultLanguage {
+        CodexVaultLanguage(rawValue: selectedLanguageRaw) ?? .english
+    }
 
     var body: some View {
         ZStack {
@@ -130,6 +135,7 @@ private struct CodexVaultRootView: View {
             }
         }
         .tint(selectedTheme.tint)
+        .environment(\.locale, selectedLanguage.locale)
     }
 
     @ViewBuilder
@@ -148,8 +154,14 @@ private struct CodexVaultRootView: View {
     private var detail: some View {
         switch selectedSection ?? .overview {
         case .overview:
-            OverviewView(theme: selectedTheme) {
-                selectedSection = .backup
+            if backupCoordinator.hasOwnContent {
+                OverviewView(theme: selectedTheme) {
+                    selectedSection = .backup
+                }
+            } else {
+                CodexVaultFirstStartView(theme: selectedTheme) {
+                    selectedSection = .backup
+                }
             }
         case .backup:
             BackupView(theme: selectedTheme, coordinator: backupCoordinator)
@@ -160,6 +172,134 @@ private struct CodexVaultRootView: View {
         case .settings:
             SettingsView(selectedTheme: $selectedTheme)
         }
+    }
+}
+
+private struct CodexVaultFirstStartView: View {
+    let theme: DisplayTheme
+    let onStartSetup: () -> Void
+
+    @State private var pendingAIService: CodexVaultAIHelpService?
+
+    private var language: CodexVaultLanguage {
+        CodexVaultLanguage.current
+    }
+
+    private var title: String {
+        language == .german ? "Willkommen bei CodexVault" : "Welcome to CodexVault"
+    }
+
+    private var introduction: String {
+        language == .german
+            ? "CodexVault sichert ausgewählte Ordner lokal und stellt sie geprüft wieder her. Beginne mit einer eigenen Auswahl - nichts wird automatisch hochgeladen oder gesichert."
+            : "CodexVault backs up selected folders locally and restores them after verification. Start with your own selection - nothing is uploaded or backed up automatically."
+    }
+
+    private var startTitle: String {
+        language == .german ? "Backup einrichten" : "Set up backup"
+    }
+
+    private var manualTitle: String {
+        language == .german ? "Handbuch öffnen" : "Open manual"
+    }
+
+    private var privacyText: String {
+        language == .german
+            ? "Es wird nur eine allgemeine Frage in die Zwischenablage kopiert. CodexVault sendet keine persönlichen Daten automatisch an einen KI-Dienst."
+            : "Only a general question is copied to the clipboard. CodexVault never sends personal data to an AI service automatically."
+    }
+
+    var body: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "archivebox.fill")
+                .font(.system(size: 60))
+                .foregroundStyle(theme.tint)
+                .frame(width: 100, height: 100)
+                .background(theme.tint.opacity(0.14), in: Circle())
+
+            Text(title)
+                .font(.largeTitle.bold())
+
+            Text(introduction)
+                .font(.title3)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 620)
+
+            Button(action: onStartSetup) {
+                Label(startTitle, systemImage: "folder.badge.plus")
+            }
+            .buttonStyle(.borderedProminent)
+
+            Divider()
+                .frame(maxWidth: 620)
+                .padding(.vertical, 4)
+
+            Text(language == .german ? "KI-Hilfe zum Einstieg" : "AI help for getting started")
+                .font(.headline)
+            Text(language == .german
+                 ? "Wähle einen Dienst. Die vorbereitete Frage wird kopiert; füge sie dort selbst mit ⌘V ein."
+                 : "Choose a service. The prepared question is copied; paste it there yourself with ⌘V.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+
+            HStack(spacing: 12) {
+                Button {
+                    NSWorkspace.shared.open(CodexVaultHelpLinks.manualURL(for: language))
+                } label: {
+                    Label(manualTitle, systemImage: "book")
+                }
+                .buttonStyle(.bordered)
+
+                ForEach(CodexVaultAIHelpService.allCases) { service in
+                    Button {
+                        pendingAIService = service
+                    } label: {
+                        HStack(spacing: 7) {
+                            Image(nsImage: codexVaultAIHelpLogo(for: service))
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18, height: 18)
+                                .accessibilityHidden(true)
+                            Text(service.title)
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+
+            Label(privacyText, systemImage: "hand.raised.fill")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: 620, alignment: .leading)
+                .padding(.top, 6)
+        }
+        .padding(34)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .alert(item: $pendingAIService) { service in
+            Alert(
+                title: Text(language == .german ? "\(service.title) öffnen" : "Open \(service.title)"),
+                message: Text(
+                    language == .german
+                        ? "CodexVault kopiert eine vorbereitete allgemeine Frage und öffnet \(service.title). Füge die Frage dort selbst mit ⌘V ein."
+                        : "CodexVault copies a prepared general question and opens \(service.title). Paste the question there yourself with ⌘V."
+                ),
+                primaryButton: .default(Text(language == .german ? "Kopieren und öffnen" : "Copy and open")) {
+                    copyPromptAndOpen(service)
+                },
+                secondaryButton: .cancel(Text(language == .german ? "Abbrechen" : "Cancel"))
+            )
+        }
+    }
+
+    private func copyPromptAndOpen(_ service: CodexVaultAIHelpService) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(
+            CodexVaultHelpLinks.aiPrompt(for: language),
+            forType: .string
+        )
+        NSWorkspace.shared.open(service.url)
     }
 }
 
@@ -217,12 +357,12 @@ private struct OverviewView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Header(title: "Your workspace, protected.", subtitle: "CodexVault is ready when you are.")
+                Header(title: CodexVaultLocalization.text("Your workspace, protected."), subtitle: CodexVaultLocalization.text("CodexVault is ready when you are."))
 
                 HStack(spacing: 16) {
-                    MetricCard(icon: "clock.arrow.circlepath", title: "Last backup", value: "Not created", tint: theme.tint)
-                    MetricCard(icon: "shield", title: "Protected", value: "No sources", tint: theme.tint)
-                    MetricCard(icon: "externaldrive", title: "Storage", value: "0 bytes", tint: theme.tint)
+                    MetricCard(icon: "clock.arrow.circlepath", title: CodexVaultLocalization.text("Last backup"), value: CodexVaultLocalization.text("Not created"), tint: theme.tint)
+                    MetricCard(icon: "shield", title: CodexVaultLocalization.text("Protected"), value: CodexVaultLocalization.text("No sources"), tint: theme.tint)
+                    MetricCard(icon: "externaldrive", title: CodexVaultLocalization.text("Storage"), value: "0 bytes", tint: theme.tint)
                 }
 
                 SurfaceCard {
@@ -247,6 +387,8 @@ private struct OverviewView: View {
                     .padding(24)
                 }
 
+                CodexVaultAIHelpCard()
+
                 SurfaceCard {
                     VStack(alignment: .leading, spacing: 0) {
                         Label("Activity", systemImage: "list.bullet.rectangle")
@@ -267,6 +409,70 @@ private struct OverviewView: View {
     }
 }
 
+private struct CodexVaultAIHelpCard: View {
+    @State private var pendingAIService: CodexVaultAIHelpService?
+
+    private var language: CodexVaultLanguage { CodexVaultLanguage.current }
+
+    var body: some View {
+        SurfaceCard {
+            VStack(alignment: .leading, spacing: 12) {
+                Label(language == .german ? "KI-Hilfe" : "AI help", systemImage: "sparkles")
+                    .font(.headline)
+                Text(language == .german
+                     ? "Allgemeine Einstiegsfrage kopieren und bei Bedarf selbst in einen KI-Dienst einfügen."
+                     : "Copy a general getting-started question and paste it into an AI service yourself when needed.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 12) {
+                    Button {
+                        NSWorkspace.shared.open(CodexVaultHelpLinks.manualURL(for: language))
+                    } label: {
+                        Label(language == .german ? "Handbuch öffnen" : "Open manual", systemImage: "book")
+                    }
+                    .buttonStyle(.bordered)
+
+                    ForEach(CodexVaultAIHelpService.allCases) { service in
+                        Button {
+                            pendingAIService = service
+                        } label: {
+                            HStack(spacing: 7) {
+                                Image(nsImage: codexVaultAIHelpLogo(for: service))
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 18, height: 18)
+                                    .accessibilityHidden(true)
+                                Text(service.title)
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                }
+            }
+            .padding(20)
+        }
+        .alert(item: $pendingAIService) { service in
+            Alert(
+                title: Text(language == .german ? "\(service.title) öffnen" : "Open \(service.title)"),
+                message: Text(language == .german
+                              ? "CodexVault kopiert eine vorbereitete allgemeine Frage und öffnet \(service.title). Füge die Frage dort selbst mit ⌘V ein."
+                              : "CodexVault copies a prepared general question and opens \(service.title). Paste the question there yourself with ⌘V."),
+                primaryButton: .default(Text(language == .german ? "Kopieren und öffnen" : "Copy and open")) {
+                    copyPromptAndOpen(service)
+                },
+                secondaryButton: .cancel(Text(language == .german ? "Abbrechen" : "Cancel"))
+            )
+        }
+    }
+
+    private func copyPromptAndOpen(_ service: CodexVaultAIHelpService) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(CodexVaultHelpLinks.aiPrompt(for: language), forType: .string)
+        NSWorkspace.shared.open(service.url)
+    }
+}
+
 private struct BackupView: View {
     let theme: DisplayTheme
     @Bindable var coordinator: BackupCoordinator
@@ -274,7 +480,7 @@ private struct BackupView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Header(title: "Create a backup", subtitle: "Choose exactly what you want to protect.")
+                Header(title: CodexVaultLocalization.text("Create a backup"), subtitle: CodexVaultLocalization.text("Choose exactly what you want to protect."))
 
                 SurfaceCard {
                     VStack(alignment: .leading, spacing: 16) {
@@ -364,17 +570,47 @@ private struct BackupView: View {
                                     .foregroundStyle(.secondary)
                             }
                             HStack {
-                                Label("Project folders", systemImage: "folder")
+                                Label("Visible Codex workspace", systemImage: "folder.badge.gearshape")
                                     .font(.subheadline.weight(.medium))
                                 Spacer()
-                                Text(coordinator.fullBackupProjectRoots.isEmpty ? "None configured" : coordinator.fullBackupProjectRoots.map(\.lastPathComponent).joined(separator: " · "))
+                                Text("Detected during backup if available")
                                     .font(.caption)
-                                    .foregroundStyle(coordinator.fullBackupProjectRoots.isEmpty ? .secondary : .primary)
+                                    .foregroundStyle(.secondary)
+                            }
+                            VStack(alignment: .leading, spacing: 8) {
+                                Label("Project folders (\(coordinator.fullBackupProjectRoots.count))", systemImage: "folder")
+                                    .font(.subheadline.weight(.medium))
+                                if coordinator.fullBackupProjectRoots.isEmpty {
+                                    Text("None configured. Add one or more project folders.")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                } else {
+                                    ForEach(coordinator.fullBackupProjectRoots, id: \.self) { root in
+                                        HStack(spacing: 8) {
+                                            Image(systemName: "folder.fill")
+                                                .foregroundStyle(.blue)
+                                            VStack(alignment: .leading, spacing: 1) {
+                                                Text(root.lastPathComponent)
+                                                    .font(.caption.weight(.medium))
+                                                Text(root.path)
+                                                    .font(.caption2)
+                                                    .foregroundStyle(.secondary)
+                                                    .lineLimit(1)
+                                                    .truncationMode(.middle)
+                                            }
+                                            Spacer(minLength: 8)
+                                            Button("Remove", role: .destructive) {
+                                                coordinator.removeFullBackupProjectRoot(root)
+                                            }
+                                            .controlSize(.small)
+                                        }
+                                    }
+                                }
                             }
                         }
                         HStack {
-                            Button("Configure project folders") {
-                                coordinator.chooseFullBackupProjectRoots()
+                            Button("Add project folders") {
+                                coordinator.addFullBackupProjectRoots()
                             }
                             Button("Change destination") {
                                 coordinator.chooseFullBackupDestination()
@@ -579,7 +815,7 @@ private struct RestoreView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Header(title: "Restore with confidence", subtitle: "Validate a backup, choose its contents, then create a new restore folder.")
+                Header(title: CodexVaultLocalization.text("Restore with confidence"), subtitle: CodexVaultLocalization.text("Validate a backup, choose its contents, then create a new restore folder."))
 
                 SurfaceCard {
                     HStack {
@@ -702,7 +938,7 @@ private struct ArchiveView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            Header(title: "Your archive", subtitle: "Only backups you choose will be listed here.")
+            Header(title: CodexVaultLocalization.text("Your archive"), subtitle: CodexVaultLocalization.text("Only backups you choose will be listed here."))
             SurfaceCard {
                 if coordinator.archives.isEmpty {
                     ContentUnavailableView("No archive yet", systemImage: "archivebox", description: Text("Verified backup packages remain under your control and are never uploaded."))
@@ -739,12 +975,31 @@ private struct ArchiveView: View {
 
 private struct SettingsView: View {
     @Binding var selectedTheme: DisplayTheme
+    @AppStorage(CodexVaultLanguage.storageKey) private var selectedLanguageRaw = CodexVaultLanguage.english.rawValue
+
+    private var selectedLanguage: Binding<CodexVaultLanguage> {
+        Binding(
+            get: { CodexVaultLanguage(rawValue: selectedLanguageRaw) ?? .english },
+            set: { selectedLanguageRaw = $0.rawValue }
+        )
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 Text("Settings")
                     .font(.system(size: 40, weight: .bold))
+
+                settingsSection(title: "Language") {
+                    Picker("App language", selection: selectedLanguage) {
+                        ForEach(CodexVaultLanguage.allCases) { language in
+                            Text(language.title).tag(language)
+                        }
+                    }
+                    Text("English is the default. The selected language also controls the AI-help prompt and manual link.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
 
                 settingsSection(title: "Appearance") {
                 Picker("Preview theme", selection: $selectedTheme) {

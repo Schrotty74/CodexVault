@@ -22,6 +22,8 @@ Keep this list current whenever an implemented user-facing feature changes.
 - Create a complete local ZIP backup of detected Codex data and configured
   project folders, with progress, verification, a dated copy, and a `latest`
   copy.
+- Add multiple project folders to a persistent full-backup list and remove an
+  individual folder without replacing the other selections.
 - Keep the three newest dated complete backups per source after an explicit
   confirmation; the app never removes older backups silently.
 - Inspect local Codex storage by category and project assignment, then
@@ -29,8 +31,15 @@ Keep this list current whenever an implemented user-facing feature changes.
   confirmation.
 - Use four appearances: Liquid Glass, Full Glass, Graphite & Lime, and
   Midnight.
+- Use English (default) or German for the app interface. The selected language
+  also controls the AI-help prompt and the public manual it opens.
 - Keep Dev, Beta, and Final builds separate with distinct bundle identifiers
   and data containers.
+- Show a first-start welcome screen while no own selection, configuration, or
+  backup content exists. The Overview also keeps this AI help available after
+  setup: it can open the public manual or copy a general, language-matched help
+  question before opening ChatGPT, Google Gemini, or Claude. No app content is
+  sent automatically.
 
 ## Documentation
 

@@ -30,26 +30,27 @@ final class BackupCoordinator {
 
     private let fullBackupDestinationKey = "codexVault.fullBackup.destination"
     private let fullBackupProjectRootsKey = "codexVault.fullBackup.projectRoots"
+    private let hasOwnContentKey = "codexVault.hasOwnContent"
 
     init() {
         let defaults = UserDefaults.standard
         let home = FileManager.default.homeDirectoryForCurrentUser
         let fallbackDestination = home.appendingPathComponent("Documents/CodexVault Backups", isDirectory: true)
+        let savedRoots = defaults.stringArray(forKey: fullBackupProjectRootsKey) ?? []
+        let hasSavedFullBackupSetup = defaults.object(forKey: fullBackupDestinationKey) != nil ||
+            !savedRoots.isEmpty
         if let savedDestination = defaults.string(forKey: fullBackupDestinationKey) {
             completeBackupDestinationURL = URL(fileURLWithPath: savedDestination, isDirectory: true)
         } else {
             completeBackupDestinationURL = fallbackDestination
         }
-        if let savedRoots = defaults.stringArray(forKey: fullBackupProjectRootsKey) {
+        if !savedRoots.isEmpty {
             fullBackupProjectRoots = savedRoots.map { URL(fileURLWithPath: $0, isDirectory: true) }
         } else {
-            fullBackupProjectRoots = Self.detectedProjectRoots(home: home)
+            fullBackupProjectRoots = []
         }
-        let visibleCodexFolder = home.appendingPathComponent("Documents/Codex", isDirectory: true)
-        if FileManager.default.fileExists(atPath: visibleCodexFolder.path),
-           !fullBackupProjectRoots.contains(where: { $0.standardizedFileURL == visibleCodexFolder.standardizedFileURL }) {
-            fullBackupProjectRoots.append(visibleCodexFolder)
-            defaults.set(fullBackupProjectRoots.map(\.path), forKey: fullBackupProjectRootsKey)
+        if hasSavedFullBackupSetup {
+            defaults.set(true, forKey: hasOwnContentKey)
         }
     }
 
@@ -65,15 +66,19 @@ final class BackupCoordinator {
         sources.compactMap(\.preview?.sensitiveExclusionCount).reduce(0, +)
     }
 
+    var hasOwnContent: Bool {
+        UserDefaults.standard.bool(forKey: hasOwnContentKey) || !sources.isEmpty || !archives.isEmpty
+    }
+
     func chooseSource(kind: BackupSourceKind) {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = true
-        panel.prompt = "Add"
+        panel.prompt = CodexVaultLocalization.text("Add")
         panel.message = kind == .project
-            ? "Choose the project folders you want to include."
-            : "Choose the additional folders you want to include."
+            ? CodexVaultLocalization.text("Choose the project folders you want to include.")
+            : CodexVaultLocalization.text("Choose the additional folders you want to include.")
 
         guard panel.runModal() == .OK else { return }
         for url in panel.urls where !sources.contains(where: { $0.url.standardizedFileURL == url.standardizedFileURL }) {
@@ -87,21 +92,23 @@ final class BackupCoordinator {
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        panel.prompt = "Use destination"
-        panel.message = "Choose the folder where CodexVault should create the backup."
+        panel.prompt = CodexVaultLocalization.text("Use destination")
+        panel.message = CodexVaultLocalization.text("Choose the folder where CodexVault should create the backup.")
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
         destinationURL = url
-        statusMessage = "Backup destination selected."
+        statusMessage = CodexVaultLocalization.text("Backup destination selected.")
     }
 
     func createCompleteBackup() {
         isWorking = true
         errorMessage = nil
         completeBackupProgress = 0
-        completeBackupProgressMessage = "Starting complete backup…"
-        statusMessage = "Backing up Codex and configured project folders…"
-        let projectRoots = fullBackupProjectRoots
+        completeBackupProgressMessage = CodexVaultLocalization.text("Starting complete backup…")
+        statusMessage = CodexVaultLocalization.text("Backing up Codex and configured project folders…")
+        let projectRoots = fullBackupProjectRoots + automaticFullBackupProjectRoots.filter { automaticRoot in
+            !fullBackupProjectRoots.contains { $0.standardizedFileURL == automaticRoot.standardizedFileURL }
+        }
         let destination = completeBackupDestinationURL
 
         Task {
@@ -118,9 +125,10 @@ final class BackupCoordinator {
                     return (summary, obsolete)
                 }.value
                 let size = ByteCountFormatter.string(fromByteCount: Int64(result.0.byteCount), countStyle: .file)
-                let skipped = result.0.skippedSourceNames.isEmpty ? "" : " Missing: \(result.0.skippedSourceNames.joined(separator: ", "))."
-                statusMessage = "\(result.0.zipURLs.count) ZIP backups verified: \(result.0.fileCount) files · \(size).\(skipped)"
+                let skipped = result.0.skippedSourceNames.isEmpty ? "" : " \(CodexVaultLocalization.text("Missing:")) \(result.0.skippedSourceNames.joined(separator: ", "))."
+                statusMessage = "\(result.0.zipURLs.count) ZIP \(CodexVaultLocalization.text("backups verified:")) \(result.0.fileCount) \(CodexVaultLocalization.text("files")) · \(size).\(skipped)"
                 pendingCompleteBackupCleanup = result.1
+                markOwnContent()
             } catch {
                 errorMessage = error.localizedDescription
                 statusMessage = nil
@@ -130,15 +138,25 @@ final class BackupCoordinator {
         }
     }
 
-    func chooseFullBackupProjectRoots() {
+    func addFullBackupProjectRoots() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = true
-        panel.prompt = "Use project folders"
-        panel.message = "Choose the project folders that CodexVault should include in every full backup. This choice is stored locally for this user."
+        panel.prompt = CodexVaultLocalization.text("Add project folders")
+        panel.message = CodexVaultLocalization.text("Choose one or more project folders that CodexVault should include in every full backup. This choice is stored locally for this user.")
         guard panel.runModal() == .OK else { return }
-        fullBackupProjectRoots = panel.urls
+        for url in panel.urls where !fullBackupProjectRoots.contains(where: {
+            $0.standardizedFileURL == url.standardizedFileURL
+        }) {
+            fullBackupProjectRoots.append(url)
+        }
+        persistFullBackupSetup()
+        markOwnContent()
+    }
+
+    func removeFullBackupProjectRoot(_ root: URL) {
+        fullBackupProjectRoots.removeAll { $0.standardizedFileURL == root.standardizedFileURL }
         persistFullBackupSetup()
     }
 
@@ -147,11 +165,12 @@ final class BackupCoordinator {
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        panel.prompt = "Use destination"
-        panel.message = "Choose where CodexVault should store full backups for this user."
+        panel.prompt = CodexVaultLocalization.text("Use destination")
+        panel.message = CodexVaultLocalization.text("Choose where CodexVault should store full backups for this user.")
         guard panel.runModal() == .OK, let url = panel.url else { return }
         completeBackupDestinationURL = url
         persistFullBackupSetup()
+        markOwnContent()
     }
 
     private func persistFullBackupSetup() {
@@ -159,25 +178,14 @@ final class BackupCoordinator {
         UserDefaults.standard.set(fullBackupProjectRoots.map(\.path), forKey: fullBackupProjectRootsKey)
     }
 
-    private static func detectedProjectRoots(home: URL) -> [URL] {
-        let fileManager = FileManager.default
-        let documents = home.appendingPathComponent("Documents", isDirectory: true)
-        guard let children = try? fileManager.contentsOfDirectory(
-            at: documents,
-            includingPropertiesForKeys: [.isDirectoryKey],
-            options: [.skipsHiddenFiles]
-        ) else { return [] }
-        return children.filter { candidate in
-            guard (try? candidate.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true else { return false }
-            if fileManager.fileExists(atPath: candidate.appendingPathComponent("Package.swift").path) ||
-                fileManager.fileExists(atPath: candidate.appendingPathComponent("package.json").path) ||
-                fileManager.fileExists(atPath: candidate.appendingPathComponent(".git").path) {
-                return true
-            }
-            return (try? fileManager.contentsOfDirectory(at: candidate, includingPropertiesForKeys: nil))?.contains {
-                $0.pathExtension == "xcodeproj"
-            } == true
-        }
+    private func markOwnContent() {
+        UserDefaults.standard.set(true, forKey: hasOwnContentKey)
+    }
+
+    private var automaticFullBackupProjectRoots: [URL] {
+        let visibleCodexFolder = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Documents/Codex", isDirectory: true)
+        return FileManager.default.fileExists(atPath: visibleCodexFolder.path) ? [visibleCodexFolder] : []
     }
 
     func removeOldCompleteBackups() {
@@ -191,7 +199,7 @@ final class BackupCoordinator {
                     try BackupEngine().removeCompleteBackups(urls)
                 }.value
                 pendingCompleteBackupCleanup = []
-                statusMessage = "Older complete backups were removed."
+                statusMessage = CodexVaultLocalization.text("Older complete backups were removed.")
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -247,7 +255,7 @@ final class BackupCoordinator {
                 sessionPreview = try await Task.detached(priority: .userInitiated) {
                     try BackupEngine().sessionCleanupPreview()
                 }.value
-                statusMessage = "Selected unassigned local records were removed."
+                statusMessage = CodexVaultLocalization.text("Selected unassigned local records were removed.")
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -265,13 +273,13 @@ final class BackupCoordinator {
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        panel.prompt = "Open backup"
-        panel.message = "Choose a CodexVault backup package to validate."
+        panel.prompt = CodexVaultLocalization.text("Open backup")
+        panel.message = CodexVaultLocalization.text("Choose a CodexVault backup package to validate.")
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
         isWorking = true
         errorMessage = nil
-        restoreStatusMessage = "Validating backup…"
+        restoreStatusMessage = CodexVaultLocalization.text("Validating backup…")
 
         Task {
             do {
@@ -283,7 +291,7 @@ final class BackupCoordinator {
                 restorePackageURL = url
                 restoreManifest = manifest
                 selectedRestoreSourceIDs = Set(manifest.entries.map(\.sourceID))
-                restoreStatusMessage = "Backup verified. Choose what to restore."
+                restoreStatusMessage = CodexVaultLocalization.text("Backup verified. Choose what to restore.")
             } catch {
                 restorePackageURL = nil
                 restoreManifest = nil
@@ -300,8 +308,8 @@ final class BackupCoordinator {
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        panel.prompt = "Use destination"
-        panel.message = "Choose where CodexVault should create a new restore folder."
+        panel.prompt = CodexVaultLocalization.text("Use destination")
+        panel.message = CodexVaultLocalization.text("Choose where CodexVault should create a new restore folder.")
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
         restoreDestinationURL = url
@@ -317,14 +325,14 @@ final class BackupCoordinator {
 
     func restoreSelected() {
         guard let restorePackageURL, let restoreDestinationURL else {
-            errorMessage = "Choose a verified backup and a restore destination."
+            errorMessage = CodexVaultLocalization.text("Choose a verified backup and a restore destination.")
             return
         }
 
         let sourceIDs = selectedRestoreSourceIDs
         isWorking = true
         errorMessage = nil
-        restoreStatusMessage = "Restoring and verifying files…"
+        restoreStatusMessage = CodexVaultLocalization.text("Restoring and verifying files…")
 
         Task {
             do {
@@ -335,7 +343,7 @@ final class BackupCoordinator {
                         destination: restoreDestinationURL
                     )
                 }.value
-                restoreStatusMessage = "Restored \(summary.restoredFileCount) files into a new verified folder."
+                restoreStatusMessage = "\(CodexVaultLocalization.text("Restored")) \(summary.restoredFileCount) \(CodexVaultLocalization.text("files into a new verified folder."))"
             } catch {
                 errorMessage = error.localizedDescription
                 restoreStatusMessage = nil
@@ -346,18 +354,18 @@ final class BackupCoordinator {
 
     func createBackup() {
         guard !sources.isEmpty else {
-            errorMessage = "Choose at least one project or folder."
+            errorMessage = CodexVaultLocalization.text("Choose at least one project or folder.")
             return
         }
         guard let destinationURL else {
-            errorMessage = "Choose where the backup package should be stored."
+            errorMessage = CodexVaultLocalization.text("Choose where the backup package should be stored.")
             return
         }
 
         let selectedSources = sources
         isWorking = true
         errorMessage = nil
-        statusMessage = "Creating and verifying the backup…"
+        statusMessage = CodexVaultLocalization.text("Creating and verifying the backup…")
 
         Task {
             do {
@@ -365,7 +373,8 @@ final class BackupCoordinator {
                     try BackupEngine().createBackup(sources: selectedSources, destination: destinationURL)
                 }.value
                 archives.insert(summary, at: 0)
-                statusMessage = "Backup verified successfully."
+                statusMessage = CodexVaultLocalization.text("Backup verified successfully.")
+                markOwnContent()
             } catch {
                 errorMessage = error.localizedDescription
                 statusMessage = nil
@@ -377,7 +386,7 @@ final class BackupCoordinator {
     private func refreshPreviews() {
         let snapshot = sources
         isWorking = true
-        statusMessage = "Analyzing selected sources…"
+        statusMessage = CodexVaultLocalization.text("Analyzing selected sources…")
 
         Task {
             let previews = await Task.detached(priority: .userInitiated) {
@@ -390,7 +399,7 @@ final class BackupCoordinator {
                 sources[index].preview = preview
             }
             isWorking = false
-            statusMessage = "Selection preview ready."
+            statusMessage = CodexVaultLocalization.text("Selection preview ready.")
         }
     }
 }

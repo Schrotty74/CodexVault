@@ -2,9 +2,10 @@
 
 [Deutsch](MANUAL.de.md) · [English](MANUAL.en.md)
 
-CodexVault is a local macOS backup and restore tool. The current app interface
-is English. This manual describes the functionality that is implemented now; it
-does not describe planned features as if they already existed.
+CodexVault is a local macOS backup and restore tool. Its interface supports
+English and German; English is the default. This manual describes the
+functionality that is implemented now; it does not describe planned features as
+if they already existed.
 
 ## Before you begin
 
@@ -29,6 +30,28 @@ The sidebar contains five sections:
 | Settings | Appearance, privacy status, and build-channel information. |
 
 The **Start setup** button on Overview opens Backup.
+
+## First-start help
+
+When CodexVault has no own folder selection, full-backup configuration, or
+created backup content yet, Overview shows a friendly first-start screen.
+
+- **Set up backup** opens Backup. No backup starts automatically.
+- **Open manual** opens this public English manual when the app uses English,
+  or the public German manual when the app uses German.
+- The ChatGPT, Google Gemini, and Claude buttons show a confirmation first.
+  After you choose **Copy and open**, CodexVault copies only a prepared general
+  question with the public manual link and confirmed public facts about the
+  app, then opens the selected service. The question explicitly tells the
+  service not to invent features such as vaults, snippets, tags, or a code
+  editor.
+- Paste the copied question yourself with Cmd+V and decide yourself whether to
+  send it. CodexVault does not open a service automatically and never transfers
+  backup content, paths, credentials, or other personal app data to a service.
+
+Once you add your own selection or configuration, or create a backup, the
+regular Overview is shown instead. Its **AI help** card keeps the same manual
+and service buttons permanently available.
 
 ## Normal backup
 
@@ -77,18 +100,21 @@ Use **CodexVault full backup** when you want a recurring local ZIP copy of
 automatically detected Codex app data and your configured project folders.
 
 1. Open **Backup** and find **CodexVault full backup**.
-2. Click **Configure project folders** and select every project folder that
-   should be included in future complete backups.
-3. Click **Change destination** and choose the trusted local folder where the
+2. Click **Add project folders** and select one or more project folders that
+   should be included in future complete backups. You can repeat this action to
+   add further folders; it does not replace the existing list.
+3. Review the visible project-folder list. Use **Remove** beside a folder only
+   when it should no longer be included; the other configured folders remain.
+4. Click **Change destination** and choose the trusted local folder where the
    ZIP files should be stored.
-4. Confirm the displayed project-folder list and destination.
-5. Click **Create complete ZIP backup**. The progress bar and message show the
+5. Confirm the displayed project-folder list and destination.
+6. Click **Create complete ZIP backup**. The progress bar and message show the
    current phase.
 
-The folder choices and destination are stored locally for the current macOS
-user. Codex app data is detected automatically; an existing visible Codex
-folder in Documents is also added to the configured project roots when found.
-No external backup script must be selected.
+The project-folder choices and destination are stored locally for the current
+macOS user. Codex app data is detected automatically. A visible Codex workspace
+is detected only while a complete backup runs; it is not shown as a configured
+project folder on a fresh start. No external backup script must be selected.
 
 ### Files, verification, and retention
 
@@ -154,6 +180,14 @@ after restarting the app, it does not automatically rediscover earlier packages
 from a destination folder.
 
 ## Settings
+
+### Language
+
+Use **Settings > Language > App language** to choose **English** or **Deutsch**.
+English is the default. The choice changes the visible app interface, the
+first-start AI-help text, and the manual opened by **Open manual**. It does not
+change selected sources, backup contents, existing packages, or security
+decisions.
 
 ### Appearance
 

@@ -39,8 +39,9 @@ icon_partial_info="$scratch_directory/CodexVault-icon-info.plist"
 swift build --package-path "$project_root" --scratch-path "$scratch_directory" --configuration release
 binary_directory="$(swift build --package-path "$project_root" --scratch-path "$scratch_directory" --configuration release --show-bin-path)"
 binary_path="$binary_directory/CodexVault"
+resource_bundle="$binary_directory/CodexVault_CodexVaultApp.bundle"
 
-if [[ ! -x "$binary_path" || ! -f "$template" || ! -f "$entitlements" || ! -d "$icon_bundle" ]]; then
+if [[ ! -x "$binary_path" || ! -d "$resource_bundle" || ! -f "$template" || ! -f "$entitlements" || ! -d "$icon_bundle" ]]; then
     echo "Build input missing." >&2
     exit 1
 fi
@@ -48,6 +49,8 @@ fi
 rm -rf "$app_bundle"
 mkdir -p "$app_bundle/Contents/MacOS" "$app_bundle/Contents/Resources"
 cp "$binary_path" "$app_bundle/Contents/MacOS/CodexVault"
+cp -R "$resource_bundle" "$app_bundle/Contents/Resources/"
+cp -R "$resource_bundle"/. "$app_bundle/Contents/Resources/"
 xcrun actool \
     --compile "$app_bundle/Contents/Resources" \
     --platform macosx \

@@ -23,11 +23,13 @@ CodexVault ist eine lokale macOS-App zur Sicherung und Wiederherstellung von Arb
 
 | Bereich | Aufgabe |
 | --- | --- |
-| `Sources/CodexVaultApp/CodexVaultApp.swift` | SwiftUI-App, Navigation, Ansichten und die vier Darstellungsvarianten. |
+| `Sources/CodexVaultApp/CodexVaultApp.swift` | SwiftUI-App, Navigation, Ansichten, Sprachwahl und die vier Darstellungsvarianten. |
 | `Sources/CodexVaultApp/BackupCoordinator.swift` | UI-Zustand, Dateiauswahl, asynchrone Abläufe und lokal gespeicherte Full-Backup-Einstellungen. |
 | `Sources/CodexVaultApp/BackupEngine.swift` | Vorschau, Erstellen, Prüfen und Wiederherstellen normaler Backups; ZIP-Backups; Speicheranalyse lokaler Codex-Daten. |
 | `Sources/CodexVaultApp/BackupDomain.swift` | Datenmodelle und Fehlerfälle. |
 | `Sources/CodexVaultApp/BuildChannel.swift` | Ermittelt den lokalen Build-Kanal aus dem App-Bundle. |
+| `Sources/CodexVaultApp/AIHelp.swift` | Sprachwahl mit Englisch als Standard, lokale Erststart-KI-Hilfe, sprachabhängige öffentliche Handbuch-Links, datensparsame Prompts und lokale Logo-Ressourcen. |
+| `Sources/CodexVaultApp/Resources/` | Unveränderte, lokal eingebundene offizielle Logos für ChatGPT, Google Gemini und Claude. |
 | `Tests/CodexVaultAppTests/` | Automatisierte Tests für Backup-Ausschlüsse, Verifikation und ZIP-Inhalte. |
 | `Scripts/` | Lokale Builds für Dev, Beta und Final. Diese Skripte veröffentlichen nichts. |
 | `Packaging/` | Bundle-Vorlage und Signaturkonfiguration für die lokalen App-Bundles. |
@@ -50,7 +52,7 @@ Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoK
 ### Vollständiges Backup
 
 - Erstellt je eine datierte ZIP-Datei und eine `latest`-Kopie für die Codex-App-Daten sowie jeden konfigurierten Projektordner.
-- Die Codex-App-Daten werden automatisch erkannt; Projektordner und Ziel werden lokal für den jeweiligen macOS-Benutzer gespeichert und können in der App geändert werden.
+- Die Codex-App-Daten und ein verfügbarer sichtbarer Codex-Arbeitsbereich werden beim vollständigen Backup automatisch für den jeweiligen macOS-Benutzer ermittelt. Nur ausdrücklich hinzugefügte Projektordner und das Ziel werden lokal gespeichert, einzeln sichtbar gelistet und einzeln entfernt. Ein frischer Start zeigt keine automatisch ermittelten Projektpfade als Konfiguration.
 - Die ZIP-Dateien werden nach dem Erstellen mit dem Systemwerkzeug geprüft. Ältere datierte Sicherungen werden erst nach einer sichtbaren Bestätigung entfernt; pro Gruppe werden die drei neuesten behalten.
 - Laufzeit- und Build-Daten werden gezielt ausgelassen: bei Codex temporäre Daten und IPC-Dateien, bei Projektordnern typische Build- und Abhängigkeitsordner.
 - Dieses Backup ist ein vollständiger lokaler Datensicherungsablauf und kann vertrauliche Codex-Inhalte enthalten. Das Ziel muss daher ein vertrauenswürdiger lokaler Speicherort sein.
@@ -66,10 +68,12 @@ Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoK
 - Auswahl mehrerer Projekt- und Zusatzordner samt lokaler Größen- und Ausschlussvorschau.
 - Normales, verifiziertes Backup mit SHA-256-Prüfung.
 - Selektive Wiederherstellung geprüfter Quellen ohne Überschreiben vorhandener Dateien.
-- Konfigurierbares vollständiges ZIP-Backup mit sichtbarem Fortschritt und auf Wunsch bestätigter Aufbewahrung.
+- Konfigurierbares vollständiges ZIP-Backup mit sichtbarer Mehrfach-Projektliste, Fortschritt und auf Wunsch bestätigter Aufbewahrung.
 - Lokale Codex-Speicherübersicht einschließlich gruppierter Sitzungsdaten und kontrollierter Entfernung nicht zugeordneter Datensätze.
+- Freundliche Erststart-Ansicht bei noch fehlenden eigenen Inhalten sowie dauerhaft erreichbare KI-Hilfe auf Overview mit Handbuch-Schaltfläche und bestätigter Kopier-und-Öffnen-Hilfe für ChatGPT, Google Gemini und Claude. Die statischen Prompts enthalten ausschließlich den passenden öffentlichen Handbuch-Link und bestätigte öffentliche App-Fakten; sie verbieten erfundene Funktionen.
 - Getrennte lokale Dev-, Beta- und Final-Bundles mit eigenen Bundle-IDs und Datencontainern.
 - Vier Designs: Liquid Glass, Full Glass, Graphite & Lime und Midnight. Full Glass nutzt die Glasoberfläche im gesamten Fenster; Liquid Glass nur für die linke Navigation.
+- Zweisprachige sichtbare Oberfläche mit Englisch als Standard und Deutsch als auswählbarer Sprache. Dieselbe Einstellung steuert auch KI-Hilfe und Handbuch-Link.
 - App-Icon als Icon-Composer-Ressource mit Liquid-Glass-Effekten und freigestelltem PNG-Quellmotiv; macOS erzeugt fehlende Erscheinungsvarianten aus der gemeinsamen Icon-Struktur.
 
 ## Feste Regeln und Entscheidungen
@@ -77,6 +81,7 @@ Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoK
 - Mindestplattform ist macOS 26.
 - Die sichtbare und interne Produktbezeichnung lautet **CodexVault**.
 - Keine Netzwerkfunktion und keine stillen Backups.
+- Die KI-Hilfe öffnet einen Dienst nur nach sichtbarer Bestätigung. Sie kopiert ausschließlich eine statische allgemeine Frage in die Zwischenablage; Nutzende fügen sie selbst ein. Sie enthält keine App-Inhalte, lokalen Pfade oder Zugangsdaten.
 - Normale Backups schließen typische Geheimnisdateien und -namen aus, darunter `.env`-Varianten, Tokens, Secrets, Credentials, Zertifikate und Schlüssel; außerdem werden typische Build- und Cache-Ordner ausgelassen.
 - Bei vollständigen Backups gilt die definierte Vollständigkeit vor der Namensfilterung: Sie sind deshalb als vertrauliche lokale Sicherungen zu behandeln.
 - Löschvorgänge brauchen eine sichtbare Auswahl und Bestätigung.
@@ -114,7 +119,7 @@ Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Am 24. Juli 2026 l
 ## Bekannte Einschränkungen
 
 - Die Archivansicht zeigt nur Backups, die während der aktuellen App-Sitzung erstellt wurden. Sie durchsucht kein Zielverzeichnis nach früheren Paketen.
-- UI-Texte sind überwiegend Englisch; eine vollständige Lokalisierung ist nicht umgesetzt.
+- Weitere Sprachen über Englisch und Deutsch hinaus sind nicht umgesetzt.
 - Die Vollständigkeit der automatischen Erkennung von Projektordnern ist bewusst begrenzt und kann eine manuelle Konfiguration erfordern.
 - Die Icon-Composer-Ressource verwendet eine gemeinsame Liquid-Glass-Struktur mit freigestelltem Quellmotiv. Spezifische grafische Überarbeitungen für Dark oder Mono sind noch nicht manuell angelegt; macOS erzeugt diese Erscheinungsvarianten aus der gemeinsamen Struktur.
 

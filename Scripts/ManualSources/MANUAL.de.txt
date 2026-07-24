@@ -3,9 +3,9 @@
 [Deutsch](MANUAL.de.md) · [English](MANUAL.en.md)
 
 CodexVault ist ein lokales macOS-Werkzeug für Backup und Wiederherstellung. Die
-aktuelle App-Oberfläche ist Englisch. Dieses Handbuch beschreibt nur Funktionen,
-die bereits umgesetzt sind, und stellt keine geplanten Funktionen als vorhanden
-dar.
+Oberfläche unterstützt Englisch und Deutsch; Englisch ist der Standard. Dieses
+Handbuch beschreibt nur Funktionen, die bereits umgesetzt sind, und stellt
+keine geplanten Funktionen als vorhanden dar.
 
 ## Vor dem Start
 
@@ -30,6 +30,30 @@ Die Seitenleiste enthält fünf Bereiche:
 | Settings | Darstellung, Datenschutzstatus und Informationen zum Build-Kanal. |
 
 Die Taste **Start setup** auf Overview öffnet Backup.
+
+## KI-Hilfe beim Erststart
+
+Solange CodexVault noch keine eigene Ordnerauswahl, Full-Backup-Konfiguration
+oder erstellte Backup-Inhalte hat, zeigt Overview eine freundliche
+Erststart-Ansicht.
+
+- **Backup einrichten** öffnet Backup. Es startet kein Backup automatisch.
+- **Handbuch öffnen** öffnet bei deutscher App-Sprache dieses öffentliche
+  deutsche Handbuch, bei englischer App-Sprache das öffentliche englische
+  Handbuch.
+- Die Tasten für ChatGPT, Google Gemini und Claude zeigen zuerst eine
+  Bestätigung. Nach **Kopieren und öffnen** kopiert CodexVault ausschließlich
+  eine vorbereitete allgemeine Frage mit öffentlichem Handbuch-Link und
+  bestätigten öffentlichen Fakten zur App und öffnet danach den gewählten
+  Dienst. Die Frage verbietet ausdrücklich, Funktionen wie Vaults, Snippets,
+  Tags oder einen Code-Editor zu erfinden.
+- Die kopierte Frage selbst mit Cmd+V einfügen und nur bei Bedarf senden.
+  CodexVault öffnet keinen Dienst automatisch und überträgt weder Backup-Inhalte
+  noch Pfade, Zugangsdaten oder andere persönliche App-Daten an einen Dienst.
+
+Sobald eine eigene Auswahl oder Konfiguration vorhanden ist oder ein Backup
+erstellt wurde, erscheint stattdessen die normale Overview-Ansicht. Deren Karte
+**KI-Hilfe** hält dieselben Handbuch- und Diensttasten dauerhaft bereit.
 
 ## Normales Backup
 
@@ -78,17 +102,21 @@ Geheimdatei erkannt wird. Eine Quelle vor dem Teilen eines Pakets selbst prüfen
 automatisch erkannten Codex-App-Daten und der konfigurierten Projektordner.
 
 1. **Backup** öffnen und **CodexVault full backup** suchen.
-2. Mit **Configure project folders** alle Projektordner wählen, die künftig in
-   jedem vollständigen Backup enthalten sein sollen.
-3. Mit **Change destination** das vertrauenswürdige lokale ZIP-Ziel wählen.
-4. Die angezeigte Projektliste und das Ziel prüfen.
-5. **Create complete ZIP backup** wählen. Fortschrittsbalken und Meldung zeigen
+2. Mit **Add project folders** einen oder mehrere Projektordner wählen, die
+   künftig in jedem vollständigen Backup enthalten sein sollen. Die Aktion kann
+   wiederholt werden und ersetzt die bestehende Liste nicht.
+3. Die sichtbare Projektliste prüfen. Mit **Remove** nur einen Ordner entfernen,
+   der nicht mehr enthalten sein soll; die übrigen bleiben ausgewählt.
+4. Mit **Change destination** das vertrauenswürdige lokale ZIP-Ziel wählen.
+5. Die angezeigte Projektliste und das Ziel prüfen.
+6. **Create complete ZIP backup** wählen. Fortschrittsbalken und Meldung zeigen
    den aktuellen Schritt.
 
-Die Ordnerauswahl und das Ziel werden lokal für den aktuellen macOS-Benutzer
-gespeichert. Die Codex-App-Daten werden automatisch erkannt; existiert ein
-sichtbarer Codex-Ordner in Documents, wird er ebenfalls zu den konfigurierten
-Projektquellen ergänzt. Es muss kein externes Backup-Skript ausgewählt werden.
+Die Projektliste und das Ziel werden lokal für den aktuellen macOS-Benutzer
+gespeichert. Die Codex-App-Daten werden automatisch erkannt. Ein sichtbarer
+Codex-Arbeitsbereich wird nur während eines vollständigen Backups erkannt und
+erscheint beim frischen Start nicht als konfigurierter Projektordner. Es muss
+kein externes Backup-Skript ausgewählt werden.
 
 ### Dateien, Prüfung und Aufbewahrung
 
@@ -157,6 +185,14 @@ Dateibrowser: Nach einem Neustart sucht die App frühere Pakete nicht automatisc
 im Zielordner.
 
 ## Einstellungen
+
+### Sprache
+
+Unter **Settings > Language > App language** zwischen **English** und
+**Deutsch** wählen. Englisch ist der Standard. Die Auswahl ändert die sichtbare
+App-Oberfläche, den Text der KI-Hilfe beim Erststart und das über **Handbuch
+öffnen** geöffnete Handbuch. Quellen, Backup-Inhalte, bestehende Pakete und
+Sicherheitsentscheidungen bleiben unverändert.
 
 ### Appearance
 
