@@ -23,7 +23,7 @@ Die Seitenleiste enthält fünf Bereiche:
 
 | Bereich | Zweck |
 | --- | --- |
-| Overview | Startpunkt und aktuelle Platzhalter-Statuskarten. |
+| Overview | Startpunkt und aktuelle Statuskarten. Der Bereich Aktivität erscheint erst, nachdem in der aktuellen App-Sitzung ein Backup erstellt wurde. |
 | Backup | Normale Backups, vollständige ZIP-Backups und lokale Codex-Speicherübersicht. |
 | Restore | Prüfung und gezielte Wiederherstellung eines normalen Backup-Pakets. |
 | Archive | Backups, die während der aktuellen App-Sitzung erstellt wurden. |

@@ -23,7 +23,7 @@ The sidebar contains five sections:
 
 | Section | Purpose |
 | --- | --- |
-| Overview | Starting point and current placeholder status cards. |
+| Overview | Starting point and current status cards. The Activity area appears only after a backup has been created in the current app session. |
 | Backup | Normal backups, complete ZIP backups, and local Codex storage review. |
 | Restore | Validation and selective restoration of a normal backup package. |
 | Archive | Backups created during the current app session. |

@@ -17,6 +17,8 @@
 "Activity" = "Aktivität";
 "No activity yet" = "Noch keine Aktivität";
 "A verified backup will appear here after you create one." = "Ein geprüftes Backup erscheint hier, nachdem du eines erstellt hast.";
+"Verified backup" = "Geprüftes Backup";
+"Backup needs verification" = "Backup muss geprüft werden";
 "Create a backup" = "Backup erstellen";
 "Choose exactly what you want to protect." = "Wähle genau aus, was du schützen möchtest.";
 "Sources" = "Quellen";

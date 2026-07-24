@@ -41,6 +41,21 @@ Keep this list current whenever an implemented user-facing feature changes.
   question before opening ChatGPT, Google Gemini, or Claude. No app content is
   sent automatically.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><a href="docs/images/overview.png"><img src="docs/images/overview.png" width="360" alt="CodexVault Overview"></a><br><sub>Overview</sub></td>
+    <td align="center"><a href="docs/images/backup.png"><img src="docs/images/backup.png" width="360" alt="CodexVault Backup"></a><br><sub>Backup</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="docs/images/restore.png"><img src="docs/images/restore.png" width="360" alt="CodexVault Restore"></a><br><sub>Restore</sub></td>
+    <td align="center"><a href="docs/images/archive.png"><img src="docs/images/archive.png" width="360" alt="CodexVault Archive"></a><br><sub>Archive</sub></td>
+  </tr>
+</table>
+
+Select a preview to open the full-size original.
+
 ## Documentation
 
 - [English manual (PDF)](docs/CodexVault-Manual-EN.pdf)

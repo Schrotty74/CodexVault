@@ -46,6 +46,21 @@ anpassen.
   danach ChatGPT, Google Gemini oder Claude öffnen. App-Inhalte werden nie
   automatisch gesendet.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><a href="docs/images/overview.png"><img src="docs/images/overview.png" width="360" alt="CodexVault Übersicht"></a><br><sub>Übersicht</sub></td>
+    <td align="center"><a href="docs/images/backup.png"><img src="docs/images/backup.png" width="360" alt="CodexVault Backup"></a><br><sub>Backup</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="docs/images/restore.png"><img src="docs/images/restore.png" width="360" alt="CodexVault Wiederherstellung"></a><br><sub>Wiederherstellung</sub></td>
+    <td align="center"><a href="docs/images/archive.png"><img src="docs/images/archive.png" width="360" alt="CodexVault Archiv"></a><br><sub>Archiv</sub></td>
+  </tr>
+</table>
+
+Eine Vorschau anklicken, um das Original in voller Größe zu öffnen.
+
 ## Dokumentation
 
 - [Deutsches Handbuch (PDF)](docs/CodexVault-Handbuch-DE.pdf)

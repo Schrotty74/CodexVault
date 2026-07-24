@@ -27,3 +27,13 @@
 The checked source publication contains application code and reusable project
 resources only. It contains no known private user content, secrets, backup
 packages, build output, or absolute user paths.
+
+## Screenshot update – 24 July 2026
+
+- Added four public README screenshots for Overview, Backup, Restore, and
+  Archive.
+- Replaced the machine-specific full-backup destination visible in the Backup
+  screenshot with the generic text `Not configured` before adding it.
+- Checked all four committed PNG files for absolute user paths and CleanShot or
+  C2PA provenance metadata; none are included.
+- The README previews link only to the repository's own full-size PNG files.

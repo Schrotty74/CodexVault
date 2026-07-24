@@ -155,7 +155,7 @@ private struct CodexVaultRootView: View {
         switch selectedSection ?? .overview {
         case .overview:
             if backupCoordinator.hasOwnContent {
-                OverviewView(theme: selectedTheme) {
+                OverviewView(theme: selectedTheme, archives: backupCoordinator.archives) {
                     selectedSection = .backup
                 }
             } else {
@@ -352,6 +352,7 @@ private struct CodexVaultSidebar: View {
 
 private struct OverviewView: View {
     let theme: DisplayTheme
+    let archives: [ArchiveSummary]
     let onStartSetup: () -> Void
 
     var body: some View {
@@ -389,17 +390,30 @@ private struct OverviewView: View {
 
                 CodexVaultAIHelpCard()
 
-                SurfaceCard {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Label("Activity", systemImage: "list.bullet.rectangle")
-                            .font(.headline)
-                            .padding(.bottom, 12)
-                        Divider()
-                        ContentUnavailableView("No activity yet", systemImage: "tray", description: Text("A verified backup will appear here after you create one."))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 24)
+                if !archives.isEmpty {
+                    SurfaceCard {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Label("Activity", systemImage: "list.bullet.rectangle")
+                                .font(.headline)
+                            Divider()
+                            ForEach(archives.prefix(3)) { archive in
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(archive.displayName)
+                                            .font(.subheadline.weight(.medium))
+                                        Text(archive.verified ? "Verified backup" : "Backup needs verification")
+                                            .font(.caption)
+                                            .foregroundStyle(archive.verified ? .green : .secondary)
+                                    }
+                                    Spacer()
+                                    Text(ByteCountFormatter.string(fromByteCount: Int64(archive.byteCount), countStyle: .file))
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                        .padding(20)
                     }
-                    .padding(20)
                 }
 
             }
