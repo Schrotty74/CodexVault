@@ -565,7 +565,7 @@ struct BackupEngine {
         }
 
         let fileListURL = fileManager.temporaryDirectory
-            .appendingPathComponent("ArchiveAtlas-ZIP-\(UUID().uuidString).txt")
+            .appendingPathComponent("CodexVault-ZIP-\(UUID().uuidString).txt")
         try entries.joined(separator: "\n").appending("\n").write(to: fileListURL, atomically: true, encoding: .utf8)
         return fileListURL
     }

@@ -12,7 +12,6 @@ Dieses Dokument enthält nur Punkte, die aus dem aktuellen Quellcode oder der be
 
 ## Priorität 2
 
-- Interne technische Altbezeichner `ArchiveAtlas` im Swift-Package, in Quellnamen und Packaging strukturiert auf `CodexVault` umstellen, ohne Kompatibilität oder Build-Kanäle zu beschädigen.
 - Die Projekterkennung für vollständige Backups mit transparenten Regeln und einer verständlichen Vorschau erweitern.
 - Die Testabdeckung für Wiederherstellung, ältere Manifest-Schemata, Aufbewahrung und die ausgewählte Entfernung nicht zugeordneter lokaler Datensätze ausbauen.
 

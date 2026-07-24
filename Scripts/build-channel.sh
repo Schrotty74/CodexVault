@@ -32,13 +32,13 @@ esac
 scratch_directory="$project_root/.build/channels/$channel"
 app_bundle="$output_directory/$display_name.app"
 template="$project_root/Packaging/Info.plist.template"
-entitlements="$project_root/Packaging/ArchiveAtlas.entitlements"
+entitlements="$project_root/Packaging/CodexVault.entitlements"
 icon_bundle="$project_root/Assets/AppIcon/CodexVault.icon"
 icon_partial_info="$scratch_directory/CodexVault-icon-info.plist"
 
 swift build --package-path "$project_root" --scratch-path "$scratch_directory" --configuration release
 binary_directory="$(swift build --package-path "$project_root" --scratch-path "$scratch_directory" --configuration release --show-bin-path)"
-binary_path="$binary_directory/ArchiveAtlas"
+binary_path="$binary_directory/CodexVault"
 
 if [[ ! -x "$binary_path" || ! -f "$template" || ! -f "$entitlements" || ! -d "$icon_bundle" ]]; then
     echo "Build input missing." >&2

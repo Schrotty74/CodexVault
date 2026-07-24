@@ -1,4 +1,4 @@
-# ArchiveAtlas – Phase 0: Discovery
+# CodexVault – Phase 0: Discovery
 
 > Historische Bestandsaufnahme vom 22. Juli 2026. Der aktuelle Produktname ist CodexVault. Für den heutigen technischen Stand zuerst [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) und [NEXT_STEPS.md](NEXT_STEPS.md) lesen; bei Abweichungen gelten diese aktuellen Dokumente.
 
@@ -9,7 +9,7 @@ Status: Bestandsaufnahme abgeschlossen; Phase-1-Backup-Grundlage lokal implement
 
 Die lokale Codex-Installation wurde ausschließlich lesend und über Struktur- und Metadaten geprüft. Es wurden keine Konfigurationsinhalte, Chat-Inhalte, Zugangsdaten, lokalen Benutzerpfade oder Dateinamen in dieses Dokument übernommen.
 
-ArchiveAtlas ist ein lokales Git-Repository ohne Commit und ohne Remote. Die Implementierung bleibt lokal, bis ein separater Commit-Auftrag erteilt wird.
+Zum Zeitpunkt dieser Bestandsaufnahme war CodexVault ein lokales Git-Repository ohne Commit und ohne Remote. Den aktuellen Quellcode- und Veröffentlichungsstand dokumentiert ausschließlich `PROJECT_CONTEXT.md`.
 
 ## Entwicklungsumgebung
 
@@ -21,7 +21,7 @@ ArchiveAtlas ist ein lokales Git-Repository ohne Commit und ohne Remote. Die Imp
 | Versionsverwaltung | Git 2.50.1, lokal initialisiert |
 | Zusätzliche Laufzeiten | Python 3.14.6, Node 26.5.0 vorhanden |
 
-Für den MVP sind keine externen Bibliotheken erforderlich oder vorgeschlagen. SwiftUI, Foundation, CryptoKit und Security-Scoped Bookmarks decken die geplante Basis ab. Python und Node sind keine ArchiveAtlas-Abhängigkeiten.
+Für den MVP sind keine externen Bibliotheken erforderlich oder vorgeschlagen. SwiftUI, Foundation, CryptoKit und Security-Scoped Bookmarks decken die geplante Basis ab. Python und Node sind keine CodexVault-Abhängigkeiten.
 
 ## Lesende Codex-Inventarisierung
 
@@ -52,9 +52,9 @@ Die Inventarisierung bestätigt damit den Grundsatz aus dem Briefing: Codex ben�
 
 ## Produktentscheidungen
 
-1. **Mindestversion:** Verbindlich macOS 26. ArchiveAtlas wird nicht für ältere macOS-Versionen entwickelt oder getestet.
+1. **Mindestversion:** Verbindlich macOS 26. CodexVault wird nicht für ältere macOS-Versionen entwickelt oder getestet.
 2. **Passwortschutz für Backups:** Noch offen. Gemeint ist nur: Soll ein portables Backup auf Wunsch mit einem Passwort geschützt werden? Das Passwort würde nie gespeichert und bei einer Wiederherstellung erneut abgefragt.
-3. **Git und Quellcode:** Der vollständige ArchiveAtlas-Quellcode wird später in Git bereitgestellt. Private Inhalte, Zugangsdaten, lokale Pfade, Build-Ausgaben und Backup-Pakete bleiben ausgeschlossen. Davon getrennt wird die Sicherung eines versteckten Git-Ordners innerhalb eines Benutzerprojekts später als sichtbare Auswahl angeboten.
+3. **Git und Quellcode:** Der vollständige CodexVault-Quellcode wird später in Git bereitgestellt. Private Inhalte, Zugangsdaten, lokale Pfade, Build-Ausgaben und Backup-Pakete bleiben ausgeschlossen. Davon getrennt wird die Sicherung eines versteckten Git-Ordners innerhalb eines Benutzerprojekts später als sichtbare Auswahl angeboten.
 4. **Automatische Backups:** Geplant. Benutzer wählen selbst, wann gesichert wird, wohin gesichert wird und welche Module oder Ordner dazugehören. Es gibt keine stillen, voreingestellten Sicherungen.
 5. **Startdesign:** Noch offen; der Benutzer legt das Standarddesign später fest. Alle vier Designs bleiben ausschließlich Darstellungsschichten.
 
@@ -79,11 +79,11 @@ Für die Glasvarianten gilt verbindlich: **Full Glass** verwendet eine durchgän
 Noch **nicht angelegt**:
 
 ```text
-ArchiveAtlas/
-  ArchiveAtlasApp/        App-Shell, Navigation, Designs, Einstellungen
-  ArchiveAtlasDomain/     Modelle und Regeln ohne UI oder Dateizugriff
-  ArchiveAtlasServices/   Scanner, Backup, Restore, Privacy, Archive Store
-  ArchiveAtlasTests/      Synthetische Manifest-, Auswahl- und Konflikttests
+CodexVault/
+  CodexVaultApp/          App-Shell, Navigation, Designs, Einstellungen
+  CodexVaultDomain/       Modelle und Regeln ohne UI oder Dateizugriff
+  CodexVaultServices/     Scanner, Backup, Restore, Privacy, Archive Store
+  CodexVaultTests/        Synthetische Manifest-, Auswahl- und Konflikttests
   Fixtures/               Ausschließlich künstliche, nicht personenbezogene Daten
 ```
 

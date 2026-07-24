@@ -8,7 +8,10 @@ Status: Öffentlicher Quellcode-Upload auf GitHub am 24. Juli 2026 erfolgt. Es g
 1. Diese Datei – aktuelle technische und fachliche Grundlage.
 2. [NEXT_STEPS.md](NEXT_STEPS.md) – nur die tatsächlich noch offenen Arbeiten.
 3. [README.md](README.md) – kurze Startanleitung.
-4. [PHASE_0_DISCOVERY.md](PHASE_0_DISCOVERY.md) – historische Bestandsaufnahme; bei Abweichungen hat diese Datei Vorrang.
+4. [PHASE_0_DISCOVERY.md](PHASE_0_DISCOVERY.md) – historische Bestandsaufnahme; bei Abweichungen hat diese Datei keinen Vorrang.
+5. Vor einer Beta- oder Final-Veröffentlichung zusätzlich [docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md](docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md) lesen und einen konkreten Bericht daraus erstellen.
+
+Öffentliche Nutzerdokumentation liegt zweisprachig in `README.md`, `README.de.md`, `docs/MANUAL.en.md` und `docs/MANUAL.de.md`. Bei jeder sichtbaren Funktions- oder Einstellungsänderung müssen die Feature-Listen und die passenden Handbuchabschnitte im selben Auftrag aktualisiert werden.
 
 Bei einer inhaltlichen Änderung an Funktionen, Datenformaten, Build-Abläufen oder offenen Punkten sind diese Datei und `NEXT_STEPS.md` im selben Arbeitsauftrag zu aktualisieren.
 
@@ -20,15 +23,16 @@ CodexVault ist eine lokale macOS-App zur Sicherung und Wiederherstellung von Arb
 
 | Bereich | Aufgabe |
 | --- | --- |
-| `Sources/ArchiveAtlasApp/ArchiveAtlasApp.swift` | SwiftUI-App, Navigation, Ansichten und die vier Darstellungsvarianten. Der interne Target-Name ist noch `ArchiveAtlasApp`; sichtbar heißt die App CodexVault. |
-| `Sources/ArchiveAtlasApp/BackupCoordinator.swift` | UI-Zustand, Dateiauswahl, asynchrone Abläufe und lokal gespeicherte Full-Backup-Einstellungen. |
-| `Sources/ArchiveAtlasApp/BackupEngine.swift` | Vorschau, Erstellen, Prüfen und Wiederherstellen normaler Backups; ZIP-Backups; Speicheranalyse lokaler Codex-Daten. |
-| `Sources/ArchiveAtlasApp/BackupDomain.swift` | Datenmodelle und Fehlerfälle. |
-| `Sources/ArchiveAtlasApp/BuildChannel.swift` | Ermittelt den lokalen Build-Kanal aus dem App-Bundle. |
-| `Tests/ArchiveAtlasAppTests/` | Automatisierte Tests für Backup-Ausschlüsse, Verifikation und ZIP-Inhalte. |
+| `Sources/CodexVaultApp/CodexVaultApp.swift` | SwiftUI-App, Navigation, Ansichten und die vier Darstellungsvarianten. |
+| `Sources/CodexVaultApp/BackupCoordinator.swift` | UI-Zustand, Dateiauswahl, asynchrone Abläufe und lokal gespeicherte Full-Backup-Einstellungen. |
+| `Sources/CodexVaultApp/BackupEngine.swift` | Vorschau, Erstellen, Prüfen und Wiederherstellen normaler Backups; ZIP-Backups; Speicheranalyse lokaler Codex-Daten. |
+| `Sources/CodexVaultApp/BackupDomain.swift` | Datenmodelle und Fehlerfälle. |
+| `Sources/CodexVaultApp/BuildChannel.swift` | Ermittelt den lokalen Build-Kanal aus dem App-Bundle. |
+| `Tests/CodexVaultAppTests/` | Automatisierte Tests für Backup-Ausschlüsse, Verifikation und ZIP-Inhalte. |
 | `Scripts/` | Lokale Builds für Dev, Beta und Final. Diese Skripte veröffentlichen nichts. |
 | `Packaging/` | Bundle-Vorlage und Signaturkonfiguration für die lokalen App-Bundles. |
 | `Assets/AppIcon/` | Quellbilder und die von Icon Composer erzeugte `CodexVault.icon`-Ressource für das macOS-26-App-Icon. Der Build kompiliert sie zu `Assets.car` und `CodexVault.icns`. |
+| `docs/MANUAL.en.md`, `docs/MANUAL.de.md` | Öffentliche englische und deutsche Bedienungsanleitungen für die aktuell umgesetzten Funktionen und Einstellungen. |
 
 Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoKit. Es gibt keine externen Paketabhängigkeiten.
 
@@ -70,7 +74,7 @@ Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoK
 ## Feste Regeln und Entscheidungen
 
 - Mindestplattform ist macOS 26.
-- Die sichtbare Produktbezeichnung lautet immer **CodexVault**. Interne Bezeichner mit `ArchiveAtlas` sind technische Altlasten und werden nicht als öffentliche Produktbezeichnung verwendet.
+- Die sichtbare und interne Produktbezeichnung lautet **CodexVault**.
 - Keine Netzwerkfunktion und keine stillen Backups.
 - Normale Backups schließen typische Geheimnisdateien und -namen aus, darunter `.env`-Varianten, Tokens, Secrets, Credentials, Zertifikate und Schlüssel; außerdem werden typische Build- und Cache-Ordner ausgelassen.
 - Bei vollständigen Backups gilt die definierte Vollständigkeit vor der Namensfilterung: Sie sind deshalb als vertrauliche lokale Sicherungen zu behandeln.
@@ -96,11 +100,18 @@ Scripts/build-beta.sh
 Scripts/build-final.sh
 ```
 
-Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Am 23. Juli 2026 lief `swift test` mit zwei erfolgreichen Tests. Ein vollständiger Signierungs- oder Notarisierungsworkflow ist nicht dokumentiert und darf nicht angenommen werden. Jede spätere Beta- oder Final-Veröffentlichung braucht einen separaten Auftrag sowie einen angehängten Datenschutzbericht.
+Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Am 24. Juli 2026 lief `swift test` mit zwei erfolgreichen Tests. Ein vollständiger Signierungs- oder Notarisierungsworkflow ist nicht dokumentiert und darf nicht angenommen werden. Jede spätere Beta- oder Final-Veröffentlichung braucht einen separaten Auftrag sowie einen angehängten Datenschutzbericht.
+
+## Quellcode und Veröffentlichungsstand
+
+- Der vollständige, datenschutzgeprüfte Quellcode ist im öffentlichen Repository `Schrotty74/CodexVault` auf dem Branch `main` veröffentlicht.
+- Die GPL-3.0-Lizenz liegt als `LICENSE` im Projektstamm. Ihre rechtliche Auswirkung wurde nicht gesondert geprüft.
+- Es gibt keine Beta-, Final- oder Dev-App-Veröffentlichung. Dev wird nie veröffentlicht.
+- Der Bericht zur ersten Quellcode-Veröffentlichung liegt unter `docs/PRIVACY_REPORT_SOURCE_PUBLICATION_2026-07-24.md`.
+- Die öffentlichen README- und Handbuchdateien sind zweisprachig. Ihre Feature-Listen dürfen nur tatsächlich umgesetzte Funktionen enthalten.
 
 ## Bekannte Einschränkungen
 
-- Der interne Swift-Package- und Quellname lautet noch `ArchiveAtlas`; eine vollständige interne Umbenennung ist nicht umgesetzt.
 - Die Archivansicht zeigt nur Backups, die während der aktuellen App-Sitzung erstellt wurden. Sie durchsucht kein Zielverzeichnis nach früheren Paketen.
 - UI-Texte sind überwiegend Englisch; eine vollständige Lokalisierung ist nicht umgesetzt.
 - Die Vollständigkeit der automatischen Erkennung von Projektordnern ist bewusst begrenzt und kann eine manuelle Konfiguration erfordern.

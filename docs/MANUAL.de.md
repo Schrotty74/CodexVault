@@ -1,0 +1,203 @@
+# CodexVault Handbuch
+
+[Deutsch](MANUAL.de.md) · [English](MANUAL.en.md)
+
+CodexVault ist ein lokales macOS-Werkzeug für Backup und Wiederherstellung. Die
+aktuelle App-Oberfläche ist Englisch. Dieses Handbuch beschreibt nur Funktionen,
+die bereits umgesetzt sind, und stellt keine geplanten Funktionen als vorhanden
+dar.
+
+## Vor dem Start
+
+- CodexVault benötigt macOS 26.
+- Quellen und Ziele immer sichtbar auswählen. Ein normales Backup startet nie
+  automatisch.
+- Vollständige Backups nur an einem vertrauenswürdigen lokalen Ziel ablegen: Sie
+  können sensible lokale Codex-Daten enthalten.
+- Normale und vollständige Backups verwenden unterschiedliche Ausschlussregeln.
+  Vor der Auswahl daher den jeweiligen Abschnitt lesen.
+
+## Navigation
+
+Die Seitenleiste enthält fünf Bereiche:
+
+| Bereich | Zweck |
+| --- | --- |
+| Overview | Startpunkt und aktuelle Platzhalter-Statuskarten. |
+| Backup | Normale Backups, vollständige ZIP-Backups und lokale Codex-Speicherübersicht. |
+| Restore | Prüfung und gezielte Wiederherstellung eines normalen Backup-Pakets. |
+| Archive | Backups, die während der aktuellen App-Sitzung erstellt wurden. |
+| Settings | Darstellung, Datenschutzstatus und Informationen zum Build-Kanal. |
+
+Die Taste **Start setup** auf Overview öffnet Backup.
+
+## Normales Backup
+
+Ein normales Backup eignet sich für ein portables Paket mit genau den Ordnern,
+die du auswählst.
+
+1. **Backup** öffnen.
+2. Unter **Sources** mit **Add project** einen Projektordner oder mit
+   **Add folder** einen weiteren Ordner wählen. Mehrere Quellen sind möglich.
+3. Die Vorschau abwarten. Sie zeigt pro Quelle Dateianzahl und geschätzte Größe.
+   Mit der Entfernen-Taste neben einer Quelle wird sie nur aus der aktuellen
+   Auswahl entfernt.
+4. Unter **Backup destination** auf **Choose destination** klicken und einen
+   beschreibbaren Ordner wählen. Mit **Change** kann das Ziel geändert werden.
+5. Die Zusammenfassung unten prüfen. **Create verified backup** wird erst mit
+   mindestens einer Quelle und einem Ziel aktiv.
+6. **Create verified backup** wählen und die Erfolgsmeldung abwarten.
+
+### Ergebnis
+
+CodexVault erstellt im gewählten Ziel einen neuen Ordner mit der Endung
+`.codexvault`. Er enthält:
+
+- `manifest.json` mit Paket-Schema, logischen Quellnamen, relativen Pfaden,
+  Ausschlusszählern und SHA-256-Prüfsummen.
+- Die ausgewählten Quellen direkt an der Paketwurzel; es gibt keinen technischen
+  Zwischenordner `payload`.
+
+Nach dem Erstellen wird das Paket geprüft. Bereits vorhandene Dateien im Ziel
+werden nicht überschrieben.
+
+### Ausschlüsse im normalen Backup
+
+Vorschau und normales Backup schließen typische sensible oder erzeugte Dateien
+aus, darunter `.env`-Varianten, Dateinamen mit token, secret oder credential,
+übliche Zertifikat-/Schlüsselformate, Git-Metadaten, Build-Ordner,
+Abhängigkeitsordner und gängige Cache-Ordner. Eine sichtbare Warnung zeigt die
+Zahl der in der Vorschau ausgeschlossenen sensiblen Dateien.
+
+Das ist ein namensbasierter Schutz und keine Garantie, dass jede mögliche
+Geheimdatei erkannt wird. Eine Quelle vor dem Teilen eines Pakets selbst prüfen.
+
+## Vollständiges ZIP-Backup
+
+**CodexVault full backup** erstellt wiederkehrende lokale ZIP-Kopien der
+automatisch erkannten Codex-App-Daten und der konfigurierten Projektordner.
+
+1. **Backup** öffnen und **CodexVault full backup** suchen.
+2. Mit **Configure project folders** alle Projektordner wählen, die künftig in
+   jedem vollständigen Backup enthalten sein sollen.
+3. Mit **Change destination** das vertrauenswürdige lokale ZIP-Ziel wählen.
+4. Die angezeigte Projektliste und das Ziel prüfen.
+5. **Create complete ZIP backup** wählen. Fortschrittsbalken und Meldung zeigen
+   den aktuellen Schritt.
+
+Die Ordnerauswahl und das Ziel werden lokal für den aktuellen macOS-Benutzer
+gespeichert. Die Codex-App-Daten werden automatisch erkannt; existiert ein
+sichtbarer Codex-Ordner in Documents, wird er ebenfalls zu den konfigurierten
+Projektquellen ergänzt. Es muss kein externes Backup-Skript ausgewählt werden.
+
+### Dateien, Prüfung und Aufbewahrung
+
+Für jede verfügbare Quelle erstellt CodexVault eine datierte ZIP-Datei und
+aktualisiert eine separate `latest`-ZIP-Kopie. Jede neue ZIP-Datei wird vor der
+Erfolgsmeldung mit dem System-ZIP-Prüfwerkzeug getestet.
+
+Nach einem erfolgreichen Lauf kann CodexVault anbieten, datierte Backups über
+die drei neuesten pro Quelle hinaus zu entfernen. Der Dialog enthält eine
+destruktive Option und **Keep all**. Ohne Auswahl der destruktiven Option wird
+nichts gelöscht.
+
+### Ausschlüsse im vollständigen Backup
+
+Vollständige Backups dienen der Fortsetzung und sind daher umfassender als
+normale Backups. Bei Codex-Daten werden temporäre Daten und IPC-Dateien
+ausgeschlossen. Bei konfigurierten Projektordnern werden übliche Build- und
+Abhängigkeitsordner ausgelassen. Die ZIPs können trotzdem sensible Arbeits- und
+Codex-Daten enthalten und dürfen nicht als öffentlich teilbar betrachtet werden.
+
+## Codex-Speicherübersicht und Bereinigung lokaler Einträge
+
+Die **Codex storage overview** zeigt den lokalen Platzbedarf, bevor etwas
+gelöscht wird.
+
+1. In Backup auf **Check storage** klicken.
+2. Gesamtzahl und Gesamtgröße sowie die Speicher-Kategorien prüfen.
+3. **Local records grouped by project** ansehen. Einträge können einem aktuellen
+   Projekt, früherer lokaler Arbeit oder keinem aktuellen Projekt zugeordnet sein.
+4. Mit **Collapse** die vorhandene Ansicht einklappen. In der aktuellen
+   App-Sitzung öffnet **Check storage** dieselbe Vorschau wieder; für eine neue
+   Analyse die App neu starten.
+
+Falls **Unassigned local records** angezeigt wird, nur Einträge auswählen, die
+wirklich nicht mehr benötigt werden. Danach **Remove selected local records**
+wählen und im Dialog **Remove permanently** bestätigen. Damit werden nur die
+ausgewählten, derzeit nicht zugeordneten lokalen Sitzungsdateien entfernt. Das
+kann nicht rückgängig gemacht werden.
+
+Die Speicherübersicht selbst ist lesend. Sie entfernt nichts, bevor Einträge
+ausgewählt und die destruktive Aktion bestätigt wurden.
+
+## Wiederherstellung eines normalen Backups
+
+Die Wiederherstellung arbeitet mit einem geprüften `.codexvault`-Paket.
+
+1. **Restore** öffnen.
+2. **Choose Backup** wählen und ein Backup-Paket auswählen.
+3. Die Prüfung abwarten. Bei einem Fehler steht das Paket nicht für die
+   Wiederherstellung zur Verfügung.
+4. Unter **Verified contents** die logischen Quellen wählen. Nach einer
+   erfolgreichen Prüfung sind sie zunächst ausgewählt.
+5. Ein **Restore destination** wählen.
+6. **Restore selected** wählen und die Prüfung abwarten.
+
+CodexVault erstellt unter dem gewählten Ziel einen neuen Wiederherstellungsordner
+und prüft die Dateien gegen die Paket-Prüfsummen. Vorhandene Zieldateien werden
+nie überschrieben. Bei erfolgreicher Prüfung werden Paket-Schema 1, 2 und 3
+akzeptiert.
+
+## Archive
+
+Archive zeigt normale Backup-Pakete, die während der aktuellen App-Sitzung
+erstellt wurden, mit Prüfstatus, Dateianzahl und Größe. Archive ist kein
+Dateibrowser: Nach einem Neustart sucht die App frühere Pakete nicht automatisch
+im Zielordner.
+
+## Einstellungen
+
+### Appearance
+
+**Preview theme** ändert nur die aktuelle Darstellung der App. Quellen,
+Backup-Inhalte, Sicherheitsentscheidungen und bestehende Pakete bleiben gleich.
+
+| Theme | Darstellung |
+| --- | --- |
+| Liquid Glass | Native Glasoberfläche nur in der linken Navigation. |
+| Full Glass | Native Glasoberfläche im gesamten Fenster. |
+| Graphite & Lime | Dunkle Graphitoberfläche mit Lime-Akzenten. |
+| Midnight | Dunkle Blau-/Indigo-Oberfläche. |
+
+Das gewählte Theme ist derzeit eine Sitzungseinstellung; es ist nicht als
+dauerhaft gespeicherte Einstellung dokumentiert.
+
+### Privacy
+
+Im Bereich Privacy steht, dass Netzwerkaktivität deaktiviert ist und die App
+keinen privaten Inhaltskatalog speichert. Dateiberechtigungen werden immer über
+sichtbare Ordnerauswahl angefordert. Die lokale Konfiguration für vollständige
+Backups speichert nur die dafür benötigten Ordner- und Zielverweise, keinen
+Katalog der Backup-Inhalte.
+
+### Build channel
+
+Der Bereich zeigt den laufenden Build-Kanal. Dev, Beta und Final haben getrennte
+Bundle-IDs und getrennte Sandbox-Container. Daten werden nicht zwischen diesen
+Kanälen migriert.
+
+## Fehler und sichere nächste Schritte
+
+| Meldung oder Situation | Vorgehen |
+| --- | --- |
+| Keine Quelle oder kein Ziel gewählt | Mindestens eine Quelle und ein beschreibbares Ziel wählen. |
+| Paket konnte nicht geprüft werden | Nicht wiederherstellen; anderes Paket wählen oder ein neues geprüftes Backup erstellen. |
+| Vollständiges ZIP-Backup fehlgeschlagen | Prüfen, ob das Ziel beschreibbar und die Quelle verfügbar ist, dann erneut versuchen. |
+| Ältere vollständige Backups sollen gelöscht werden | **Keep all** wählen, wenn die Aufbewahrungsentscheidung noch nicht geprüft wurde. |
+| Nicht zugeordnete Einträge werden gezeigt | Nicht nur nach Größe löschen; nur wirklich nicht mehr benötigte Einträge wählen. |
+
+## Regel für Funktionsdokumentation
+
+Bei jeder sichtbaren Funktionsänderung die Funktionslisten in beiden READMEs und
+die passenden Abschnitte in beiden Handbüchern im selben Auftrag aktualisieren.

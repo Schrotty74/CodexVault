@@ -2,10 +2,10 @@ import AppKit
 import SwiftUI
 
 @main
-struct ArchiveAtlasApp: App {
+struct CodexVaultApp: App {
     var body: some Scene {
         WindowGroup {
-            ArchiveAtlasRootView()
+            CodexVaultRootView()
                 .frame(minWidth: 1_040, minHeight: 700)
         }
         .windowResizability(.contentMinSize)
@@ -78,27 +78,27 @@ private enum DisplayTheme: String, CaseIterable, Identifiable {
     }
 }
 
-private struct ArchiveAtlasFullGlassKey: EnvironmentKey {
+private struct CodexVaultFullGlassKey: EnvironmentKey {
     static let defaultValue = false
 }
 
-private struct ArchiveAtlasSidebarOnlyGlassKey: EnvironmentKey {
+private struct CodexVaultSidebarOnlyGlassKey: EnvironmentKey {
     static let defaultValue = false
 }
 
 private extension EnvironmentValues {
-    var archiveAtlasFullGlass: Bool {
-        get { self[ArchiveAtlasFullGlassKey.self] }
-        set { self[ArchiveAtlasFullGlassKey.self] = newValue }
+    var codexVaultFullGlass: Bool {
+        get { self[CodexVaultFullGlassKey.self] }
+        set { self[CodexVaultFullGlassKey.self] = newValue }
     }
 
-    var archiveAtlasSidebarOnlyGlass: Bool {
-        get { self[ArchiveAtlasSidebarOnlyGlassKey.self] }
-        set { self[ArchiveAtlasSidebarOnlyGlassKey.self] = newValue }
+    var codexVaultSidebarOnlyGlass: Bool {
+        get { self[CodexVaultSidebarOnlyGlassKey.self] }
+        set { self[CodexVaultSidebarOnlyGlassKey.self] = newValue }
     }
 }
 
-private struct ArchiveAtlasRootView: View {
+private struct CodexVaultRootView: View {
     @State private var selectedSection: AppSection? = .overview
     @State private var selectedTheme: DisplayTheme = .liquidGlass
     @State private var backupCoordinator = BackupCoordinator()
@@ -125,8 +125,8 @@ private struct ArchiveAtlasRootView: View {
                 detail
                     .padding(32)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .environment(\.archiveAtlasFullGlass, selectedTheme == .fullGlass)
-                    .environment(\.archiveAtlasSidebarOnlyGlass, selectedTheme == .liquidGlass)
+                    .environment(\.codexVaultFullGlass, selectedTheme == .fullGlass)
+                    .environment(\.codexVaultSidebarOnlyGlass, selectedTheme == .liquidGlass)
             }
         }
         .tint(selectedTheme.tint)
@@ -136,10 +136,10 @@ private struct ArchiveAtlasRootView: View {
     private var sidebar: some View {
         if selectedTheme == .liquidGlass || selectedTheme == .fullGlass {
             NativeGlassPanel {
-                ArchiveAtlasSidebar(selection: $selectedSection, theme: selectedTheme)
+                CodexVaultSidebar(selection: $selectedSection, theme: selectedTheme)
             }
         } else {
-            ArchiveAtlasSidebar(selection: $selectedSection, theme: selectedTheme)
+            CodexVaultSidebar(selection: $selectedSection, theme: selectedTheme)
                 .background(.regularMaterial)
         }
     }
@@ -163,7 +163,7 @@ private struct ArchiveAtlasRootView: View {
     }
 }
 
-private struct ArchiveAtlasSidebar: View {
+private struct CodexVaultSidebar: View {
     @Binding var selection: AppSection?
     let theme: DisplayTheme
 
@@ -837,8 +837,8 @@ private struct MetricCard: View {
 }
 
 private struct ModuleRow: View {
-    @Environment(\.archiveAtlasFullGlass) private var usesFullGlass
-    @Environment(\.archiveAtlasSidebarOnlyGlass) private var usesSidebarOnlyGlass
+    @Environment(\.codexVaultFullGlass) private var usesFullGlass
+    @Environment(\.codexVaultSidebarOnlyGlass) private var usesSidebarOnlyGlass
     let title: String
     let icon: String
     let subtitle: String
@@ -886,8 +886,8 @@ private struct ModuleRow: View {
 }
 
 private struct SurfaceCard<Content: View>: View {
-    @Environment(\.archiveAtlasFullGlass) private var usesFullGlass
-    @Environment(\.archiveAtlasSidebarOnlyGlass) private var usesSidebarOnlyGlass
+    @Environment(\.codexVaultFullGlass) private var usesFullGlass
+    @Environment(\.codexVaultSidebarOnlyGlass) private var usesSidebarOnlyGlass
     @ViewBuilder let content: Content
 
     var body: some View {

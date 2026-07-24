@@ -2,20 +2,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "ArchiveAtlas",
+    name: "CodexVault",
     platforms: [.macOS(.v26)],
     products: [
-        .executable(name: "ArchiveAtlas", targets: ["ArchiveAtlasApp"])
+        .executable(name: "CodexVault", targets: ["CodexVaultApp"])
     ],
     targets: [
         .executableTarget(
-            name: "ArchiveAtlasApp",
-            path: "Sources/ArchiveAtlasApp"
+            name: "CodexVaultApp",
+            path: "Sources/CodexVaultApp"
         ),
         .testTarget(
-            name: "ArchiveAtlasAppTests",
-            dependencies: ["ArchiveAtlasApp"],
-            path: "Tests/ArchiveAtlasAppTests"
+            name: "CodexVaultAppTests",
+            dependencies: ["CodexVaultApp"],
+            path: "Tests/CodexVaultAppTests"
         )
     ]
 )

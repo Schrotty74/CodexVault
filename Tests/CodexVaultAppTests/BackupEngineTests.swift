@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import ArchiveAtlasApp
+@testable import CodexVaultApp
 
 final class BackupEngineTests: XCTestCase {
     func testCompleteBackupCreatesVerifiedZipAndKeepsConfigurationFiles() throws {

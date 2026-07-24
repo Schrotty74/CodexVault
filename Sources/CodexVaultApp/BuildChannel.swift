@@ -7,7 +7,7 @@ enum BuildChannel: String {
 
     static var current: BuildChannel {
         guard
-            let value = Bundle.main.object(forInfoDictionaryKey: "ArchiveAtlasBuildChannel") as? String,
+            let value = Bundle.main.object(forInfoDictionaryKey: "CodexVaultBuildChannel") as? String,
             let channel = BuildChannel(rawValue: value)
         else {
             return .dev

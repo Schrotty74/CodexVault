@@ -1,54 +1,74 @@
+<p align="center">
+  <img src="Assets/AppIcon/CodexVault-Transparent-Large.png" width="180" alt="CodexVault app icon">
+</p>
+
 # CodexVault
-Die aktuelle Wissensquelle für neue Chats ist [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md); offene Arbeiten stehen in [NEXT_STEPS.md](NEXT_STEPS.md). [PHASE_0_DISCOVERY.md](PHASE_0_DISCOVERY.md) ist eine historische Bestandsaufnahme.
 
-CodexVault ist eine lokale macOS-App für die selektive Sicherung und Wiederherstellung von Codex- und Arbeitsdaten.
+[Deutsch](README.de.md) · [English](README.md)
 
-## Erster App-Stand
+CodexVault is a local macOS app for creating verified backups of selected work
+folders and Codex-related data, then restoring them into new folders without
+overwriting existing files. It does not upload data or run silent backups.
 
-Die erste SwiftUI-App enthält die Navigation, vier umschaltbare Darstellungsvarianten und sichere Leer-/Vorschaustände für Übersicht, Backup, Wiederherstellung, Archiv und Einstellungen.
+## Features
 
-Normale Backups sichern nur ausdrücklich ausgewählte Ordner in ein ebenfalls ausdrücklich gewähltes lokales Ziel. Das Full Backup verwendet einmal konfigurierte Quellen und ein Ziel. Die App speichert keinen privaten Inhaltskatalog, hat keine Netzwerkfunktion und entfernt Daten nur nach sichtbarer Auswahl und Bestätigung.
+Keep this list current whenever an implemented user-facing feature changes.
 
-## Lokale Sicherung – Phase 1
+- Select multiple project and additional folders for a normal backup.
+- Preview file count, size, and excluded sensitive files before creating a
+  backup.
+- Create portable `.codexvault` packages with a manifest and SHA-256 checks.
+- Verify a package before restoring selected sources into a new folder.
+- Create a complete local ZIP backup of detected Codex data and configured
+  project folders, with progress, verification, a dated copy, and a `latest`
+  copy.
+- Keep the three newest dated complete backups per source after an explicit
+  confirmation; the app never removes older backups silently.
+- Inspect local Codex storage by category and project assignment, then
+  permanently remove only explicitly selected, unassigned local records after
+  confirmation.
+- Use four appearances: Liquid Glass, Full Glass, Graphite & Lime, and
+  Midnight.
+- Keep Dev, Beta, and Final builds separate with distinct bundle identifiers
+  and data containers.
 
-Die Backup-Ansicht kann Projekte und zusätzliche Ordner über den macOS-Dateidialog auswählen. Sie zeigt eine lokale Vorschau von Dateianzahl und Größe, bevor der Benutzer ein Zielverzeichnis auswählt.
+## Documentation
 
-Beim Start der Sicherung erstellt CodexVault dort ein neues Paket mit Manifest und SHA-256-Prüfsummen. Die gewählten Projekt- und Ordnernamen liegen direkt im Paket; es gibt keinen technischen Zwischenordner. Das Paket wird direkt danach erneut geöffnet und verifiziert. Dateien mit typischen Geheimnisnamen, `.env`-Dateien, Zertifikate, Schlüssel sowie Standard-Build- und Cache-Ordner werden standardmäßig ausgeschlossen. Weder die App noch das Manifest speichert absolute Quellpfade.
+- [English manual](docs/MANUAL.en.md)
+- [Deutsches Handbuch](docs/MANUAL.de.md)
+- [Project context for new Codex chats](PROJECT_CONTEXT.md)
+- [Current development tasks](NEXT_STEPS.md)
 
-Die Wiederherstellung öffnet ein CodexVault-Paket, prüft es vollständig, lässt die enthaltenen logischen Quellen einzeln auswählen und erstellt am gewählten Ziel immer einen neuen Restore-Ordner. Vorhandene Dateien werden nie überschrieben.
+## Requirements and local start
 
-Zusätzlich sichert „Komplett-Backup“ die automatisch erkannte Codex-App-Datenbasis und die einmal pro macOS-Benutzer konfigurierten Projektordner. Pro Quelle entstehen eine datierte ZIP-Datei und eine `latest`-Kopie. Kein externes Skript wird ausgewählt. CodexVault prüft jedes ZIP und schlägt die Bereinigung älterer Sicherungen erst nach einer sichtbaren Bestätigung vor.
-
-Chat-Import und zeitgesteuerte Sicherungen sind nicht implementiert. CodexVault erstellt Backups nur nach einer aktiven Aktion der nutzenden Person; es gibt keine stillen oder zeitgesteuerten Sicherungen.
-
-## Lokal starten
-
-Voraussetzung: macOS 26 und Xcode 26.6 oder neuer.
+CodexVault requires macOS 26. To run the Swift Package locally, use Xcode 26.6
+or newer:
 
 ```zsh
 swift run
 ```
 
-Das Projekt kann auch als Swift Package in Xcode geöffnet werden. Es verwendet ausschließlich Apple-Frameworks und keine externen Abhängigkeiten.
+For local bundles, use the scripts in `Scripts/`:
 
-Für ein lokal startbares Dev-Bundle verwende Scripts/build-development.sh. Das Bundle liegt danach unter Build/dev/CodexVault Dev.app.
+```zsh
+Scripts/build-development.sh
+Scripts/build-beta.sh
+Scripts/build-final.sh
+```
 
-## Getrennte Build-Kanäle
+The scripts build locally only. They do not publish an app.
 
-Scripts/build-development.sh, Scripts/build-beta.sh und Scripts/build-final.sh erzeugen getrennte lokale Bundles. Jeder Kanal hat einen eigenen Namen, eine eigene Bundle-ID, einen eigenen Swift-Build-Ordner und damit einen eigenen Sandbox-Datencontainer:
+## Privacy and releases
 
-- Dev: CodexVault Dev / com.codexvault.dev
-- Beta: CodexVault Beta / com.codexvault.beta
-- Final: CodexVault / com.codexvault
+CodexVault works locally. Normal backups exclude typical secrets and build
+artifacts. Complete backups can contain sensitive local Codex data and must be
+stored only in a trusted destination.
 
-Die Scripts bauen ausschließlich lokal. Sie veröffentlichen nichts, löschen keine Container und übernehmen keine Daten zwischen den Kanälen.
+Dev app bundles are never published. Only a separately authorized Beta or Final
+release may be published, and each one must include a completed privacy report
+as a separate release attachment. See
+[the release privacy-report template](docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md).
 
-## App-Icon
+## License
 
-`Assets/AppIcon/CodexVault.icon` ist die Icon-Composer-Ressource für macOS 26. Der lokale Bundle-Build kompiliert sie mit Apples Asset-Compiler zu `Assets.car` und `CodexVault.icns`; erst diese Bundle-Ressourcen erkennt der Finder als App-Icon. Das freigestellte Liquid-Glass-Quellmotiv erlaubt macOS die passende Erscheinungsvariante.
-
-## Datenschutz
-
-Lokale Inhalte, Zugangsdaten, Tokens, Backups und absolute Benutzerpfade gehören nicht in Git. Die Datei `.gitignore` schließt Build-Ausgaben und künftige Backup-Pakete aus.
-
-Dev-Bundles werden niemals veröffentlicht. Eine spätere Veröffentlichung ist nur für Beta oder Final möglich und benötigt jeweils einen aktuellen Datenschutzbericht als separaten Release-Anhang. Die Vorlage steht in [docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md](docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md).
+CodexVault is licensed under the [GNU GPL v3.0](LICENSE).
