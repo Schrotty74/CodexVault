@@ -34,8 +34,8 @@ Keep this list current whenever an implemented user-facing feature changes.
 
 ## Documentation
 
-- [English manual](docs/MANUAL.en.md)
-- [Deutsches Handbuch](docs/MANUAL.de.md)
+- [English manual (PDF)](docs/CodexVault-Manual-EN.pdf)
+- [Deutsches Handbuch (PDF)](docs/CodexVault-Handbuch-DE.pdf)
 - [Project context for new Codex chats](PROJECT_CONTEXT.md)
 - [Current development tasks](NEXT_STEPS.md)
 

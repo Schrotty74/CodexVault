@@ -11,7 +11,7 @@ Status: Öffentlicher Quellcode-Upload auf GitHub am 24. Juli 2026 erfolgt. Es g
 4. [PHASE_0_DISCOVERY.md](PHASE_0_DISCOVERY.md) – historische Bestandsaufnahme; bei Abweichungen hat diese Datei keinen Vorrang.
 5. Vor einer Beta- oder Final-Veröffentlichung zusätzlich [docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md](docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md) lesen und einen konkreten Bericht daraus erstellen.
 
-Öffentliche Nutzerdokumentation liegt zweisprachig in `README.md`, `README.de.md`, `docs/MANUAL.en.md` und `docs/MANUAL.de.md`. Bei jeder sichtbaren Funktions- oder Einstellungsänderung müssen die Feature-Listen und die passenden Handbuchabschnitte im selben Auftrag aktualisiert werden.
+Öffentliche Nutzerdokumentation liegt zweisprachig in `README.md`, `README.de.md`, `docs/CodexVault-Manual-EN.pdf` und `docs/CodexVault-Handbuch-DE.pdf`. Die PDF-Handbücher werden mit `Scripts/generate-manual-pdfs.py` aus den Textquellen unter `Scripts/ManualSources/` erzeugt. Bei jeder sichtbaren Funktions- oder Einstellungsänderung müssen die Feature-Listen, die passenden Handbuchquellen und die daraus erzeugten PDFs im selben Auftrag aktualisiert werden.
 
 Bei einer inhaltlichen Änderung an Funktionen, Datenformaten, Build-Abläufen oder offenen Punkten sind diese Datei und `NEXT_STEPS.md` im selben Arbeitsauftrag zu aktualisieren.
 
@@ -32,7 +32,8 @@ CodexVault ist eine lokale macOS-App zur Sicherung und Wiederherstellung von Arb
 | `Scripts/` | Lokale Builds für Dev, Beta und Final. Diese Skripte veröffentlichen nichts. |
 | `Packaging/` | Bundle-Vorlage und Signaturkonfiguration für die lokalen App-Bundles. |
 | `Assets/AppIcon/` | Quellbilder und die von Icon Composer erzeugte `CodexVault.icon`-Ressource für das macOS-26-App-Icon. Der Build kompiliert sie zu `Assets.car` und `CodexVault.icns`. |
-| `docs/MANUAL.en.md`, `docs/MANUAL.de.md` | Öffentliche englische und deutsche Bedienungsanleitungen für die aktuell umgesetzten Funktionen und Einstellungen. |
+| `docs/CodexVault-Manual-EN.pdf`, `docs/CodexVault-Handbuch-DE.pdf` | Öffentliche englische und deutsche Bedienungsanleitungen für die aktuell umgesetzten Funktionen und Einstellungen. |
+| `Scripts/ManualSources/`, `Scripts/generate-manual-pdfs.py` | Textquellen und reproduzierbarer Generator der öffentlichen PDF-Handbücher. |
 
 Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoKit. Es gibt keine externen Paketabhängigkeiten.
 

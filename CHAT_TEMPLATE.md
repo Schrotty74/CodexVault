@@ -6,7 +6,7 @@ Lies zuerst vollständig `PROJECT_CONTEXT.md` und `NEXT_STEPS.md`. Danach prüfe
 
 Bei wichtigen Änderungen an Funktionen, Datenformaten, Build-Abläufen oder offenen Aufgaben aktualisiere `PROJECT_CONTEXT.md` und `NEXT_STEPS.md` im selben Auftrag. Keine Fakten, Testergebnisse oder offenen Punkte erfinden; Unbekanntes deutlich als unbekannt markieren.
 
-Bei sichtbaren Funktions- oder Einstellungsänderungen zusätzlich die Feature-Listen in `README.md` und `README.de.md` sowie die passenden Abschnitte in `docs/MANUAL.en.md` und `docs/MANUAL.de.md` aktualisieren. Nur bereits umgesetzte Funktionen dokumentieren.
+Bei sichtbaren Funktions- oder Einstellungsänderungen zusätzlich die Feature-Listen in `README.md` und `README.de.md`, die passenden Textquellen in `Scripts/ManualSources/` sowie die daraus erzeugten PDF-Handbücher in `docs/` aktualisieren. Nur bereits umgesetzte Funktionen dokumentieren.
 
 Schutzregeln:
 

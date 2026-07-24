@@ -37,8 +37,8 @@ anpassen.
 
 ## Dokumentation
 
-- [Deutsches Handbuch](docs/MANUAL.de.md)
-- [English manual](docs/MANUAL.en.md)
+- [Deutsches Handbuch (PDF)](docs/CodexVault-Handbuch-DE.pdf)
+- [English manual (PDF)](docs/CodexVault-Manual-EN.pdf)
 - [Projektkontext für neue Codex-Chats](PROJECT_CONTEXT.md)
 - [Aktuelle Entwicklungsaufgaben](NEXT_STEPS.md)
 
