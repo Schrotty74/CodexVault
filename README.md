@@ -1,5 +1,4 @@
 # CodexVault
-
 Die aktuelle Wissensquelle für neue Chats ist [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md); offene Arbeiten stehen in [NEXT_STEPS.md](NEXT_STEPS.md). [PHASE_0_DISCOVERY.md](PHASE_0_DISCOVERY.md) ist eine historische Bestandsaufnahme.
 
 CodexVault ist eine lokale macOS-App für die selektive Sicherung und Wiederherstellung von Codex- und Arbeitsdaten.
