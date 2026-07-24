@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>ArchiveAtlasBuildChannel</key>
+    <string>__BUILD_CHANNEL__</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleDisplayName</key>
+    <string>__APP_DISPLAY_NAME__</string>
+    <key>CFBundleExecutable</key>
+    <string>CodexVault</string>
+    <key>CFBundleIdentifier</key>
+    <string>__BUNDLE_IDENTIFIER__</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleIconName</key>
+    <string>CodexVault</string>
+    <key>CFBundleIconFile</key>
+    <string>CodexVault</string>
+    <key>CFBundleName</key>
+    <string>__APP_DISPLAY_NAME__</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>__MARKETING_VERSION__</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>26.0</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+</dict>
+</plist>

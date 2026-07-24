@@ -1,0 +1,14 @@
+.DS_Store
+.build/
+.swiftpm/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+ArchiveAtlasBackups/
+CodexVaultBackups/
+CodexVault-Restore-*/
+Build/
+dist/
+*.archiveatlas
+*.codexvault
+*.zip
