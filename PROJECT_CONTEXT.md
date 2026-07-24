@@ -1,7 +1,7 @@
 # CodexVault – Projektkontext
 
 Stand: 24. Juli 2026
-Status: Öffentlicher Quellcode-Upload auf GitHub am 24. Juli 2026 vorbereitet. Es gibt noch keine Beta- oder Final-Veröffentlichung.
+Status: Öffentlicher Quellcode-Upload auf GitHub am 24. Juli 2026 erfolgt. Es gibt noch keine Beta- oder Final-Veröffentlichung.
 
 ## Zuerst lesen
 
