@@ -12,9 +12,7 @@ let package = Package(
         .executableTarget(
             name: "CodexVaultApp",
             path: "Sources/CodexVaultApp",
-            resources: [
-                .process("Resources")
-            ]
+            exclude: ["Resources"]
         ),
         .testTarget(
             name: "CodexVaultAppTests",

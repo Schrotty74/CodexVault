@@ -97,11 +97,12 @@ enum CodexVaultResources {
            let bundle = Bundle(url: resourceURL.appendingPathComponent("CodexVault_CodexVaultApp.bundle", isDirectory: true)) {
             return bundle
         }
-        #if SWIFT_PACKAGE
-        return Bundle.module
-        #else
-        return Bundle.main
-        #endif
+        if Bundle.main.url(forResource: "ai-chatgpt-logo", withExtension: "jpg") != nil {
+            return Bundle.main
+        }
+        let sourceResources = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
+            .appendingPathComponent("Sources/CodexVaultApp/Resources", isDirectory: true)
+        return Bundle(url: sourceResources) ?? Bundle.main
     }
 }
 

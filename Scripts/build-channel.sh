@@ -14,7 +14,7 @@ case "$channel" in
     beta)
         display_name="CodexVault Beta"
         bundle_identifier="com.codexvault.beta"
-        marketing_version="0.1.0-beta"
+        marketing_version="1.0.0"
         output_directory="$project_root/Build/beta"
         ;;
     final)
@@ -39,9 +39,8 @@ icon_partial_info="$scratch_directory/CodexVault-icon-info.plist"
 swift build --package-path "$project_root" --scratch-path "$scratch_directory" --configuration release
 binary_directory="$(swift build --package-path "$project_root" --scratch-path "$scratch_directory" --configuration release --show-bin-path)"
 binary_path="$binary_directory/CodexVault"
-resource_bundle="$binary_directory/CodexVault_CodexVaultApp.bundle"
 
-if [[ ! -x "$binary_path" || ! -d "$resource_bundle" || ! -f "$template" || ! -f "$entitlements" || ! -d "$icon_bundle" ]]; then
+if [[ ! -x "$binary_path" || ! -f "$template" || ! -f "$entitlements" || ! -d "$icon_bundle" ]]; then
     echo "Build input missing." >&2
     exit 1
 fi
@@ -49,8 +48,7 @@ fi
 rm -rf "$app_bundle"
 mkdir -p "$app_bundle/Contents/MacOS" "$app_bundle/Contents/Resources"
 cp "$binary_path" "$app_bundle/Contents/MacOS/CodexVault"
-cp -R "$resource_bundle" "$app_bundle/Contents/Resources/"
-cp -R "$resource_bundle"/. "$app_bundle/Contents/Resources/"
+cp -R "$project_root/Sources/CodexVaultApp/Resources"/. "$app_bundle/Contents/Resources/"
 xcrun actool \
     --compile "$app_bundle/Contents/Resources" \
     --platform macosx \
@@ -60,6 +58,11 @@ xcrun actool \
     "$icon_bundle" >/dev/null
 
 sed -e "s/__BUILD_CHANNEL__/$channel/g" -e "s/__APP_DISPLAY_NAME__/$display_name/g" -e "s/__BUNDLE_IDENTIFIER__/$bundle_identifier/g" -e "s/__MARKETING_VERSION__/$marketing_version/g" "$template" > "$app_bundle/Contents/Info.plist"
+
+if strings "$app_bundle/Contents/MacOS/CodexVault" | grep -Fq "$project_root"; then
+    echo "Refusing to build an artifact containing the local project path." >&2
+    exit 1
+fi
 
 codesign --force --sign - --entitlements "$entitlements" "$app_bundle"
 plutil -lint "$app_bundle/Contents/Info.plist" >/dev/null
