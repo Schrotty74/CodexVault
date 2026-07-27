@@ -12,7 +12,7 @@ Schutzregeln:
 
 - Keine privaten Inhalte, Benutzerpfade, Zugangsdaten, Tokens, Backups oder Testdaten dokumentieren oder veröffentlichen.
 - Keine Commits, Pushes, Tags, Releases oder Versionsänderungen ohne ausdrücklichen Auftrag.
-- GitHub-Quellcode darf nur nach einer Datenschutzprüfung veröffentlicht werden. Dev-Bundles werden nie veröffentlicht; Beta- und Final-Veröffentlichungen benötigen jeweils einen aktuellen Datenschutzbericht als Release-Anhang.
+- GitHub-Quellcode darf nur nach einer Datenschutzprüfung veröffentlicht werden. Dev-Bundles werden nie verpackt oder veröffentlicht. Jede Beta- oder Final-Veröffentlichung benötigt eine DMG mit `Applications`-Link, ein ZIP und einen aktuellen Datenschutzbericht mit beiden Prüfsummen als Release-Anhang.
 - Keine stillen Sicherungen oder Löschungen: Auswahl, Ziel und Bestätigung müssen sichtbar bleiben.
 - Sichtbarer Produktname ist CodexVault; öffentliche Namen nur `Schrotty74`.
 - Bestehende Datenformate und die Trennung von Dev, Beta und Final nur bewusst und mit Prüfung ändern.

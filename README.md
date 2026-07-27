@@ -87,8 +87,8 @@ The scripts build locally only. They do not publish an app.
 [CodexVault 1.0 Beta 1](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.1)
 is ad-hoc signed and not notarized yet. macOS may therefore block its first
 launch. Download the DMG (recommended) or ZIP only from the official release.
-Open the DMG and move the app to Applications, then use one of these one-time,
-app-specific approvals:
+Open the DMG and drag the app onto its included **Applications** link, then use
+one of these one-time, app-specific approvals:
 
 1. In Finder, Control-click `CodexVault Beta.app`, choose **Open**, then choose
    **Open** again in the confirmation dialog.
@@ -107,9 +107,10 @@ CodexVault works locally. Normal backups exclude typical secrets and build
 artifacts. Complete backups can contain sensitive local Codex data and must be
 stored only in a trusted destination.
 
-Dev app bundles are never published. Only a separately authorized Beta or Final
-release may be published, and each one must include a completed privacy report
-as a separate release attachment. See
+Dev app bundles are never packaged or published. Each separately authorized
+Beta or Final release contains both a DMG (with an **Applications** link) and a
+ZIP, plus a completed privacy report with both SHA-256 checksums as a separate
+release attachment. See
 [the release privacy-report template](docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md).
 
 ## License

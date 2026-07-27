@@ -8,9 +8,9 @@
 - Verified by: `Schrotty74`
 - Release artifacts and SHA-256:
   - `CodexVault-1.0-Beta-1.dmg`
-    `aca0a76cfbaaa217808b9e6de696cff37d484cc63ef5f5e092dc058feb93a6f7`
+    `e8be2efb35f6056007c1dfe0744ee31ad8c3ed8c6a253a4363c29ddbf033f5e5`
   - `CodexVault-1.0-Beta-1.zip`
-    `e43e96fed97177679db285b5b2dedf959e83f0608f1e3d0966d72c4c3a7d3004`
+    `925a1a6027038ad5864499ce15c37280c48017b55b7e38ee00b95b179f7761a6`
 
 ## Scope checked
 
@@ -21,6 +21,8 @@
       data.
 - [x] Build output, local backup packages, `.env` files, caches, Finder
       metadata, and temporary files are not included in the release ZIP.
+- [x] The DMG contains only `CodexVault Beta.app` and an `Applications` link
+      to `/Applications`.
 - [x] Public names and product naming are correct.
 - [x] The app's visible backup and restore behavior was reviewed for this
       release; no unannounced network transfer or silent backup was introduced.
@@ -32,8 +34,9 @@
 `swift test` completed successfully with 7 passing tests. The Beta app bundle
 passed `codesign --verify --deep --strict`; the ZIP archive passed `unzip -t`
 and the DMG passed `hdiutil verify`. The mounted DMG contains only
-`CodexVault Beta.app`. No absolute user paths or credential markers were found
-in the app executable or Info.plist.
+`CodexVault Beta.app` and an `Applications` link to `/Applications`. No
+absolute user paths or credential markers were found in the app executable or
+Info.plist.
 
 The app is ad-hoc signed for this first Beta and is not notarized. macOS
 Gatekeeper may therefore require the tester to explicitly approve opening it.

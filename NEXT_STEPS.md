@@ -23,4 +23,4 @@ Dieses Dokument enthält nur Punkte, die aus dem aktuellen Quellcode oder der be
 - Zeitgesteuerte oder automatische Backups: vorgesehen, aber noch nicht implementiert.
 - Passwortschutz oder Verschlüsselung portabler Backup-Pakete: noch nicht entschieden.
 - Import eines Chat-Exports: nicht implementiert.
-- Signierungs- und Notarisierungsablauf: nicht festgelegt. Bei jeder späteren Beta- oder Final-Veröffentlichung ist jedoch ein Datenschutzbericht als Release-Anhang verpflichtend; Dev wird nie veröffentlicht.
+- Signierungs- und Notarisierungsablauf: nicht festgelegt. Bei jeder späteren Beta- oder Final-Veröffentlichung sind DMG (mit `Applications`-Link), ZIP und ein Datenschutzbericht mit beiden Prüfsummen verpflichtend; Dev wird nie verpackt oder veröffentlicht.

@@ -31,7 +31,7 @@ CodexVault ist eine lokale macOS-App zur Sicherung und Wiederherstellung von Arb
 | `Sources/CodexVaultApp/AIHelp.swift` | Sprachwahl mit Englisch als Standard, lokale Erststart-KI-Hilfe, sprachabhängige öffentliche Handbuch-Links, datensparsame Prompts und lokale Logo-Ressourcen. |
 | `Sources/CodexVaultApp/Resources/` | Unveränderte, lokal eingebundene offizielle Logos für ChatGPT, Google Gemini und Claude. |
 | `Tests/CodexVaultAppTests/` | Automatisierte Tests für Backup-Ausschlüsse, Verifikation und ZIP-Inhalte. |
-| `Scripts/` | Lokale Builds für Dev, Beta und Final. Diese Skripte veröffentlichen nichts. |
+| `Scripts/` | Lokale Builds für Dev, Beta und Final sowie die lokale Verpackung von Beta-/Final-DMG und -ZIP. Keines der Skripte veröffentlicht etwas. |
 | `Packaging/` | Bundle-Vorlage und Signaturkonfiguration für die lokalen App-Bundles. |
 | `Assets/AppIcon/` | Quellbilder und die von Icon Composer erzeugte `CodexVault.icon`-Ressource für das macOS-26-App-Icon. Der Build kompiliert sie zu `Assets.car` und `CodexVault.icns`. |
 | `docs/CodexVault-Manual-EN.pdf`, `docs/CodexVault-Handbuch-DE.pdf` | Öffentliche englische und deutsche Bedienungsanleitungen für die aktuell umgesetzten Funktionen und Einstellungen. |
@@ -88,7 +88,8 @@ Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoK
 - Dev, Beta und Final sind getrennte Build-Kanäle. Ein lokaler Build bedeutet weder Commit noch Release noch Upload.
 - Der vollständige Quellcode darf auf GitHub bereitgestellt werden, jedoch erst nach einer Datenschutzprüfung. Private Inhalte, lokale Pfade, Backups, Build-Ausgaben und Zugangsdaten sind ausgeschlossen.
 - Dev-Bundles werden nie veröffentlicht. Ausschließlich Beta- oder Final-Bundles dürfen auf ausdrücklichen Auftrag veröffentlicht werden.
-- Zu jeder Beta- oder Final-Veröffentlichung wird ein versionierter Datenschutzbericht aus `docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md` erstellt und als eigenständiger Release-Anhang mit veröffentlicht.
+- Jede ausdrücklich beauftragte Beta- oder Final-Veröffentlichung enthält immer **beide** Formate: eine DMG und ein ZIP. Die DMG enthält zusätzlich den Finder-Link `Applications` auf `/Applications`, damit die App dorthin gezogen werden kann. Dev wird weder verpackt noch veröffentlicht.
+- Zu jeder Beta- oder Final-Veröffentlichung wird ein versionierter Datenschutzbericht aus `docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md` erstellt und als eigenständiger Release-Anhang mit veröffentlicht. Er enthält die SHA-256-Prüfsummen von DMG und ZIP.
 
 ## Build-, Test- und Release-Workflow
 
@@ -106,13 +107,24 @@ Scripts/build-beta.sh
 Scripts/build-final.sh
 ```
 
+Für ein ausdrücklich beauftragtes Beta- oder Final-Release werden die beiden
+Artefakte lokal und überprüft erzeugt (dies veröffentlicht nichts):
+
+```zsh
+Scripts/package-release-artifacts.sh beta CodexVault-<VERSION>
+Scripts/package-release-artifacts.sh final CodexVault-<VERSION>
+```
+
+Das Skript lehnt Dev ab, erstellt ausschließlich DMG und ZIP, prüft beide und
+stellt sicher, dass die DMG neben der App einen `Applications`-Link enthält.
+
 Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Am 27. Juli 2026 lief `swift test` mit sieben erfolgreichen Tests. Ein vollständiger Signierungs- oder Notarisierungsworkflow ist nicht dokumentiert und darf nicht angenommen werden. Jede spätere Beta- oder Final-Veröffentlichung braucht einen separaten Auftrag sowie einen angehängten Datenschutzbericht.
 
 ## Quellcode und Veröffentlichungsstand
 
 - Der vollständige, datenschutzgeprüfte Quellcode ist im öffentlichen Repository `Schrotty74/CodexVault` auf dem Branch `main` veröffentlicht.
 - Die GPL-3.0-Lizenz liegt als `LICENSE` im Projektstamm. Ihre rechtliche Auswirkung wurde nicht gesondert geprüft.
-- Die erste öffentliche Beta ist [CodexVault 1.0 Beta 1](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.1). Sie enthält `CodexVault-1.0-Beta-1.dmg`, `CodexVault-1.0-Beta-1.zip` und den separaten Datenschutzbericht. Es gibt keine Final- oder Dev-App-Veröffentlichung; Dev wird nie veröffentlicht.
+- Die erste öffentliche Beta ist [CodexVault 1.0 Beta 1](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.1). Sie enthält `CodexVault-1.0-Beta-1.dmg` (mit `Applications`-Link), `CodexVault-1.0-Beta-1.zip` und den separaten Datenschutzbericht. Es gibt keine Final- oder Dev-App-Veröffentlichung; Dev wird nie veröffentlicht.
 - Der Beta-Build hat die Bundle-ID `com.codexvault.beta`, Version `1.0.0` und Build `1`. Er ist ad-hoc signiert und nicht notarisiert; Gatekeeper kann deshalb eine ausdrückliche Freigabe verlangen.
 - Der Datenschutzbericht dieser Beta liegt unter `docs/releases/CodexVault-1.0-Beta-1-Privacy-Report.md` und ist zusätzlich als Release-Anhang veröffentlicht.
 - Der Bericht zur ersten Quellcode-Veröffentlichung liegt unter `docs/PRIVACY_REPORT_SOURCE_PUBLICATION_2026-07-24.md`.
@@ -132,4 +144,4 @@ Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Am 27. Juli 2026 l
 - Keine Commits, Pushes, Tags, Versionsänderungen oder Releases ohne ausdrücklichen Auftrag.
 - Öffentliche Nennungen verwenden ausschließlich den Namen `Schrotty74`.
 - Vor jeder späteren Veröffentlichung müssen Datenschutz, Inhaltsausschlüsse, Verpackung und die sichtbaren Produktnamen erneut geprüft werden.
-- Quellcode-Pushes erfolgen nur nach einer Datenschutzprüfung. Dev-Bundles werden nie veröffentlicht. Beta- und Final-Releases erhalten jeweils einen aktuellen Datenschutzbericht als separaten Anhang.
+- Quellcode-Pushes erfolgen nur nach einer Datenschutzprüfung. Dev-Bundles werden nie veröffentlicht. Jeder Beta- und Final-Release enthält DMG, ZIP und einen aktuellen Datenschutzbericht als separaten Anhang.
