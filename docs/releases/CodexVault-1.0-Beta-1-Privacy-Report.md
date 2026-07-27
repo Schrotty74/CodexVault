@@ -6,13 +6,15 @@
 - Version: `1.0 Beta 1` (`1.0.0`, build `1`)
 - Date: 27 July 2026
 - Verified by: `Schrotty74`
-- Release artifact filename and SHA-256:
-  `CodexVault-1.0-Beta-1.zip`
-  `e43e96fed97177679db285b5b2dedf959e83f0608f1e3d0966d72c4c3a7d3004`
+- Release artifacts and SHA-256:
+  - `CodexVault-1.0-Beta-1.dmg`
+    `aca0a76cfbaaa217808b9e6de696cff37d484cc63ef5f5e092dc058feb93a6f7`
+  - `CodexVault-1.0-Beta-1.zip`
+    `e43e96fed97177679db285b5b2dedf959e83f0608f1e3d0966d72c4c3a7d3004`
 
 ## Scope checked
 
-- [x] Only the intended Beta artifact is attached; no Dev bundle or Dev data
+- [x] Only the intended Beta artifacts are attached; no Dev bundle or Dev data
       container is included.
 - [x] The source tree and release material were checked for private user paths,
       personal content, API keys, tokens, credentials, certificates, and backup
@@ -28,9 +30,10 @@
 ## Result
 
 `swift test` completed successfully with 7 passing tests. The Beta app bundle
-passed `codesign --verify --deep --strict`; its ZIP archive passed `unzip -t`.
-The archive contains only `CodexVault Beta.app` and no absolute user paths or
-credential markers were found in the app executable or Info.plist.
+passed `codesign --verify --deep --strict`; the ZIP archive passed `unzip -t`
+and the DMG passed `hdiutil verify`. The mounted DMG contains only
+`CodexVault Beta.app`. No absolute user paths or credential markers were found
+in the app executable or Info.plist.
 
 The app is ad-hoc signed for this first Beta and is not notarized. macOS
 Gatekeeper may therefore require the tester to explicitly approve opening it.

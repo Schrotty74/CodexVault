@@ -112,7 +112,7 @@ Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Am 27. Juli 2026 l
 
 - Der vollständige, datenschutzgeprüfte Quellcode ist im öffentlichen Repository `Schrotty74/CodexVault` auf dem Branch `main` veröffentlicht.
 - Die GPL-3.0-Lizenz liegt als `LICENSE` im Projektstamm. Ihre rechtliche Auswirkung wurde nicht gesondert geprüft.
-- Die erste öffentliche Beta ist [CodexVault 1.0 Beta 1](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.1). Sie enthält ausschließlich `CodexVault-1.0-Beta-1.zip` und den separaten Datenschutzbericht. Es gibt keine Final- oder Dev-App-Veröffentlichung; Dev wird nie veröffentlicht.
+- Die erste öffentliche Beta ist [CodexVault 1.0 Beta 1](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.1). Sie enthält `CodexVault-1.0-Beta-1.dmg`, `CodexVault-1.0-Beta-1.zip` und den separaten Datenschutzbericht. Es gibt keine Final- oder Dev-App-Veröffentlichung; Dev wird nie veröffentlicht.
 - Der Beta-Build hat die Bundle-ID `com.codexvault.beta`, Version `1.0.0` und Build `1`. Er ist ad-hoc signiert und nicht notarisiert; Gatekeeper kann deshalb eine ausdrückliche Freigabe verlangen.
 - Der Datenschutzbericht dieser Beta liegt unter `docs/releases/CodexVault-1.0-Beta-1-Privacy-Report.md` und ist zusätzlich als Release-Anhang veröffentlicht.
 - Der Bericht zur ersten Quellcode-Veröffentlichung liegt unter `docs/PRIVACY_REPORT_SOURCE_PUBLICATION_2026-07-24.md`.
