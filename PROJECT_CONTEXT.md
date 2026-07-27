@@ -1,7 +1,7 @@
 # CodexVault – Projektkontext
 
-Stand: 24. Juli 2026
-Status: Öffentlicher Quellcode-Upload auf GitHub am 24. Juli 2026 erfolgt. Es gibt noch keine Beta- oder Final-Veröffentlichung.
+Stand: 27. Juli 2026
+Status: Öffentlicher Quellcode-Upload und erste Beta-Veröffentlichung `v1.0.0-beta.1` erfolgt. Es gibt noch keine Final-Veröffentlichung.
 
 ## Zuerst lesen
 
@@ -106,13 +106,15 @@ Scripts/build-beta.sh
 Scripts/build-final.sh
 ```
 
-Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Am 24. Juli 2026 lief `swift test` mit zwei erfolgreichen Tests. Ein vollständiger Signierungs- oder Notarisierungsworkflow ist nicht dokumentiert und darf nicht angenommen werden. Jede spätere Beta- oder Final-Veröffentlichung braucht einen separaten Auftrag sowie einen angehängten Datenschutzbericht.
+Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Am 27. Juli 2026 lief `swift test` mit sieben erfolgreichen Tests. Ein vollständiger Signierungs- oder Notarisierungsworkflow ist nicht dokumentiert und darf nicht angenommen werden. Jede spätere Beta- oder Final-Veröffentlichung braucht einen separaten Auftrag sowie einen angehängten Datenschutzbericht.
 
 ## Quellcode und Veröffentlichungsstand
 
 - Der vollständige, datenschutzgeprüfte Quellcode ist im öffentlichen Repository `Schrotty74/CodexVault` auf dem Branch `main` veröffentlicht.
 - Die GPL-3.0-Lizenz liegt als `LICENSE` im Projektstamm. Ihre rechtliche Auswirkung wurde nicht gesondert geprüft.
-- Es gibt keine Beta-, Final- oder Dev-App-Veröffentlichung. Dev wird nie veröffentlicht.
+- Die erste öffentliche Beta ist [CodexVault 1.0 Beta 1](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.1). Sie enthält ausschließlich `CodexVault-1.0-Beta-1.zip` und den separaten Datenschutzbericht. Es gibt keine Final- oder Dev-App-Veröffentlichung; Dev wird nie veröffentlicht.
+- Der Beta-Build hat die Bundle-ID `com.codexvault.beta`, Version `1.0.0` und Build `1`. Er ist ad-hoc signiert und nicht notarisiert; Gatekeeper kann deshalb eine ausdrückliche Freigabe verlangen.
+- Der Datenschutzbericht dieser Beta liegt unter `docs/releases/CodexVault-1.0-Beta-1-Privacy-Report.md` und ist zusätzlich als Release-Anhang veröffentlicht.
 - Der Bericht zur ersten Quellcode-Veröffentlichung liegt unter `docs/PRIVACY_REPORT_SOURCE_PUBLICATION_2026-07-24.md`.
 - Die öffentlichen README- und Handbuchdateien sind zweisprachig. Ihre Feature-Listen dürfen nur tatsächlich umgesetzte Funktionen enthalten.
 
@@ -122,6 +124,7 @@ Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Am 24. Juli 2026 l
 - Weitere Sprachen über Englisch und Deutsch hinaus sind nicht umgesetzt.
 - Die Vollständigkeit der automatischen Erkennung von Projektordnern ist bewusst begrenzt und kann eine manuelle Konfiguration erfordern.
 - Die Icon-Composer-Ressource verwendet eine gemeinsame Liquid-Glass-Struktur mit freigestelltem Quellmotiv. Spezifische grafische Überarbeitungen für Dark oder Mono sind noch nicht manuell angelegt; macOS erzeugt diese Erscheinungsvarianten aus der gemeinsamen Struktur.
+- Die erste Beta ist nicht notarisiert. Vor einer breiteren Verteilung muss ein separater, ausdrücklich autorisierter Signierungs- und Notarisierungsablauf festgelegt werden.
 
 ## Datenschutz und Veröffentlichungen
 

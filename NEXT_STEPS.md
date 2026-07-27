@@ -1,11 +1,13 @@
 # Nächste Schritte – CodexVault
 
-Stand: 24. Juli 2026
+Stand: 27. Juli 2026
 
 Dieses Dokument enthält nur Punkte, die aus dem aktuellen Quellcode oder der bereits getroffenen Produktentscheidung ableitbar sind. Bei größeren Änderungen aktualisieren.
 
 ## Priorität 1
 
+- Rückmeldungen zur öffentlichen Beta `v1.0.0-beta.1` sammeln und nur bestätigte Fehler oder Verbesserungen aufnehmen.
+- Einen separaten, autorisierten Signierungs- und Notarisierungsablauf für spätere Beta- oder Final-Artefakte festlegen. Die erste Beta ist bewusst nur ad-hoc signiert.
 - Die Archivansicht persistent machen oder klar als Sitzungsübersicht umbenennen. Derzeit werden frühere Backup-Pakete nach einem Neustart nicht erneut eingelesen.
 - Die deutsche und englische Oberfläche mit einem manuellen Durchgang aller Ansichten und Dateiauswahl-Dialoge prüfen. Ein aktuelles Ergebnis ist nicht dokumentiert.
 - Den Normal- und Full-Backup-Ablauf mit realistischen, künstlichen Testdaten manuell durchtesten, insbesondere Wiederherstellung und Verwaltung der konfigurierten Projektliste. Ein aktuelles Ergebnis ist nicht dokumentiert.
