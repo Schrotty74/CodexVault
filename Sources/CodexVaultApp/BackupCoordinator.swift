@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import Observation
+import UniformTypeIdentifiers
 
 @MainActor
 @Observable
@@ -13,6 +14,8 @@ final class BackupCoordinator {
     var selectedRestoreSourceIDs: Set<String> = []
     var restoreDestinationURL: URL?
     var restoreStatusMessage: String?
+    var restorePassword = ""
+    var restoreRequiresPassword = false
     var isWorking = false
     var statusMessage: String?
     var errorMessage: String?
@@ -24,16 +27,32 @@ final class BackupCoordinator {
     var isSessionPreviewExpanded = false
     var selectedUnassignedRecordIDs: Set<String> = []
     var isUnassignedDeletionConfirmationPresented = false
+    var isFullBackupStartConfirmationPresented = false
+    var encryptNormalBackup = false
+    var normalBackupPassword = ""
+    var automaticFullBackupEnabled = false
+    var automaticFullBackupInterval: FullBackupScheduleInterval = .weekly
+    var lastAutomaticFullBackupDate: Date?
 
     var completeBackupDestinationURL: URL
     var fullBackupProjectRoots: [URL]
+    var discoveredProjectCandidates: [ProjectCandidate] = []
+    var selectedDiscoveredProjectURLs: Set<URL> = []
+    var isDiscoveringProjects = false
 
     private let fullBackupDestinationKey = "codexVault.fullBackup.destination"
     private let fullBackupProjectRootsKey = "codexVault.fullBackup.projectRoots"
     private let hasOwnContentKey = "codexVault.hasOwnContent"
+    private let archivesKey = "codexVault.archiveHistory"
+    private let automaticFullBackupEnabledKey = "codexVault.fullBackup.automatic.enabled"
+    private let automaticFullBackupIntervalKey = "codexVault.fullBackup.automatic.interval"
+    private let automaticFullBackupDateKey = "codexVault.fullBackup.automatic.lastRun"
+    private let defaults: UserDefaults
+    @ObservationIgnored private var automaticBackupTimer: Timer?
 
     init() {
         let defaults = UserDefaults.standard
+        self.defaults = defaults
         let home = FileManager.default.homeDirectoryForCurrentUser
         let fallbackDestination = home.appendingPathComponent("Documents/CodexVault Backups", isDirectory: true)
         let savedRoots = defaults.stringArray(forKey: fullBackupProjectRootsKey) ?? []
@@ -49,9 +68,18 @@ final class BackupCoordinator {
         } else {
             fullBackupProjectRoots = []
         }
+        let savedArchives = ArchiveHistory.decode(defaults.data(forKey: archivesKey))
+        archives = savedArchives
+        if let encodedArchives = ArchiveHistory.encode(savedArchives) {
+            defaults.set(encodedArchives, forKey: archivesKey)
+        }
         if hasSavedFullBackupSetup {
             defaults.set(true, forKey: hasOwnContentKey)
         }
+        automaticFullBackupEnabled = defaults.bool(forKey: automaticFullBackupEnabledKey)
+        automaticFullBackupInterval = FullBackupScheduleInterval(rawValue: defaults.string(forKey: automaticFullBackupIntervalKey) ?? "") ?? .weekly
+        lastAutomaticFullBackupDate = defaults.object(forKey: automaticFullBackupDateKey) as? Date
+        scheduleAutomaticBackupCheck()
     }
 
     var totalFileCount: Int {
@@ -87,6 +115,27 @@ final class BackupCoordinator {
         refreshPreviews()
     }
 
+    func chooseChatGPTExport() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [.json, .zip]
+        panel.prompt = CodexVaultLocalization.text("Import ChatGPT export")
+        panel.message = CodexVaultLocalization.text("Choose the conversations.json file or ZIP from a ChatGPT data export. It stays local and is included only in a backup you create.")
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        if EncryptedArchive.isEncrypted(packageURL: url) {
+            restorePackageURL = url
+            restoreManifest = nil
+            restoreRequiresPassword = true
+            restoreStatusMessage = CodexVaultLocalization.text("Enter the backup password to validate encrypted contents.")
+            return
+        }
+        guard !sources.contains(where: { $0.url.standardizedFileURL == url.standardizedFileURL }) else { return }
+        sources.append(BackupSource(kind: .chatGPTExport, url: url))
+        refreshPreviews()
+    }
+
     func chooseDestination() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
@@ -100,7 +149,18 @@ final class BackupCoordinator {
         statusMessage = CodexVaultLocalization.text("Backup destination selected.")
     }
 
-    func createCompleteBackup() {
+    func requestCompleteBackup() {
+        guard !isWorking else { return }
+        isFullBackupStartConfirmationPresented = true
+    }
+
+    func saveAutomaticBackupSettings() {
+        defaults.set(automaticFullBackupEnabled, forKey: automaticFullBackupEnabledKey)
+        defaults.set(automaticFullBackupInterval.rawValue, forKey: automaticFullBackupIntervalKey)
+        scheduleAutomaticBackupCheck()
+    }
+
+    func createCompleteBackup(isAutomatic: Bool = false) {
         isWorking = true
         errorMessage = nil
         completeBackupProgress = 0
@@ -129,12 +189,46 @@ final class BackupCoordinator {
                 statusMessage = "\(result.0.zipURLs.count) ZIP \(CodexVaultLocalization.text("backups verified:")) \(result.0.fileCount) \(CodexVaultLocalization.text("files")) · \(size).\(skipped)"
                 pendingCompleteBackupCleanup = result.1
                 markOwnContent()
+                if isAutomatic {
+                    lastAutomaticFullBackupDate = Date()
+                    defaults.set(lastAutomaticFullBackupDate, forKey: automaticFullBackupDateKey)
+                }
             } catch {
                 errorMessage = error.localizedDescription
                 statusMessage = nil
             }
             completeBackupProgressMessage = nil
             isWorking = false
+        }
+    }
+
+    private func scheduleAutomaticBackupCheck() {
+        automaticBackupTimer?.invalidate()
+        automaticBackupTimer = nil
+        guard automaticFullBackupEnabled else { return }
+        automaticBackupTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.runAutomaticBackupIfDue() }
+        }
+        runAutomaticBackupIfDue()
+    }
+
+    private func runAutomaticBackupIfDue() {
+        guard automaticFullBackupEnabled, !isWorking else { return }
+        if let lastAutomaticFullBackupDate,
+           Date().timeIntervalSince(lastAutomaticFullBackupDate) < automaticFullBackupInterval.seconds {
+            return
+        }
+        guard !codexDesktopAppIsRunning else {
+            statusMessage = CodexVaultLocalization.text("Automatic full backup is waiting for Codex to close.")
+            return
+        }
+        createCompleteBackup(isAutomatic: true)
+    }
+
+    private var codexDesktopAppIsRunning: Bool {
+        NSWorkspace.shared.runningApplications.contains { application in
+            application.bundleIdentifier?.localizedCaseInsensitiveContains("codex") == true ||
+                application.localizedName?.localizedCaseInsensitiveCompare("Codex") == .orderedSame
         }
     }
 
@@ -153,6 +247,51 @@ final class BackupCoordinator {
         }
         persistFullBackupSetup()
         markOwnContent()
+    }
+
+    func chooseProjectDiscoveryScope() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.prompt = CodexVaultLocalization.text("Search projects")
+        panel.message = CodexVaultLocalization.text("Choose a folder to search locally for project markers. Nothing is added until you select candidates and confirm.")
+        guard panel.runModal() == .OK, let scope = panel.url else { return }
+        isDiscoveringProjects = true
+        discoveredProjectCandidates = []
+        selectedDiscoveredProjectURLs = []
+        Task {
+            defer { isDiscoveringProjects = false }
+            do {
+                let candidates = try await Task.detached(priority: .userInitiated) {
+                    try ProjectDiscovery.candidates(in: scope)
+                }.value
+                discoveredProjectCandidates = candidates.filter { candidate in
+                    !fullBackupProjectRoots.contains { $0.standardizedFileURL == candidate.url.standardizedFileURL }
+                }
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    func addSelectedDiscoveredProjects() {
+        for candidate in discoveredProjectCandidates where selectedDiscoveredProjectURLs.contains(candidate.url) {
+            guard !fullBackupProjectRoots.contains(where: { $0.standardizedFileURL == candidate.url.standardizedFileURL }) else { continue }
+            fullBackupProjectRoots.append(candidate.url)
+        }
+        discoveredProjectCandidates = []
+        selectedDiscoveredProjectURLs = []
+        persistFullBackupSetup()
+        markOwnContent()
+    }
+
+    func toggleDiscoveredProject(_ candidate: ProjectCandidate) {
+        if selectedDiscoveredProjectURLs.contains(candidate.url) {
+            selectedDiscoveredProjectURLs.remove(candidate.url)
+        } else {
+            selectedDiscoveredProjectURLs.insert(candidate.url)
+        }
     }
 
     func removeFullBackupProjectRoot(_ root: URL) {
@@ -180,6 +319,17 @@ final class BackupCoordinator {
 
     private func markOwnContent() {
         UserDefaults.standard.set(true, forKey: hasOwnContentKey)
+    }
+
+    private func persistArchives() {
+        guard let data = ArchiveHistory.encode(archives) else { return }
+        defaults.set(data, forKey: archivesKey)
+    }
+
+    private func addArchiveToHistory(_ summary: ArchiveSummary) {
+        archives.removeAll { $0.packageURL.standardizedFileURL == summary.packageURL.standardizedFileURL }
+        archives.insert(summary, at: 0)
+        persistArchives()
     }
 
     private var automaticFullBackupProjectRoots: [URL] {
@@ -290,6 +440,7 @@ final class BackupCoordinator {
                 }.value
                 restorePackageURL = url
                 restoreManifest = manifest
+                restoreRequiresPassword = false
                 selectedRestoreSourceIDs = Set(manifest.entries.map(\.sourceID))
                 restoreStatusMessage = CodexVaultLocalization.text("Backup verified. Choose what to restore.")
             } catch {
@@ -315,6 +466,28 @@ final class BackupCoordinator {
         restoreDestinationURL = url
     }
 
+    func validateEncryptedRestore() {
+        guard let restorePackageURL, !restorePassword.isEmpty else { return }
+        isWorking = true
+        let password = restorePassword
+        Task {
+            do {
+                let manifest = try await Task.detached(priority: .userInitiated) {
+                    let unpacked = try EncryptedArchive.decryptedPackage(from: restorePackageURL, password: password)
+                    let engine = BackupEngine()
+                    guard try engine.verify(packageURL: unpacked) else { throw BackupError.invalidBackup }
+                    return try engine.manifest(in: unpacked)
+                }.value
+                restoreManifest = manifest
+                selectedRestoreSourceIDs = Set(manifest.entries.map(\.sourceID))
+                restoreStatusMessage = CodexVaultLocalization.text("Encrypted backup verified. Choose what to restore.")
+            } catch {
+                errorMessage = CodexVaultLocalization.text("The password is incorrect or this encrypted package is invalid.")
+            }
+            isWorking = false
+        }
+    }
+
     func toggleRestoreSource(_ sourceID: String) {
         if selectedRestoreSourceIDs.contains(sourceID) {
             selectedRestoreSourceIDs.remove(sourceID)
@@ -330,6 +503,7 @@ final class BackupCoordinator {
         }
 
         let sourceIDs = selectedRestoreSourceIDs
+        let password = restorePassword
         isWorking = true
         errorMessage = nil
         restoreStatusMessage = CodexVaultLocalization.text("Restoring and verifying files…")
@@ -337,8 +511,14 @@ final class BackupCoordinator {
         Task {
             do {
                 let summary = try await Task.detached(priority: .userInitiated) {
-                    try BackupEngine().restore(
-                        packageURL: restorePackageURL,
+                    let sourcePackage: URL
+                    if EncryptedArchive.isEncrypted(packageURL: restorePackageURL) {
+                        sourcePackage = try EncryptedArchive.decryptedPackage(from: restorePackageURL, password: password)
+                    } else {
+                        sourcePackage = restorePackageURL
+                    }
+                    return try BackupEngine().restore(
+                        packageURL: sourcePackage,
                         sourceIDs: sourceIDs,
                         destination: restoreDestinationURL
                     )
@@ -363,6 +543,7 @@ final class BackupCoordinator {
         }
 
         let selectedSources = sources
+        let password = encryptNormalBackup ? normalBackupPassword : nil
         isWorking = true
         errorMessage = nil
         statusMessage = CodexVaultLocalization.text("Creating and verifying the backup…")
@@ -370,9 +551,13 @@ final class BackupCoordinator {
         Task {
             do {
                 let summary = try await Task.detached(priority: .userInitiated) {
-                    try BackupEngine().createBackup(sources: selectedSources, destination: destinationURL)
+                    try BackupEngine().createBackup(
+                        sources: selectedSources,
+                        destination: destinationURL,
+                        password: password
+                    )
                 }.value
-                archives.insert(summary, at: 0)
+                addArchiveToHistory(summary)
                 statusMessage = CodexVaultLocalization.text("Backup verified successfully.")
                 markOwnContent()
             } catch {

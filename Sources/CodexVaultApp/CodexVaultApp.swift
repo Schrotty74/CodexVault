@@ -103,6 +103,7 @@ private struct CodexVaultRootView: View {
     @State private var selectedTheme: DisplayTheme = .liquidGlass
     @State private var backupCoordinator = BackupCoordinator()
     @AppStorage(CodexVaultLanguage.storageKey) private var selectedLanguageRaw = CodexVaultLanguage.english.rawValue
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var selectedLanguage: CodexVaultLanguage {
         CodexVaultLanguage(rawValue: selectedLanguageRaw) ?? .english
@@ -111,7 +112,7 @@ private struct CodexVaultRootView: View {
     var body: some View {
         ZStack {
             if selectedTheme == .fullGlass {
-                FullGlassBackdrop()
+                FullGlassBackdrop(isAnimated: fullGlassAnimationEnabled)
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
             } else {
@@ -140,14 +141,20 @@ private struct CodexVaultRootView: View {
 
     @ViewBuilder
     private var sidebar: some View {
-        if selectedTheme == .liquidGlass || selectedTheme == .fullGlass {
+        if selectedTheme == .liquidGlass {
             NativeGlassPanel {
                 CodexVaultSidebar(selection: $selectedSection, theme: selectedTheme)
             }
+        } else if selectedTheme == .fullGlass {
+            CodexVaultSidebar(selection: $selectedSection, theme: selectedTheme)
         } else {
             CodexVaultSidebar(selection: $selectedSection, theme: selectedTheme)
                 .background(.regularMaterial)
         }
+    }
+
+    private var fullGlassAnimationEnabled: Bool {
+        !reduceMotion && !backupCoordinator.isWorking && !backupCoordinator.isAnalyzingSessions
     }
 
     @ViewBuilder
@@ -315,6 +322,17 @@ private struct CodexVaultSidebar: View {
                     .foregroundStyle(theme.tint)
                 Text("CodexVault")
                     .font(.headline.weight(.semibold))
+                Spacer(minLength: 4)
+                CommunityLinkButton(
+                    title: "Discord",
+                    assetName: "discord-mark-white",
+                    url: CodexVaultCommunityLinks.discord
+                )
+                CommunityLinkButton(
+                    title: "GitHub",
+                    assetName: "github-invertocat",
+                    url: CodexVaultCommunityLinks.github
+                )
             }
             .padding(.horizontal, 20)
             .padding(.top, 24)
@@ -348,6 +366,55 @@ private struct CodexVaultSidebar: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
+}
+
+private enum CodexVaultCommunityLinks {
+    static let github = URL(string: "https://github.com/Schrotty74/CodexVault")!
+    static let discord = URL(string: "https://discord.gg/RbsvqRCPQ")!
+}
+
+private struct CommunityLinkButton: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    let title: String
+    let assetName: String
+    let url: URL
+
+    private var isDiscord: Bool { assetName == "discord-mark-white" }
+
+    private var imageName: String {
+        isDiscord ? assetName : "\(assetName)-\(colorScheme == .dark ? "black" : "white")"
+    }
+
+    var body: some View {
+        Button {
+            NSWorkspace.shared.open(url)
+        } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(isDiscord
+                          ? Color(red: 0.35, green: 0.40, blue: 0.95)
+                          : (colorScheme == .dark ? Color.white.opacity(0.96) : Color.black.opacity(0.88)))
+                Image(nsImage: codexVaultCommunityLogo(named: imageName))
+                    .resizable()
+                    .scaledToFit()
+                    .padding(isDiscord ? 5 : 5.5)
+                    .accessibilityHidden(true)
+            }
+            .frame(width: 26, height: 26)
+        }
+        .buttonStyle(.plain)
+        .help(title)
+        .accessibilityLabel(title)
+    }
+}
+
+private func codexVaultCommunityLogo(named name: String) -> NSImage {
+    guard let url = CodexVaultResources.bundle.url(forResource: name, withExtension: "svg"),
+          let image = NSImage(contentsOf: url) else {
+        return NSImage()
+    }
+    return image
 }
 
 private struct OverviewView: View {
@@ -508,6 +575,9 @@ private struct BackupView: View {
                             Button("Add folder") {
                                 coordinator.chooseSource(kind: .folder)
                             }
+                            Button("Import ChatGPT export") {
+                                coordinator.chooseChatGPTExport()
+                            }
                         }
 
                         if coordinator.sources.isEmpty {
@@ -516,7 +586,7 @@ private struct BackupView: View {
                         } else {
                             ForEach(coordinator.sources) { source in
                                 HStack(spacing: 12) {
-                                    Image(systemName: source.kind == .project ? "folder.fill" : "folder")
+                                    Image(systemName: source.kind == .project ? "folder.fill" : (source.kind == .chatGPTExport ? "bubble.left.and.bubble.right" : "folder"))
                                         .foregroundStyle(theme.tint)
                                     VStack(alignment: .leading, spacing: 3) {
                                         Text(source.displayName)
@@ -561,6 +631,13 @@ private struct BackupView: View {
                         Text("A new portable CodexVault package is created inside this folder. Existing files are never overwritten.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                        Toggle("Encrypt this backup with a password", isOn: $coordinator.encryptNormalBackup)
+                        if coordinator.encryptNormalBackup {
+                            SecureField("Backup password", text: $coordinator.normalBackupPassword)
+                            Text("The password is not stored. Keep it safe: encrypted packages cannot be opened without it.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     .padding(20)
                 }
@@ -621,10 +698,51 @@ private struct BackupView: View {
                                     }
                                 }
                             }
+                            if coordinator.isDiscoveringProjects {
+                                HStack(spacing: 8) {
+                                    ProgressView()
+                                    Text("Searching selected folder locally…")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            } else if !coordinator.discoveredProjectCandidates.isEmpty {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Suggested projects")
+                                        .font(.subheadline.weight(.medium))
+                                    Text("These are local suggestions based on project files. Select only folders you want in every full backup.")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    ForEach(coordinator.discoveredProjectCandidates) { candidate in
+                                        Button {
+                                            coordinator.toggleDiscoveredProject(candidate)
+                                        } label: {
+                                            HStack(spacing: 8) {
+                                                Image(systemName: coordinator.selectedDiscoveredProjectURLs.contains(candidate.url) ? "checkmark.square.fill" : "square")
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(candidate.displayName)
+                                                        .font(.caption.weight(.medium))
+                                                    Text(candidate.signals.joined(separator: " · "))
+                                                        .font(.caption2)
+                                                        .foregroundStyle(.secondary)
+                                                }
+                                                Spacer()
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    Button("Add selected projects") {
+                                        coordinator.addSelectedDiscoveredProjects()
+                                    }
+                                    .disabled(coordinator.selectedDiscoveredProjectURLs.isEmpty)
+                                }
+                            }
                         }
                         HStack {
                             Button("Add project folders") {
                                 coordinator.addFullBackupProjectRoots()
+                            }
+                            Button("Search projects") {
+                                coordinator.chooseProjectDiscoveryScope()
                             }
                             Button("Change destination") {
                                 coordinator.chooseFullBackupDestination()
@@ -640,9 +758,35 @@ private struct BackupView: View {
                                     .foregroundStyle(.secondary)
                             }
                         }
+                        VStack(alignment: .leading, spacing: 8) {
+                            Toggle("Automatic full backups while CodexVault is open", isOn: Binding(
+                                get: { coordinator.automaticFullBackupEnabled },
+                                set: {
+                                    coordinator.automaticFullBackupEnabled = $0
+                                    coordinator.saveAutomaticBackupSettings()
+                                }
+                            ))
+                            if coordinator.automaticFullBackupEnabled {
+                                Picker("Frequency", selection: Binding(
+                                    get: { coordinator.automaticFullBackupInterval },
+                                    set: {
+                                        coordinator.automaticFullBackupInterval = $0
+                                        coordinator.saveAutomaticBackupSettings()
+                                    }
+                                )) {
+                                    ForEach(FullBackupScheduleInterval.allCases) { interval in
+                                        Text(interval.title).tag(interval)
+                                    }
+                                }
+                                .pickerStyle(.segmented)
+                                Text("CodexVault checks once per minute while it is open. It waits until the Codex desktop app is closed; it never launches in the background.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                         HStack {
                             Button(coordinator.isWorking ? "Working…" : "Create complete ZIP backup") {
-                                coordinator.createCompleteBackup()
+                                coordinator.requestCompleteBackup()
                             }
                             .buttonStyle(.borderedProminent)
                             .disabled(coordinator.isWorking)
@@ -819,6 +963,18 @@ private struct BackupView: View {
         } message: {
             Text("Only the selected local Codex records with no current project assignment are removed. This cannot be undone.")
         }
+        .confirmationDialog(
+            "Close the Codex desktop app before the full backup",
+            isPresented: $coordinator.isFullBackupStartConfirmationPresented,
+            titleVisibility: .visible
+        ) {
+            Button("Codex is closed - start backup") {
+                coordinator.createCompleteBackup()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Keep CodexVault open. Close only the separate Codex desktop app first so its local data is not being written during the backup. Then return here and start the backup.")
+        }
     }
 }
 
@@ -846,6 +1002,21 @@ private struct RestoreView: View {
                         .buttonStyle(.borderedProminent)
                     }
                     .padding(20)
+                }
+
+                if coordinator.restoreRequiresPassword, coordinator.restoreManifest == nil {
+                    SurfaceCard {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Label("Encrypted backup", systemImage: "lock.fill")
+                                .font(.headline)
+                            SecureField("Backup password", text: $coordinator.restorePassword)
+                            Button("Unlock and validate") {
+                                coordinator.validateEncryptedRestore()
+                            }
+                            .disabled(coordinator.restorePassword.isEmpty || coordinator.isWorking)
+                        }
+                        .padding(20)
+                    }
                 }
 
                 if let manifest = coordinator.restoreManifest {
@@ -991,6 +1162,10 @@ private struct SettingsView: View {
     @Binding var selectedTheme: DisplayTheme
     @AppStorage(CodexVaultLanguage.storageKey) private var selectedLanguageRaw = CodexVaultLanguage.english.rawValue
 
+    private var isGerman: Bool {
+        CodexVaultLanguage.current == .german
+    }
+
     private var selectedLanguage: Binding<CodexVaultLanguage> {
         Binding(
             get: { CodexVaultLanguage(rawValue: selectedLanguageRaw) ?? .english },
@@ -1027,9 +1202,12 @@ private struct SettingsView: View {
                 }
 
                 settingsSection(title: "Privacy") {
-                    LabeledContent("Network activity", value: "Disabled")
-                    LabeledContent("Stored private content", value: "None")
-                    Text("Backup and restore permissions will always be requested explicitly.")
+                    LabeledContent(isGerman ? "Automatische Netzwerkaktivität" : "Automatic network activity", value: isGerman ? "Deaktiviert" : "Disabled")
+                    LabeledContent(isGerman ? "Externe Links" : "External links", value: isGerman ? "Nur nach Klick" : "Only after click")
+                    LabeledContent(isGerman ? "Gespeicherte private Inhalte" : "Stored private content", value: isGerman ? "Keine" : "None")
+                    Text(isGerman
+                         ? "Backup- und Wiederherstellungsberechtigungen werden immer ausdrücklich angefordert."
+                         : "Backup and restore permissions will always be requested explicitly.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -1178,11 +1356,17 @@ private struct SurfaceCard<Content: View>: View {
 }
 
 private struct FullGlassBackdrop: NSViewRepresentable {
+    let isAnimated: Bool
+
     func makeNSView(context: Context) -> FullGlassBackdropView {
-        FullGlassBackdropView()
+        let view = FullGlassBackdropView()
+        view.setAnimated(isAnimated)
+        return view
     }
 
-    func updateNSView(_ view: FullGlassBackdropView, context: Context) { }
+    func updateNSView(_ view: FullGlassBackdropView, context: Context) {
+        view.setAnimated(isAnimated)
+    }
 }
 
 private struct NativeGlassPanel<Content: View>: NSViewRepresentable {
@@ -1267,6 +1451,9 @@ private final class NativeGlassPanelView<Content: View>: NSVisualEffectView {
 
 private final class FullGlassBackdropView: NSVisualEffectView {
     private let glowLayer = CAGradientLayer()
+    private let sparkLayer = CALayer()
+    private var sparkTimer: Timer?
+    private var isAnimated = false
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -1280,10 +1467,24 @@ private final class FullGlassBackdropView: NSVisualEffectView {
 
     override func layout() {
         super.layout()
+        let horizontalInset = max(bounds.width * 0.9, 420)
+        let verticalInset = max(bounds.height * 0.9, 420)
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        glowLayer.frame = bounds.insetBy(dx: -240, dy: -240)
+        glowLayer.frame = bounds.insetBy(dx: -horizontalInset, dy: -verticalInset)
+        sparkLayer.frame = bounds
         CATransaction.commit()
+        updateGlowAnimation()
+        if isAnimated, sparkTimer == nil, sparkLayer.sublayers?.isEmpty != false {
+            updateSparks()
+        }
+    }
+
+    func setAnimated(_ animated: Bool) {
+        guard isAnimated != animated else { return }
+        isAnimated = animated
+        updateGlowAnimation()
+        updateSparks()
     }
 
     private func configure() {
@@ -1293,14 +1494,111 @@ private final class FullGlassBackdropView: NSVisualEffectView {
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
         layer?.masksToBounds = true
-        glowLayer.startPoint = CGPoint(x: 0, y: 0.15)
-        glowLayer.endPoint = CGPoint(x: 1, y: 0.85)
+        glowLayer.startPoint = CGPoint(x: 0, y: 0.08)
+        glowLayer.endPoint = CGPoint(x: 1, y: 0.92)
+        glowLayer.locations = [0, 0.16, 0.36, 0.58, 0.80, 1]
         glowLayer.colors = [
-            NSColor.systemTeal.withAlphaComponent(0.24).cgColor,
-            NSColor.systemCyan.withAlphaComponent(0.34).cgColor,
-            NSColor.systemBlue.withAlphaComponent(0.26).cgColor,
-            NSColor.systemIndigo.withAlphaComponent(0.20).cgColor
+            NSColor.clear.cgColor,
+            NSColor.systemCyan.withAlphaComponent(0.24).cgColor,
+            NSColor.systemBlue.withAlphaComponent(0.27).cgColor,
+            NSColor.systemPurple.withAlphaComponent(0.21).cgColor,
+            NSColor.systemPink.withAlphaComponent(0.13).cgColor,
+            NSColor.clear.cgColor
         ]
         layer?.insertSublayer(glowLayer, at: 0)
+        layer?.insertSublayer(sparkLayer, above: glowLayer)
+    }
+
+    private func updateGlowAnimation() {
+        glowLayer.removeAnimation(forKey: "fullGlassDiagonalGlow")
+        glowLayer.opacity = isAnimated ? 0.72 : 0.33
+
+        guard isAnimated, bounds.width > 0, bounds.height > 0 else { return }
+
+        let travel = CABasicAnimation(keyPath: "transform.translation")
+        travel.fromValue = NSValue(size: CGSize(width: -bounds.width * 0.18, height: -bounds.height * 0.16))
+        travel.toValue = NSValue(size: CGSize(width: bounds.width * 0.18, height: bounds.height * 0.16))
+        travel.duration = 38
+        travel.repeatCount = .infinity
+        travel.timingFunction = CAMediaTimingFunction(name: .linear)
+        glowLayer.add(travel, forKey: "fullGlassDiagonalGlow")
+    }
+
+    private func updateSparks() {
+        sparkTimer?.invalidate()
+        sparkTimer = nil
+        sparkLayer.sublayers?.forEach { $0.removeFromSuperlayer() }
+
+        guard isAnimated, bounds.width > 0, bounds.height > 0 else { return }
+
+        scheduleNextSpark(after: Double.random(in: 0.08...0.30))
+    }
+
+    private func scheduleNextSpark(after delay: TimeInterval) {
+        guard isAnimated else { return }
+        sparkTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                guard let self, self.isAnimated else { return }
+                self.addSpark()
+                self.scheduleNextSpark(after: Double.random(in: 0.12...0.48))
+            }
+        }
+    }
+
+    private func addSpark() {
+        guard bounds.width > 0, bounds.height > 0 else { return }
+
+        let colors: [NSColor] = [
+            .systemCyan,
+            .systemTeal,
+            .systemBlue,
+            .systemPurple,
+            .systemPink,
+            .systemYellow
+        ]
+        let spark = CAShapeLayer()
+        let size = CGFloat.random(in: 4.0...9.0)
+        let color = colors.randomElement()!.withAlphaComponent(CGFloat.random(in: 0.60...0.92))
+        let start = CGPoint(
+            x: CGFloat.random(in: bounds.width * 0.025...bounds.width * 0.975),
+            y: CGFloat.random(in: bounds.height * 0.035...bounds.height * 0.965)
+        )
+        let drift = CGPoint(x: CGFloat.random(in: -16...16), y: CGFloat.random(in: -12...12))
+        let duration = Double.random(in: 1.6...3.8)
+
+        spark.path = CGPath(ellipseIn: CGRect(x: -size / 2, y: -size / 2, width: size, height: size), transform: nil)
+        spark.fillColor = color.cgColor
+        spark.shadowColor = color.cgColor
+        spark.shadowRadius = CGFloat.random(in: 9...18)
+        spark.shadowOpacity = 0.9
+        spark.opacity = 0
+        spark.position = start
+        sparkLayer.addSublayer(spark)
+
+        let movement = CABasicAnimation(keyPath: "position")
+        movement.fromValue = NSValue(point: start)
+        movement.toValue = NSValue(point: CGPoint(x: start.x + drift.x, y: start.y + drift.y))
+        movement.duration = duration
+        movement.timingFunction = CAMediaTimingFunction(name: .easeOut)
+
+        let fade = CAKeyframeAnimation(keyPath: "opacity")
+        fade.values = [0, 0.9, 0.32, 0]
+        fade.keyTimes = [0, 0.22, 0.58, 1]
+        fade.duration = duration
+        fade.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+        let scale = CAKeyframeAnimation(keyPath: "transform.scale")
+        scale.values = [0.35, 1.15, 0.72, 0.25]
+        scale.keyTimes = [0, 0.22, 0.62, 1]
+        scale.duration = duration
+
+        let group = CAAnimationGroup()
+        group.animations = [movement, fade, scale]
+        group.duration = duration
+        group.isRemovedOnCompletion = true
+        spark.add(group, forKey: "fullGlassSpark")
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak spark] in
+            spark?.removeFromSuperlayer()
+        }
     }
 }

@@ -18,6 +18,15 @@ Keep this list current whenever an implemented user-facing feature changes.
 - Preview file count, size, and excluded sensitive files before creating a
   backup.
 - Create portable `.codexvault` packages with a manifest and SHA-256 checks.
+- Keep locally created, verified normal backup packages in Archive across app
+  restarts while their package folders still exist; unknown packages are never
+  scanned or imported automatically.
+- Search a user-chosen folder locally for recognizable project markers before
+  adding suggested projects to full backups.
+- Schedule complete backups daily or weekly while CodexVault is open; they wait
+  until the separate Codex desktop app is closed.
+- Include a local ChatGPT `conversations.json` file or export ZIP as a normal
+  backup source, and protect new normal packages with a password that is never stored.
 - Verify a package before restoring selected sources into a new folder.
 - Create a complete local ZIP backup of detected Codex data and configured
   project folders, with progress, verification, a dated copy, and a `latest`
@@ -30,7 +39,9 @@ Keep this list current whenever an implemented user-facing feature changes.
   permanently remove only explicitly selected, unassigned local records after
   confirmation.
 - Use four appearances: Liquid Glass, Full Glass, Graphite & Lime, and
-  Midnight.
+  Midnight. Full Glass is a single milky window surface with a slow diagonal
+  cyan/blue/purple/pink glow and subtle random light points; it pauses during
+  intensive work and when Reduce Motion is enabled.
 - Use English (default) or German for the app interface. The selected language
   also controls the AI-help prompt and the public manual it opens.
 - Keep Dev, Beta, and Final builds separate with distinct bundle identifiers
@@ -40,6 +51,8 @@ Keep this list current whenever an implemented user-facing feature changes.
   setup: it can open the public manual or copy a general, language-matched help
   question before opening ChatGPT, Google Gemini, or Claude. No app content is
   sent automatically.
+- Open the public CodexVault GitHub page or Discord community only after an
+  explicit click in the sidebar; no app data is included.
 
 ## Screenshots
 
@@ -85,8 +98,8 @@ The scripts build locally only. They do not publish an app.
 ## Gatekeeper notice for Beta 1
 
 [CodexVault 1.0 Beta 1](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.1)
-is ad-hoc signed and not notarized yet. macOS may therefore block its first
-launch. Download the DMG (recommended) or ZIP only from the official release.
+is deliberately ad-hoc signed and not notarized. macOS may therefore block its
+first launch. Download the DMG (recommended) or ZIP only from the official release.
 Open the DMG and drag the app onto its included **Applications** link, then use
 one of these one-time, app-specific approvals:
 

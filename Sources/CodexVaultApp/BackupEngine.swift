@@ -5,6 +5,15 @@ struct BackupEngine {
     private let fileManager = FileManager.default
 
     func preview(source: BackupSource) throws -> SourcePreview {
+        let rootValues = try source.url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+        if rootValues.isRegularFile == true {
+            return SourcePreview(
+                fileCount: 1,
+                estimatedBytes: UInt64(rootValues.fileSize ?? 0),
+                sensitiveExclusionCount: 0,
+                standardExclusionCount: 0
+            )
+        }
         var fileCount = 0
         var byteCount: UInt64 = 0
         var sensitiveExclusionCount = 0
@@ -32,7 +41,7 @@ struct BackupEngine {
         )
     }
 
-    func createBackup(sources: [BackupSource], destination: URL) throws -> ArchiveSummary {
+    func createBackup(sources: [BackupSource], destination: URL, password: String? = nil) throws -> ArchiveSummary {
         guard !sources.isEmpty else { throw BackupError.noSources }
         guard destination.hasDirectoryPath else { throw BackupError.destinationUnavailable }
 
@@ -55,6 +64,21 @@ struct BackupEngine {
             try fileManager.createDirectory(at: targetRoot, withIntermediateDirectories: true)
             directories.append(ArchiveDirectory(sourceID: sourceID, relativePath: ""))
             archiveSources.append(ArchiveSource(sourceID: sourceID, archiveRootName: archiveRootName))
+
+            let sourceValues = try source.url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+            if sourceValues.isRegularFile == true {
+                let targetURL = targetRoot.appendingPathComponent(source.url.lastPathComponent)
+                try fileManager.copyItem(at: source.url, to: targetURL)
+                let digest = try sha256(of: targetURL)
+                entries.append(ArchiveEntry(
+                    sourceID: sourceID,
+                    relativePath: source.url.lastPathComponent,
+                    archiveRelativePath: "\(archiveRootName)/\(source.url.lastPathComponent)",
+                    byteCount: UInt64(sourceValues.fileSize ?? 0),
+                    sha256: digest
+                ))
+                continue
+            }
 
             try enumerate(source.url) { url, values, relativePath in
                 let exclusion = exclusionKind(for: url.lastPathComponent)
@@ -114,6 +138,9 @@ struct BackupEngine {
 
         let verified = try verify(packageURL: packageURL)
         guard verified else { throw BackupError.verificationFailed }
+        if let password, !password.isEmpty {
+            try EncryptedArchive.encrypt(packageURL: packageURL, password: password)
+        }
 
         return ArchiveSummary(
             id: UUID(),

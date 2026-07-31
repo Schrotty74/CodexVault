@@ -3,11 +3,13 @@ import Foundation
 enum BackupSourceKind: String, Codable, CaseIterable, Sendable {
     case project
     case folder
+    case chatGPTExport
 
     var title: String {
         switch self {
         case .project: CodexVaultLocalization.text("Project")
         case .folder: CodexVaultLocalization.text("Additional folder")
+        case .chatGPTExport: "ChatGPT export"
         }
     }
 }
@@ -41,6 +43,27 @@ struct CompleteBackupSource: Sendable {
         self.url = url
         self.archiveBase = archiveBase
         self.kind = kind
+    }
+}
+
+enum FullBackupScheduleInterval: String, CaseIterable, Codable, Identifiable, Sendable {
+    case daily
+    case weekly
+
+    var id: Self { self }
+
+    var seconds: TimeInterval {
+        switch self {
+        case .daily: 86_400
+        case .weekly: 604_800
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .daily: CodexVaultLocalization.text("Daily")
+        case .weekly: CodexVaultLocalization.text("Weekly")
+        }
     }
 }
 
@@ -81,7 +104,7 @@ struct ArchiveManifest: Codable, Sendable {
     let errorCount: Int
 }
 
-struct ArchiveSummary: Identifiable, Sendable {
+struct ArchiveSummary: Codable, Equatable, Identifiable, Sendable {
     let id: UUID
     let packageURL: URL
     let createdAt: Date
@@ -99,6 +122,32 @@ struct ArchiveSummary: Identifiable, Sendable {
         formatter.timeStyle = .short
         return formatter
     }()
+}
+
+enum ArchiveHistory {
+    static func decode(_ data: Data?) -> [ArchiveSummary] {
+        guard let data,
+              let summaries = try? JSONDecoder().decode([ArchiveSummary].self, from: data) else {
+            return []
+        }
+        return existingSummaries(from: summaries)
+    }
+
+    static func encode(_ summaries: [ArchiveSummary]) -> Data? {
+        try? JSONEncoder().encode(summaries)
+    }
+
+    static func existingSummaries(from summaries: [ArchiveSummary]) -> [ArchiveSummary] {
+        summaries
+            .filter { summary in
+                var isDirectory: ObjCBool = false
+                return FileManager.default.fileExists(
+                    atPath: summary.packageURL.path,
+                    isDirectory: &isDirectory
+                ) && isDirectory.boolValue
+            }
+            .sorted { $0.createdAt > $1.createdAt }
+    }
 }
 
 struct CompleteBackupSummary: Sendable {

@@ -19,6 +19,15 @@ anpassen.
 - Mehrere Projekt- und Zusatzordner für ein normales Backup auswählen.
 - Dateianzahl, Größe und ausgeschlossene sensible Dateien vor dem Backup prüfen.
 - Portable `.codexvault`-Pakete mit Manifest und SHA-256-Prüfsummen erstellen.
+- Lokal erstellte, geprüfte normale Backup-Pakete im Archiv auch nach einem
+  Neustart anzeigen, solange ihr Paketordner noch vorhanden ist; unbekannte
+  Pakete werden nie automatisch gesucht oder importiert.
+- Innerhalb eines selbst gewählten Ordners lokale Projektmerkmale suchen und
+  nur ausgewählte Vorschläge zu Full Backups hinzufügen.
+- Vollständige Backups täglich oder wöchentlich planen, solange CodexVault
+  geöffnet ist; sie warten, bis die separate Codex-Desktop-App geschlossen ist.
+- Einen lokalen ChatGPT-Export (`conversations.json` oder ZIP) als normale
+  Backup-Quelle aufnehmen und neue normale Pakete mit einem nie gespeicherten Passwort schützen.
 - Ein Paket vor der Wiederherstellung prüfen und enthaltene Quellen gezielt in
   einen neuen Ordner wiederherstellen.
 - Ein vollständiges lokales ZIP-Backup der erkannten Codex-Daten und der
@@ -33,7 +42,10 @@ anpassen.
   nur ausgewählte, nicht zugeordnete lokale Einträge nach Bestätigung dauerhaft
   entfernen.
 - Vier Darstellungen verwenden: Liquid Glass, Full Glass, Graphite & Lime und
-  Midnight.
+  Midnight. Full Glass ist eine einheitliche milchige Fensteroberfläche mit
+  langsam diagonal wanderndem Cyan-/Blau-/Violett-/Rosa-Glow und dezenten,
+  zufälligen Lichtpunkten; bei rechenintensiven Abläufen und „Reduce Motion“
+  pausiert die Animation.
 - Die App-Oberfläche auf Englisch (Standard) oder Deutsch verwenden. Die
   gewählte Sprache steuert ebenfalls den KI-Hilfe-Prompt und das geöffnete
   öffentliche Handbuch.
@@ -45,6 +57,9 @@ anpassen.
   Handbuch öffnen oder eine allgemeine, sprachabhängige Hilfefrage kopieren und
   danach ChatGPT, Google Gemini oder Claude öffnen. App-Inhalte werden nie
   automatisch gesendet.
+- Die öffentliche CodexVault-GitHub-Seite oder Discord-Community erst nach
+  einem sichtbaren Klick in der Seitenleiste öffnen; es werden keine App-Daten
+  übergeben.
 
 ## Screenshots
 
@@ -90,8 +105,8 @@ Die Skripte bauen ausschließlich lokal und veröffentlichen keine App.
 ## Gatekeeper-Hinweis für Beta 1
 
 [CodexVault 1.0 Beta 1](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.1)
-ist derzeit ad-hoc signiert und noch nicht notarisiert. macOS kann den ersten
-Start deshalb blockieren. Die DMG (empfohlen) oder das ZIP nur aus dem
+ist bewusst ad-hoc signiert und nicht notarisiert. macOS kann den ersten Start
+deshalb blockieren. Die DMG (empfohlen) oder das ZIP nur aus dem
 offiziellen Release laden. Die DMG öffnen, die App auf den enthaltenen Link
 **Applications** ziehen und eine dieser einmaligen, nur für diese App geltenden
 Freigaben verwenden:

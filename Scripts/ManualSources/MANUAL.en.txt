@@ -19,6 +19,11 @@ if they already existed.
 
 ## Navigation
 
+The sidebar contains five sections. Its header also has official **Discord**
+and **GitHub** mark buttons. They open the public community or CodexVault
+repository only after you click them; no app data, selected folders, or backup
+contents are passed to either website.
+
 The sidebar contains five sections:
 
 | Section | Purpose |
@@ -26,7 +31,7 @@ The sidebar contains five sections:
 | Overview | Starting point and current status cards. The Activity area appears only after a backup has been created in the current app session. |
 | Backup | Normal backups, complete ZIP backups, and local Codex storage review. |
 | Restore | Validation and selective restoration of a normal backup package. |
-| Archive | Backups created during the current app session. |
+| Archive | Previously created, verified normal backups whose package folders still exist. |
 | Settings | Appearance, privacy status, and build-channel information. |
 
 The **Start setup** button on Overview opens Backup.
@@ -59,8 +64,9 @@ Use a normal backup when you want a portable package for exactly the folders you
 choose.
 
 1. Open **Backup**.
-2. In **Sources**, click **Add project** for a project folder or **Add folder**
-   for any additional folder. You can add more than one source.
+2. In **Sources**, click **Add project** for a project folder, **Add folder**
+   for any additional folder, or **Import ChatGPT export** for a local
+   `conversations.json` file or ChatGPT export ZIP. You can add more than one source.
 3. Wait for the preview. It shows the number of included files and estimated
    size for each source. Use the remove button beside a source to remove it
    from this pending selection.
@@ -69,6 +75,13 @@ choose.
 5. Review the summary at the bottom. **Create verified backup** becomes
    available only when at least one source and a destination are selected.
 6. Click **Create verified backup** and wait for the success message.
+
+### Password protection
+
+Turn on **Encrypt this backup with a password** before creating a normal backup.
+The password is not stored. To restore an encrypted package, choose it in
+Restore, enter the same password, select the verified contents, and restore
+them normally. A lost password cannot be recovered.
 
 ### What is created
 
@@ -110,6 +123,12 @@ automatically detected Codex app data and your configured project folders.
 5. Confirm the displayed project-folder list and destination.
 6. Click **Create complete ZIP backup**. The progress bar and message show the
    current phase.
+
+Use **Search projects** to choose a local folder for a one-time scan. CodexVault
+shows only suggestions with recognizable project markers; nothing is added until
+you select it. Automatic full backups can be enabled daily or weekly while
+CodexVault is open. They do not run in the background and wait until the
+separate Codex desktop app is closed. Keep CodexVault open for the backup.
 
 The project-folder choices and destination are stored locally for the current
 macOS user. Codex app data is detected automatically. A visible Codex workspace
@@ -174,10 +193,12 @@ accepted when they pass validation.
 
 ## Archive
 
-Archive lists normal backup packages created during the current app session and
-shows their verification state, file count, and size. It is not a disk browser:
-after restarting the app, it does not automatically rediscover earlier packages
-from a destination folder.
+Archive keeps a local list of normal backup packages that CodexVault created and
+verified. It shows their verification state, file count, and size across later
+app starts as long as the package folder still exists. Missing package folders
+are removed from the list. Archive is not a disk browser: it does not scan a
+destination folder or import packages that CodexVault has not previously
+created and registered.
 
 ## Settings
 
@@ -197,7 +218,7 @@ selected sources, backup contents, security decisions, or an existing package.
 | Theme | Appearance |
 | --- | --- |
 | Liquid Glass | Native glass treatment on the left navigation panel. |
-| Full Glass | Native glass treatment across the full window. |
+| Full Glass | One continuous milky glass surface across the complete window, with a slow diagonal cyan/blue/purple/pink glow and a denser field of softly glowing, irregular light points across sidebar and content. The animation pauses when macOS Reduce Motion is enabled and while a backup, restore, or storage analysis is running. |
 | Graphite & Lime | Dark graphite interface with lime accents. |
 | Midnight | Dark blue/indigo interface. |
 
@@ -206,11 +227,12 @@ persisted preference.
 
 ### Privacy
 
-The Privacy section displays that network activity is disabled and that the app
-does not keep a private content catalog. File permissions are always requested
-through explicit folder choices. The locally saved complete-backup setup stores
-only the configured folder and destination references needed to run that
-feature, not a backup-content catalog.
+The Privacy section displays that automatic network activity is disabled and
+that the app does not keep a private content catalog. Public website links and
+AI services open only after an explicit click and receive no app data. File
+permissions are always requested through explicit folder choices. The locally
+saved complete-backup setup stores only the configured folder and destination
+references needed to run that feature, not a backup-content catalog.
 
 ### Build channel
 

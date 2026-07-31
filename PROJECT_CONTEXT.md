@@ -1,6 +1,6 @@
 # CodexVault – Projektkontext
 
-Stand: 27. Juli 2026
+Stand: 31. Juli 2026
 Status: Öffentlicher Quellcode-Upload und erste Beta-Veröffentlichung `v1.0.0-beta.1` erfolgt. Es gibt noch keine Final-Veröffentlichung.
 
 ## Zuerst lesen
@@ -17,19 +17,19 @@ Bei einer inhaltlichen Änderung an Funktionen, Datenformaten, Build-Abläufen o
 
 ## Zweck
 
-CodexVault ist eine lokale macOS-App zur Sicherung und Wiederherstellung von Arbeitsordnern und Codex-bezogenen Daten. Sie arbeitet ohne Netzwerkfunktion. Nutzende wählen bei normalen Backups Quellen und Ziel selbst; vollständige Backups verwenden einmal pro macOS-Benutzer eingerichtete Projektordner und ein Ziel.
+CodexVault ist eine lokale macOS-App zur Sicherung und Wiederherstellung von Arbeitsordnern und Codex-bezogenen Daten. Sie führt keine automatische Netzwerkkommunikation aus. Öffentliche GitHub-, Discord-, Handbuch- und KI-Dienstseiten werden ausschließlich nach einem sichtbaren Klick geöffnet. Nutzende wählen bei normalen Backups Quellen und Ziel selbst; vollständige Backups verwenden einmal pro macOS-Benutzer eingerichtete Projektordner und ein Ziel.
 
 ## Architektur und wichtige Ordner
 
 | Bereich | Aufgabe |
 | --- | --- |
-| `Sources/CodexVaultApp/CodexVaultApp.swift` | SwiftUI-App, Navigation, Ansichten, Sprachwahl und die vier Darstellungsvarianten. |
+| `Sources/CodexVaultApp/CodexVaultApp.swift` | SwiftUI-App, Navigation, Ansichten, Sprachwahl, öffentliche Community-Links und die vier Darstellungsvarianten einschließlich Full-Glass-Animation. |
 | `Sources/CodexVaultApp/BackupCoordinator.swift` | UI-Zustand, Dateiauswahl, asynchrone Abläufe und lokal gespeicherte Full-Backup-Einstellungen. |
 | `Sources/CodexVaultApp/BackupEngine.swift` | Vorschau, Erstellen, Prüfen und Wiederherstellen normaler Backups; ZIP-Backups; Speicheranalyse lokaler Codex-Daten. |
 | `Sources/CodexVaultApp/BackupDomain.swift` | Datenmodelle und Fehlerfälle. |
 | `Sources/CodexVaultApp/BuildChannel.swift` | Ermittelt den lokalen Build-Kanal aus dem App-Bundle. |
 | `Sources/CodexVaultApp/AIHelp.swift` | Sprachwahl mit Englisch als Standard, lokale Erststart-KI-Hilfe, sprachabhängige öffentliche Handbuch-Links, datensparsame Prompts und lokale Logo-Ressourcen. |
-| `Sources/CodexVaultApp/Resources/` | Unveränderte, lokal eingebundene offizielle Logos für ChatGPT, Google Gemini und Claude. |
+| `Sources/CodexVaultApp/Resources/` | Unveränderte, lokal eingebundene offizielle Logos für ChatGPT, Google Gemini, Claude, GitHub und Discord. |
 | `Tests/CodexVaultAppTests/` | Automatisierte Tests für Backup-Ausschlüsse, Verifikation und ZIP-Inhalte. |
 | `Scripts/` | Lokale Builds für Dev, Beta und Final sowie die lokale Verpackung von Beta-/Final-DMG und -ZIP. Keines der Skripte veröffentlicht etwas. |
 | `Packaging/` | Bundle-Vorlage und Signaturkonfiguration für die lokalen App-Bundles. |
@@ -66,21 +66,24 @@ Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoK
 ## Umgesetzte Funktionen
 
 - Auswahl mehrerer Projekt- und Zusatzordner samt lokaler Größen- und Ausschlussvorschau.
-- Normales, verifiziertes Backup mit SHA-256-Prüfung.
+- Normales, verifiziertes Backup mit SHA-256-Prüfung und lokal gespeicherter Archivliste: Beim nächsten Start bleiben zuvor von CodexVault erstellte Pakete sichtbar, sofern ihr Paketordner noch vorhanden ist. Unbekannte Pakete werden nicht automatisch gesucht oder importiert.
 - Selektive Wiederherstellung geprüfter Quellen ohne Überschreiben vorhandener Dateien.
 - Konfigurierbares vollständiges ZIP-Backup mit sichtbarer Mehrfach-Projektliste, Fortschritt und auf Wunsch bestätigter Aufbewahrung.
+- Lokale Projektvorschau nach sichtbarer Auswahl eines Suchordners, zeitgesteuerte Full Backups ausschließlich bei geöffneter CodexVault-App sowie ein eindeutiger Hinweis, die separate Codex-Desktop-App vor einem Full Backup zu schließen.
+- ChatGPT-Exporte als ausdrücklich ausgewählte normale Backup-Quelle und optionaler Passwortschutz für normale Pakete. Passwörter werden nicht gespeichert; verschlüsselte Pakete werden vor der Wiederherstellung lokal entschlüsselt und geprüft.
 - Lokale Codex-Speicherübersicht einschließlich gruppierter Sitzungsdaten und kontrollierter Entfernung nicht zugeordneter Datensätze.
 - Freundliche Erststart-Ansicht bei noch fehlenden eigenen Inhalten sowie dauerhaft erreichbare KI-Hilfe auf Overview mit Handbuch-Schaltfläche und bestätigter Kopier-und-Öffnen-Hilfe für ChatGPT, Google Gemini und Claude. Die statischen Prompts enthalten ausschließlich den passenden öffentlichen Handbuch-Link und bestätigte öffentliche App-Fakten; sie verbieten erfundene Funktionen.
 - Getrennte lokale Dev-, Beta- und Final-Bundles mit eigenen Bundle-IDs und Datencontainern.
-- Vier Designs: Liquid Glass, Full Glass, Graphite & Lime und Midnight. Full Glass nutzt die Glasoberfläche im gesamten Fenster; Liquid Glass nur für die linke Navigation.
+- Vier Designs: Liquid Glass, Full Glass, Graphite & Lime und Midnight. Full Glass nutzt eine einzige milchige Glasoberfläche im gesamten Fenster mit ruhigem, diagonal wanderndem Farbglow und zufällig auftauchenden Lichtpunkten; Liquid Glass beschränkt Glas auf die linke Navigation. Bei „Reduce Motion“ und während Backup-, Wiederherstellungs- oder Speicheranalyse-Abläufen pausiert die Full-Glass-Animation deutlich.
 - Zweisprachige sichtbare Oberfläche mit Englisch als Standard und Deutsch als auswählbarer Sprache. Dieselbe Einstellung steuert auch KI-Hilfe und Handbuch-Link.
 - App-Icon als Icon-Composer-Ressource mit Liquid-Glass-Effekten und freigestelltem PNG-Quellmotiv; macOS erzeugt fehlende Erscheinungsvarianten aus der gemeinsamen Icon-Struktur.
+- GitHub- und Discord-Schaltflächen in der Seitenleiste verwenden lokal eingebundene offizielle Marken und öffnen ausschließlich die öffentlichen CodexVault- bzw. Community-Seiten nach einem Klick.
 
 ## Feste Regeln und Entscheidungen
 
 - Mindestplattform ist macOS 26.
 - Die sichtbare und interne Produktbezeichnung lautet **CodexVault**.
-- Keine Netzwerkfunktion und keine stillen Backups.
+- Keine automatische Netzwerkkommunikation und keine stillen Backups. Öffentliche Links und KI-Dienste werden ausschließlich nach einer sichtbaren Aktion geöffnet; es werden keine App-Daten mitgegeben.
 - Die KI-Hilfe öffnet einen Dienst nur nach sichtbarer Bestätigung. Sie kopiert ausschließlich eine statische allgemeine Frage in die Zwischenablage; Nutzende fügen sie selbst ein. Sie enthält keine App-Inhalte, lokalen Pfade oder Zugangsdaten.
 - Normale Backups schließen typische Geheimnisdateien und -namen aus, darunter `.env`-Varianten, Tokens, Secrets, Credentials, Zertifikate und Schlüssel; außerdem werden typische Build- und Cache-Ordner ausgelassen.
 - Bei vollständigen Backups gilt die definierte Vollständigkeit vor der Namensfilterung: Sie sind deshalb als vertrauliche lokale Sicherungen zu behandeln.
@@ -118,7 +121,7 @@ Scripts/package-release-artifacts.sh final CodexVault-<VERSION>
 Das Skript lehnt Dev ab, erstellt ausschließlich DMG und ZIP, prüft beide und
 stellt sicher, dass die DMG neben der App einen `Applications`-Link enthält.
 
-Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Am 27. Juli 2026 lief `swift test` mit sieben erfolgreichen Tests. Ein vollständiger Signierungs- oder Notarisierungsworkflow ist nicht dokumentiert und darf nicht angenommen werden. Jede spätere Beta- oder Final-Veröffentlichung braucht einen separaten Auftrag sowie einen angehängten Datenschutzbericht.
+Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Jede spätere Beta- oder Final-Veröffentlichung braucht einen separaten Auftrag sowie einen angehängten Datenschutzbericht. Für die Veröffentlichung bleibt die App ad-hoc signiert; die einmalige, app-spezifische Gatekeeper-Freigabe ist vorgesehen. Einen Apple-Developer-Account, Zertifikate oder eine Notarisierung darf die Projektarbeit nicht anlegen oder voraussetzen.
 
 ## Quellcode und Veröffentlichungsstand
 
@@ -132,11 +135,11 @@ Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Am 27. Juli 2026 l
 
 ## Bekannte Einschränkungen
 
-- Die Archivansicht zeigt nur Backups, die während der aktuellen App-Sitzung erstellt wurden. Sie durchsucht kein Zielverzeichnis nach früheren Paketen.
+- Die Archivansicht ist kein Dateibrowser: Sie zeigt nur die lokal gespeicherten, zuvor von CodexVault erstellten und noch vorhandenen Paketordner. Sie durchsucht keine Zielordner und importiert keine unbekannten Pakete automatisch.
 - Weitere Sprachen über Englisch und Deutsch hinaus sind nicht umgesetzt.
 - Die Vollständigkeit der automatischen Erkennung von Projektordnern ist bewusst begrenzt und kann eine manuelle Konfiguration erfordern.
 - Die Icon-Composer-Ressource verwendet eine gemeinsame Liquid-Glass-Struktur mit freigestelltem Quellmotiv. Spezifische grafische Überarbeitungen für Dark oder Mono sind noch nicht manuell angelegt; macOS erzeugt diese Erscheinungsvarianten aus der gemeinsamen Struktur.
-- Die erste Beta ist nicht notarisiert. Vor einer breiteren Verteilung muss ein separater, ausdrücklich autorisierter Signierungs- und Notarisierungsablauf festgelegt werden.
+- Die Veröffentlichung verwendet bewusst keine Notarisierung. Die einmalige Gatekeeper-Freigabe ist für Beta- und Final-Artefakte Teil des vorgesehenen Installationsablaufs.
 
 ## Datenschutz und Veröffentlichungen
 

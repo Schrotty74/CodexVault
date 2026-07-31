@@ -160,4 +160,90 @@ final class BackupEngineTests: XCTestCase {
             .appendingPathComponent("notes.txt")
         XCTAssertTrue(FileManager.default.fileExists(atPath: restoredFile.path))
     }
+
+    func testArchiveHistoryRetainsOnlyExistingPackages() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let existingPackage = root.appendingPathComponent("kept.codexvault", isDirectory: true)
+        let missingPackage = root.appendingPathComponent("missing.codexvault", isDirectory: true)
+        try FileManager.default.createDirectory(at: existingPackage, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let retained = ArchiveSummary(
+            id: UUID(),
+            packageURL: existingPackage,
+            createdAt: .now,
+            fileCount: 2,
+            byteCount: 42,
+            verified: true
+        )
+        let removed = ArchiveSummary(
+            id: UUID(),
+            packageURL: missingPackage,
+            createdAt: .distantPast,
+            fileCount: 1,
+            byteCount: 1,
+            verified: true
+        )
+
+        let encoded = try XCTUnwrap(ArchiveHistory.encode([removed, retained]))
+        XCTAssertEqual(ArchiveHistory.decode(encoded), [retained])
+    }
+
+    func testProjectDiscoveryFindsOnlyProjectMarkersAndSkipsBuildFolders() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let swiftProject = root.appendingPathComponent("SwiftProject", isDirectory: true)
+        let nodeProject = root.appendingPathComponent("NodeProject", isDirectory: true)
+        let generated = root.appendingPathComponent("node_modules/ignored", isDirectory: true)
+        try FileManager.default.createDirectory(at: swiftProject, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: nodeProject, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: generated, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data("// Swift".utf8).write(to: swiftProject.appendingPathComponent("Package.swift"))
+        try Data("{}".utf8).write(to: nodeProject.appendingPathComponent("package.json"))
+        try Data("{}".utf8).write(to: generated.appendingPathComponent("package.json"))
+
+        let candidates = try ProjectDiscovery.candidates(in: root)
+        XCTAssertEqual(Set(candidates.map(\.displayName)), ["SwiftProject", "NodeProject"])
+        XCTAssertTrue(candidates.first { $0.displayName == "SwiftProject" }?.signals.contains("Swift package") == true)
+        XCTAssertTrue(candidates.first { $0.displayName == "NodeProject" }?.signals.contains("Node project") == true)
+    }
+
+    func testChatGPTExportFileCanBeIncludedAndVerifiedInNormalBackup() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let destination = root.appendingPathComponent("destination", isDirectory: true)
+        let export = root.appendingPathComponent("conversations.json")
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data("[]".utf8).write(to: export)
+
+        let source = BackupSource(kind: .chatGPTExport, url: export)
+        let preview = try BackupEngine().preview(source: source)
+        XCTAssertEqual(preview.fileCount, 1)
+        let backup = try BackupEngine().createBackup(sources: [source], destination: destination)
+        XCTAssertTrue(try BackupEngine().verify(packageURL: backup.packageURL))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: backup.packageURL.appendingPathComponent("conversations.json/conversations.json").path))
+    }
+
+    func testEncryptedBackupCanBeDecryptedVerifiedAndRestored() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let source = root.appendingPathComponent("source", isDirectory: true)
+        let destination = root.appendingPathComponent("destination", isDirectory: true)
+        let restoreDestination = root.appendingPathComponent("restore", isDirectory: true)
+        try FileManager.default.createDirectory(at: source, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: restoreDestination, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data("protected".utf8).write(to: source.appendingPathComponent("notes.txt"))
+
+        let engine = BackupEngine()
+        let backup = try engine.createBackup(sources: [BackupSource(kind: .project, url: source)], destination: destination, password: "test-password")
+        XCTAssertTrue(EncryptedArchive.isEncrypted(packageURL: backup.packageURL))
+        let decrypted = try EncryptedArchive.decryptedPackage(from: backup.packageURL, password: "test-password")
+        XCTAssertTrue(try engine.verify(packageURL: decrypted))
+        let restored = try engine.restore(packageURL: decrypted, sourceIDs: ["source-001"], destination: restoreDestination)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: restored.destinationURL.appendingPathComponent("source/notes.txt").path))
+        XCTAssertThrowsError(try EncryptedArchive.decryptedPackage(from: backup.packageURL, password: "wrong-password"))
+    }
 }

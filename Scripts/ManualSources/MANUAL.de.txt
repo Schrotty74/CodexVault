@@ -19,6 +19,11 @@ keine geplanten Funktionen als vorhanden dar.
 
 ## Navigation
 
+Die Seitenleiste enthält fünf Bereiche. Im Kopf stehen außerdem offizielle
+**Discord**- und **GitHub**-Marken. Sie öffnen die öffentliche Community
+beziehungsweise das CodexVault-Repository nur nach einem Klick; es werden keine
+App-Daten, ausgewählten Ordner oder Backup-Inhalte an die Websites übergeben.
+
 Die Seitenleiste enthält fünf Bereiche:
 
 | Bereich | Zweck |
@@ -26,7 +31,7 @@ Die Seitenleiste enthält fünf Bereiche:
 | Overview | Startpunkt und aktuelle Statuskarten. Der Bereich Aktivität erscheint erst, nachdem in der aktuellen App-Sitzung ein Backup erstellt wurde. |
 | Backup | Normale Backups, vollständige ZIP-Backups und lokale Codex-Speicherübersicht. |
 | Restore | Prüfung und gezielte Wiederherstellung eines normalen Backup-Pakets. |
-| Archive | Backups, die während der aktuellen App-Sitzung erstellt wurden. |
+| Archive | Zuvor erstellte, geprüfte normale Backups, deren Paketordner noch vorhanden sind. |
 | Settings | Darstellung, Datenschutzstatus und Informationen zum Build-Kanal. |
 
 Die Taste **Start setup** auf Overview öffnet Backup.
@@ -61,8 +66,9 @@ Ein normales Backup eignet sich für ein portables Paket mit genau den Ordnern,
 die du auswählst.
 
 1. **Backup** öffnen.
-2. Unter **Sources** mit **Add project** einen Projektordner oder mit
-   **Add folder** einen weiteren Ordner wählen. Mehrere Quellen sind möglich.
+2. Unter **Sources** mit **Add project** einen Projektordner, mit **Add folder**
+   einen weiteren Ordner oder mit **Import ChatGPT export** eine lokale
+   `conversations.json`-Datei oder ein ChatGPT-Export-ZIP wählen. Mehrere Quellen sind möglich.
 3. Die Vorschau abwarten. Sie zeigt pro Quelle Dateianzahl und geschätzte Größe.
    Mit der Entfernen-Taste neben einer Quelle wird sie nur aus der aktuellen
    Auswahl entfernt.
@@ -71,6 +77,14 @@ die du auswählst.
 5. Die Zusammenfassung unten prüfen. **Create verified backup** wird erst mit
    mindestens einer Quelle und einem Ziel aktiv.
 6. **Create verified backup** wählen und die Erfolgsmeldung abwarten.
+
+### Passwortschutz
+
+Vor einem normalen Backup **Encrypt this backup with a password** aktivieren.
+Das Passwort wird nicht gespeichert. Zum Wiederherstellen eines verschlüsselten
+Pakets dieses unter Restore wählen, dasselbe Passwort eingeben, die geprüften
+Inhalte wählen und normal wiederherstellen. Ein verlorenes Passwort kann nicht
+wiederhergestellt werden.
 
 ### Ergebnis
 
@@ -111,6 +125,13 @@ automatisch erkannten Codex-App-Daten und der konfigurierten Projektordner.
 5. Die angezeigte Projektliste und das Ziel prüfen.
 6. **Create complete ZIP backup** wählen. Fortschrittsbalken und Meldung zeigen
    den aktuellen Schritt.
+
+Mit **Search projects** einen lokalen Ordner für eine einmalige Suche wählen.
+CodexVault zeigt nur Vorschläge mit erkennbaren Projektmerkmalen; erst die
+eigene Auswahl fügt einen Ordner hinzu. Automatische vollständige Backups können
+täglich oder wöchentlich aktiviert werden, solange CodexVault geöffnet ist. Sie
+laufen nicht im Hintergrund und warten, bis die separate Codex-Desktop-App
+geschlossen ist. CodexVault für das Backup geöffnet lassen.
 
 Die Projektliste und das Ziel werden lokal für den aktuellen macOS-Benutzer
 gespeichert. Die Codex-App-Daten werden automatisch erkannt. Ein sichtbarer
@@ -179,10 +200,12 @@ akzeptiert.
 
 ## Archive
 
-Archive zeigt normale Backup-Pakete, die während der aktuellen App-Sitzung
-erstellt wurden, mit Prüfstatus, Dateianzahl und Größe. Archive ist kein
-Dateibrowser: Nach einem Neustart sucht die App frühere Pakete nicht automatisch
-im Zielordner.
+Archive speichert lokal die Liste normaler Backup-Pakete, die CodexVault erstellt
+und geprüft hat. Die Ansicht zeigt Prüfstatus, Dateianzahl und Größe auch nach
+einem Neustart, solange der Paketordner noch vorhanden ist. Fehlende
+Paketordner werden aus der Liste entfernt. Archive ist kein Dateibrowser: Die
+App durchsucht keine Zielordner und importiert keine Pakete, die CodexVault
+nicht zuvor selbst erstellt und registriert hat.
 
 ## Einstellungen
 
@@ -202,7 +225,7 @@ Backup-Inhalte, Sicherheitsentscheidungen und bestehende Pakete bleiben gleich.
 | Theme | Darstellung |
 | --- | --- |
 | Liquid Glass | Native Glasoberfläche nur in der linken Navigation. |
-| Full Glass | Native Glasoberfläche im gesamten Fenster. |
+| Full Glass | Eine zusammenhängende milchige Glasoberfläche im gesamten Fenster mit langsam diagonal wanderndem Cyan-/Blau-/Violett-/Rosa-Glow und einem dichteren Feld aus weich leuchtenden, unregelmäßigen Lichtpunkten in Sidebar und Inhalt. Bei aktivem macOS „Reduce Motion“ sowie während Backup, Wiederherstellung oder Speicheranalyse pausiert die Animation. |
 | Graphite & Lime | Dunkle Graphitoberfläche mit Lime-Akzenten. |
 | Midnight | Dunkle Blau-/Indigo-Oberfläche. |
 
@@ -211,11 +234,13 @@ dauerhaft gespeicherte Einstellung dokumentiert.
 
 ### Privacy
 
-Im Bereich Privacy steht, dass Netzwerkaktivität deaktiviert ist und die App
-keinen privaten Inhaltskatalog speichert. Dateiberechtigungen werden immer über
-sichtbare Ordnerauswahl angefordert. Die lokale Konfiguration für vollständige
-Backups speichert nur die dafür benötigten Ordner- und Zielverweise, keinen
-Katalog der Backup-Inhalte.
+Im Bereich Privacy steht, dass automatische Netzwerkaktivität deaktiviert ist
+und die App keinen privaten Inhaltskatalog speichert. Öffentliche Website-Links
+und KI-Dienste öffnen nur nach einem sichtbaren Klick und erhalten keine
+App-Daten. Dateiberechtigungen werden immer über sichtbare Ordnerauswahl
+angefordert. Die lokale Konfiguration für vollständige Backups speichert nur
+die dafür benötigten Ordner- und Zielverweise, keinen Katalog der
+Backup-Inhalte.
 
 ### Build channel
 
