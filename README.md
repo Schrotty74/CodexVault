@@ -63,11 +63,11 @@ Scripts/build-final.sh
 
 The scripts build locally only. They do not publish an app.
 
-## Gatekeeper notice for Beta 1
+## Gatekeeper notice for Beta and Final builds
 
-[CodexVault 1.0 Beta 1](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.1)
-is deliberately ad-hoc signed and not notarized. macOS may therefore block its
-first launch. Download the DMG (recommended) or ZIP only from the official release.
+CodexVault Beta and Final builds are deliberately ad-hoc signed and not
+notarized. macOS may therefore block their first launch. Download the DMG
+(recommended) or ZIP only from the official release.
 Open the DMG and drag the app onto its included **Applications** link, then use
 one of these one-time, app-specific approvals:
 
@@ -79,8 +79,8 @@ one of these one-time, app-specific approvals:
 
 Do not disable Gatekeeper globally. See
 [Apple's instructions for safely opening apps](https://support.apple.com/102445).
-The attached [privacy report](docs/releases/CodexVault-1.0-Beta-1-Privacy-Report.md)
-contains the SHA-256 checksums for both release artifacts.
+Each release includes its own privacy report with SHA-256 checksums for both
+artifacts.
 
 ## Privacy and releases
 
