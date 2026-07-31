@@ -19,7 +19,8 @@ overwriting existing files. It does not upload data or run silent backups.
   verification, retention and optional in-app schedule.
 - Local project suggestions and ChatGPT-export backup support.
 - Persistent Archive and local Codex storage review.
-- English and German interface, AI help, and four visual themes.
+- English and German interface, AI help, and four visual themes: Liquid Glass,
+  Full Glass, Graphite & Lime, and Midnight.
 
 ## Screenshots
 

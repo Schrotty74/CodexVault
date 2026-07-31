@@ -20,7 +20,8 @@ keinen Upload und keine stillen Backups.
   Fortschritt, Prüfung, Aufbewahrung und optionalem In-App-Zeitplan.
 - Lokale Projektvorschläge und Unterstützung für ChatGPT-Export-Backups.
 - Dauerhaftes Archiv und lokale Codex-Speicherübersicht.
-- Englische und deutsche Oberfläche, KI-Hilfe und vier Darstellungsvarianten.
+- Englische und deutsche Oberfläche, KI-Hilfe und vier Darstellungsvarianten:
+  Liquid Glass, Full Glass, Graphite & Lime und Midnight.
 
 ## Screenshots
 
