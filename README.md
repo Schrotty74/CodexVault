@@ -12,47 +12,14 @@ overwriting existing files. It does not upload data or run silent backups.
 
 ## Features
 
-Keep this list current whenever an implemented user-facing feature changes.
-
-- Select multiple project and additional folders for a normal backup.
-- Preview file count, size, and excluded sensitive files before creating a
-  backup.
-- Create portable `.codexvault` packages with a manifest and SHA-256 checks.
-- Keep locally created, verified normal backup packages in Archive across app
-  restarts while their package folders still exist; unknown packages are never
-  scanned or imported automatically.
-- Search a user-chosen folder locally for recognizable project markers before
-  adding suggested projects to full backups.
-- Schedule complete backups daily or weekly while CodexVault is open; they wait
-  until the separate Codex desktop app is closed.
-- Include a local ChatGPT `conversations.json` file or export ZIP as a normal
-  backup source, and protect new normal packages with a password that is never stored.
-- Verify a package before restoring selected sources into a new folder.
-- Create a complete local ZIP backup of detected Codex data and configured
-  project folders, with progress, verification, a dated copy, and a `latest`
-  copy.
-- Add multiple project folders to a persistent full-backup list and remove an
-  individual folder without replacing the other selections.
-- Keep the three newest dated complete backups per source after an explicit
-  confirmation; the app never removes older backups silently.
-- Inspect local Codex storage by category and project assignment, then
-  permanently remove only explicitly selected, unassigned local records after
-  confirmation.
-- Use four appearances: Liquid Glass, Full Glass, Graphite & Lime, and
-  Midnight. Full Glass is a single milky window surface with a slow diagonal
-  cyan/blue/purple/pink glow and subtle random light points; it pauses during
-  intensive work and when Reduce Motion is enabled.
-- Use English (default) or German for the app interface. The selected language
-  also controls the AI-help prompt and the public manual it opens.
-- Keep Dev, Beta, and Final builds separate with distinct bundle identifiers
-  and data containers.
-- Show a first-start welcome screen while no own selection, configuration, or
-  backup content exists. The Overview also keeps this AI help available after
-  setup: it can open the public manual or copy a general, language-matched help
-  question before opening ChatGPT, Google Gemini, or Claude. No app content is
-  sent automatically.
-- Open the public CodexVault GitHub page or Discord community only after an
-  explicit click in the sidebar; no app data is included.
+- Verified normal backups with source preview, SHA-256 integrity checks, and
+  selective restore into a new folder.
+- Password-protected normal backup packages; passwords are never stored.
+- Complete local ZIP backups for Codex data and selected projects, with progress,
+  verification, retention and optional in-app schedule.
+- Local project suggestions and ChatGPT-export backup support.
+- Persistent Archive and local Codex storage review.
+- English and German interface, AI help, and four visual themes.
 
 ## Screenshots
 

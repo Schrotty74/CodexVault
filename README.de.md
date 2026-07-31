@@ -13,53 +13,14 @@ keinen Upload und keine stillen Backups.
 
 ## Funktionen
 
-Diese Liste bei jeder umgesetzten, sichtbaren Funktionsänderung ergänzen oder
-anpassen.
-
-- Mehrere Projekt- und Zusatzordner für ein normales Backup auswählen.
-- Dateianzahl, Größe und ausgeschlossene sensible Dateien vor dem Backup prüfen.
-- Portable `.codexvault`-Pakete mit Manifest und SHA-256-Prüfsummen erstellen.
-- Lokal erstellte, geprüfte normale Backup-Pakete im Archiv auch nach einem
-  Neustart anzeigen, solange ihr Paketordner noch vorhanden ist; unbekannte
-  Pakete werden nie automatisch gesucht oder importiert.
-- Innerhalb eines selbst gewählten Ordners lokale Projektmerkmale suchen und
-  nur ausgewählte Vorschläge zu Full Backups hinzufügen.
-- Vollständige Backups täglich oder wöchentlich planen, solange CodexVault
-  geöffnet ist; sie warten, bis die separate Codex-Desktop-App geschlossen ist.
-- Einen lokalen ChatGPT-Export (`conversations.json` oder ZIP) als normale
-  Backup-Quelle aufnehmen und neue normale Pakete mit einem nie gespeicherten Passwort schützen.
-- Ein Paket vor der Wiederherstellung prüfen und enthaltene Quellen gezielt in
-  einen neuen Ordner wiederherstellen.
-- Ein vollständiges lokales ZIP-Backup der erkannten Codex-Daten und der
-  konfigurierten Projektordner mit Fortschritt, Prüfung, datierter Kopie und
-  `latest`-Kopie erstellen.
-- Mehrere Projektordner zu einer dauerhaft gespeicherten Full-Backup-Liste
-  hinzufügen und einzelne Ordner entfernen, ohne die übrige Auswahl zu ersetzen.
-- Pro Quelle die drei neuesten datierten vollständigen Backups erst nach
-  sichtbarer Bestätigung behalten oder ältere löschen; es gibt keine stille
-  Bereinigung.
-- Den lokalen Codex-Speicher nach Kategorien und Projektzuordnung prüfen sowie
-  nur ausgewählte, nicht zugeordnete lokale Einträge nach Bestätigung dauerhaft
-  entfernen.
-- Vier Darstellungen verwenden: Liquid Glass, Full Glass, Graphite & Lime und
-  Midnight. Full Glass ist eine einheitliche milchige Fensteroberfläche mit
-  langsam diagonal wanderndem Cyan-/Blau-/Violett-/Rosa-Glow und dezenten,
-  zufälligen Lichtpunkten; bei rechenintensiven Abläufen und „Reduce Motion“
-  pausiert die Animation.
-- Die App-Oberfläche auf Englisch (Standard) oder Deutsch verwenden. Die
-  gewählte Sprache steuert ebenfalls den KI-Hilfe-Prompt und das geöffnete
-  öffentliche Handbuch.
-- Dev-, Beta- und Final-Builds mit getrennten Bundle-IDs und Datencontainern
-  verwenden.
-- Eine Erststart-Ansicht anzeigen, solange noch keine eigene Auswahl,
-  Konfiguration oder Backup-Inhalte vorhanden sind. Die Overview hält diese
-  KI-Hilfe auch nach der Einrichtung dauerhaft bereit: Sie kann das öffentliche
-  Handbuch öffnen oder eine allgemeine, sprachabhängige Hilfefrage kopieren und
-  danach ChatGPT, Google Gemini oder Claude öffnen. App-Inhalte werden nie
-  automatisch gesendet.
-- Die öffentliche CodexVault-GitHub-Seite oder Discord-Community erst nach
-  einem sichtbaren Klick in der Seitenleiste öffnen; es werden keine App-Daten
-  übergeben.
+- Geprüfte normale Backups mit Quellvorschau, SHA-256-Integritätsprüfung und
+  gezielter Wiederherstellung in einen neuen Ordner.
+- Passwortgeschützte normale Backup-Pakete; Passwörter werden nie gespeichert.
+- Vollständige lokale ZIP-Backups für Codex-Daten und ausgewählte Projekte mit
+  Fortschritt, Prüfung, Aufbewahrung und optionalem In-App-Zeitplan.
+- Lokale Projektvorschläge und Unterstützung für ChatGPT-Export-Backups.
+- Dauerhaftes Archiv und lokale Codex-Speicherübersicht.
+- Englische und deutsche Oberfläche, KI-Hilfe und vier Darstellungsvarianten.
 
 ## Screenshots
 
