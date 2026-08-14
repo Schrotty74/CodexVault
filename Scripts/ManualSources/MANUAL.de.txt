@@ -168,7 +168,7 @@ Codex-Arbeitsbereich wird nur während eines vollständigen Backups erkannt und
 erscheint beim frischen Start nicht als konfigurierter Projektordner. Es muss
 kein externes Backup-Skript ausgewählt werden.
 
-![Erweiterte Full-Backup-Steuerung und lokale Speicherübersicht](docs/images/full-backup.png)
+![Erweiterte Backup-Ansicht mit Full-Backup-Steuerung und lokaler Speicherübersicht](docs/images/full-backup.png)
 
 ### Dateien, Prüfung und Aufbewahrung
 

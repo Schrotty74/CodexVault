@@ -29,7 +29,7 @@ overwriting existing files. It does not upload data or run silent backups.
   <tr>
     <td align="center"><a href="docs/images/overview.png"><img src="docs/images/overview.png" width="280" alt="CodexVault Overview"></a><br><sub>Overview and AI help</sub></td>
     <td align="center"><a href="docs/images/backup.png"><img src="docs/images/backup.png" width="280" alt="CodexVault Backup"></a><br><sub>Normal backup</sub></td>
-    <td align="center"><a href="docs/images/full-backup.png"><img src="docs/images/full-backup.png" width="280" alt="CodexVault full backup"></a><br><sub>Full backup</sub></td>
+    <td align="center"><a href="docs/images/full-backup.png"><img src="docs/images/full-backup.png" width="280" alt="CodexVault expanded backup view"></a><br><sub>Expanded backup view</sub></td>
   </tr>
   <tr>
     <td align="center"><a href="docs/images/restore.png"><img src="docs/images/restore.png" width="280" alt="CodexVault Restore"></a><br><sub>Restore</sub></td>

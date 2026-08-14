@@ -31,7 +31,7 @@ keinen Upload und keine stillen Backups.
   <tr>
     <td align="center"><a href="docs/images/overview.png"><img src="docs/images/overview.png" width="280" alt="CodexVault Übersicht"></a><br><sub>Übersicht und KI-Hilfe</sub></td>
     <td align="center"><a href="docs/images/backup.png"><img src="docs/images/backup.png" width="280" alt="CodexVault Backup"></a><br><sub>Normales Backup</sub></td>
-    <td align="center"><a href="docs/images/full-backup.png"><img src="docs/images/full-backup.png" width="280" alt="CodexVault Full Backup"></a><br><sub>Full Backup</sub></td>
+    <td align="center"><a href="docs/images/full-backup.png"><img src="docs/images/full-backup.png" width="280" alt="CodexVault erweiterte Backup-Ansicht"></a><br><sub>Erweiterte Backup-Ansicht</sub></td>
   </tr>
   <tr>
     <td align="center"><a href="docs/images/restore.png"><img src="docs/images/restore.png" width="280" alt="CodexVault Wiederherstellung"></a><br><sub>Wiederherstellung</sub></td>

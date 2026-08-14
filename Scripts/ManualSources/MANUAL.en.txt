@@ -164,7 +164,7 @@ macOS user. Codex app data is detected automatically. A visible Codex workspace
 is detected only while a complete backup runs; it is not shown as a configured
 project folder on a fresh start. No external backup script must be selected.
 
-![Expanded full-backup controls and local storage overview](docs/images/full-backup.png)
+![Expanded Backup view with full-backup controls and local storage overview](docs/images/full-backup.png)
 
 ### Files, verification, and retention
 
