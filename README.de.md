@@ -4,7 +4,7 @@
 
 # CodexVault
 
-[Deutsch](README.de.md) · [English](README.md)
+[English](README.md)
 
 CodexVault ist eine lokale macOS-App zum Erstellen geprüfter Sicherungen von
 ausgewählten Arbeitsordnern und Codex-bezogenen Daten. Die Wiederherstellung
