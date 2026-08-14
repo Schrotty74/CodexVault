@@ -49,6 +49,10 @@ rm -rf "$app_bundle"
 mkdir -p "$app_bundle/Contents/MacOS" "$app_bundle/Contents/Resources"
 cp "$binary_path" "$app_bundle/Contents/MacOS/CodexVault"
 cp -R "$project_root/Sources/CodexVaultApp/Resources"/. "$app_bundle/Contents/Resources/"
+# Finder metadata must never become part of a distributable app bundle. Source
+# folders can contain ignored local metadata, so remove it only from the build
+# output after copying resources.
+find "$app_bundle/Contents/Resources" -type f \( -name '.DS_Store' -o -name '._*' \) -delete
 xcrun actool \
     --compile "$app_bundle/Contents/Resources" \
     --platform macosx \

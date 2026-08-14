@@ -31,10 +31,12 @@ Die Seitenleiste enthält fünf Bereiche:
 | Overview | Startpunkt und aktuelle Statuskarten. Der Bereich Aktivität erscheint erst, nachdem in der aktuellen App-Sitzung ein Backup erstellt wurde. |
 | Backup | Normale Backups, vollständige ZIP-Backups und lokale Codex-Speicherübersicht. |
 | Restore | Prüfung und gezielte Wiederherstellung eines normalen Backup-Pakets. |
-| Archive | Zuvor erstellte, geprüfte normale Backups, deren Paketordner noch vorhanden sind. |
+| Archive | Zuvor erstellte, geprüfte normale Backup-ZIPs, die noch vorhanden sind. |
 | Settings | Darstellung, Datenschutzstatus und Informationen zum Build-Kanal. |
 
 Die Taste **Start setup** auf Overview öffnet Backup.
+
+![Übersicht mit lokalem Status und KI-Hilfe](docs/images/overview.png)
 
 ## KI-Hilfe beim Erststart
 
@@ -66,9 +68,9 @@ Ein normales Backup eignet sich für ein portables Paket mit genau den Ordnern,
 die du auswählst.
 
 1. **Backup** öffnen.
-2. Unter **Sources** mit **Add project** einen Projektordner, mit **Add folder**
-   einen weiteren Ordner oder mit **Import ChatGPT export** eine lokale
-   `conversations.json`-Datei oder ein ChatGPT-Export-ZIP wählen. Mehrere Quellen sind möglich.
+2. Unter **Sources** mit **Add project** einen oder mehrere Projektordner oder
+   mit **Import ChatGPT export** eine lokale `conversations.json`-Datei oder
+   ein ChatGPT-Export-ZIP wählen. Mehrere Quellen sind möglich.
 3. Die Vorschau abwarten. Sie zeigt pro Quelle Dateianzahl und geschätzte Größe.
    Mit der Entfernen-Taste neben einer Quelle wird sie nur aus der aktuellen
    Auswahl entfernt.
@@ -77,6 +79,21 @@ die du auswählst.
 5. Die Zusammenfassung unten prüfen. **Create verified backup** wird erst mit
    mindestens einer Quelle und einem Ziel aktiv.
 6. **Create verified backup** wählen und die Erfolgsmeldung abwarten.
+
+![Backup: Profile, ausgewählte Quellen, Ziel und kompakte Ansicht](docs/images/backup.png)
+
+### Backup-Profile und Zielprüfung
+
+**Backup-Profile** speichern die aktuell gewählten Quellen und das Ziel lokal
+unter einem eigenen Namen. Nach mindestens einer Quelle Aktuelle Auswahl
+speichern verwenden; später dient Anwenden als Ausgangspunkt. Das
+Anwenden eines Profils erstellt nie automatisch ein Backup. Passwörter gehören
+bewusst nicht zu einem Profil und werden nie gespeichert.
+
+Nach der Zielauswahl zeigt CodexVault, ob das Ziel erreichbar und beschreibbar
+ist sowie – sofern macOS es liefert – den freien Speicher. Ein normales Backup
+startet erst mit beschreibbarem Ziel. Die Zusammenfassung kann Dateianzahl und
+Größe mit dem letzten normalen Backup vergleichen.
 
 ### Passwortschutz
 
@@ -88,16 +105,24 @@ wiederhergestellt werden.
 
 ### Ergebnis
 
-CodexVault erstellt im gewählten Ziel einen neuen Ordner mit der Endung
-`.codexvault`. Er enthält:
+CodexVault erstellt im gewählten Ziel immer eine neue Datei mit der Endung
+`.codexvault.zip`. Ihr Name besteht aus dem Namen des gewählten Projekts oder
+Ordners sowie Erstellungsdatum und -uhrzeit, zum Beispiel
+`Projektname-2026-08-14-103000.codexvault.zip`. Bei mehreren Quellen enthält
+der Name alle ausgewählten Namen. Die ZIP enthält einen `.codexvault`-Paketordner mit:
+
+Bei mehreren Quellen erscheint zusätzlich **Backup-Name (optional)**. Dort kann
+ein gemeinsamer Name statt der Quellnamen eingegeben werden; Erstellungsdatum
+und -uhrzeit bleiben immer Bestandteil des ZIP-Dateinamens.
 
 - `manifest.json` mit Paket-Schema, logischen Quellnamen, relativen Pfaden,
   Ausschlusszählern und SHA-256-Prüfsummen.
 - Die ausgewählten Quellen direkt an der Paketwurzel; es gibt keinen technischen
   Zwischenordner `payload`.
 
-Nach dem Erstellen wird das Paket geprüft. Bereits vorhandene Dateien im Ziel
-werden nicht überschrieben.
+Nach dem Erstellen wird die ZIP geprüft. Bereits vorhandene Dateien im Ziel
+werden nicht überschrieben. Die Abschlusskarte zeigt den genauen Backup-Ort
+und bietet **Im Finder anzeigen**, um die neu erstellte ZIP zu markieren.
 
 ### Ausschlüsse im normalen Backup
 
@@ -126,18 +151,24 @@ automatisch erkannten Codex-App-Daten und der konfigurierten Projektordner.
 6. **Create complete ZIP backup** wählen. Fortschrittsbalken und Meldung zeigen
    den aktuellen Schritt.
 
+Nach einem erfolgreichen Lauf zeigt die Abschlusskarte das Ziel und bietet
+**Im Finder anzeigen**, um alle neu erstellten datierten ZIPs zu markieren.
+
 Mit **Search projects** einen lokalen Ordner für eine einmalige Suche wählen.
 CodexVault zeigt nur Vorschläge mit erkennbaren Projektmerkmalen; erst die
 eigene Auswahl fügt einen Ordner hinzu. Automatische vollständige Backups können
-täglich oder wöchentlich aktiviert werden, solange CodexVault geöffnet ist. Sie
-laufen nicht im Hintergrund und warten, bis die separate Codex-Desktop-App
-geschlossen ist. CodexVault für das Backup geöffnet lassen.
+täglich oder wöchentlich mit bevorzugter Uhrzeit aktiviert werden, solange
+CodexVault geöffnet ist. Sie laufen nicht im Hintergrund, warten auf ein
+erreichbares Ziel und darauf, dass die separate Codex-Desktop-App geschlossen
+ist. CodexVault für das Backup geöffnet lassen.
 
 Die Projektliste und das Ziel werden lokal für den aktuellen macOS-Benutzer
 gespeichert. Die Codex-App-Daten werden automatisch erkannt. Ein sichtbarer
 Codex-Arbeitsbereich wird nur während eines vollständigen Backups erkannt und
 erscheint beim frischen Start nicht als konfigurierter Projektordner. Es muss
 kein externes Backup-Skript ausgewählt werden.
+
+![Erweiterte Full-Backup-Steuerung und lokale Speicherübersicht](docs/images/full-backup.png)
 
 ### Dateien, Prüfung und Aufbewahrung
 
@@ -182,7 +213,9 @@ ausgewählt und die destruktive Aktion bestätigt wurden.
 
 ## Wiederherstellung eines normalen Backups
 
-Die Wiederherstellung arbeitet mit einem geprüften `.codexvault`-Paket.
+Die Wiederherstellung arbeitet mit einem geprüften `.codexvault.zip`-Backup.
+Ältere unkomprimierte `.codexvault`-Pakete bleiben aus Kompatibilitätsgründen
+weiterhin unterstützt.
 
 1. **Restore** öffnen.
 2. **Choose Backup** wählen und ein Backup-Paket auswählen.
@@ -195,17 +228,26 @@ Die Wiederherstellung arbeitet mit einem geprüften `.codexvault`-Paket.
 
 CodexVault erstellt unter dem gewählten Ziel einen neuen Wiederherstellungsordner
 und prüft die Dateien gegen die Paket-Prüfsummen. Vorhandene Zieldateien werden
-nie überschrieben. Bei erfolgreicher Prüfung werden Paket-Schema 1, 2 und 3
-akzeptiert.
+nie überschrieben. Nach einer erfolgreichen Wiederherstellung zeigt **Im Finder
+anzeigen** den neuen Wiederherstellungsordner. Bei erfolgreicher Prüfung werden
+Paket-Schema 1, 2 und 3 akzeptiert.
+
+![Wiederherstellung: Backup-Paket wählen und prüfen](docs/images/restore.png)
 
 ## Archive
 
 Archive speichert lokal die Liste normaler Backup-Pakete, die CodexVault erstellt
 und geprüft hat. Die Ansicht zeigt Prüfstatus, Dateianzahl und Größe auch nach
-einem Neustart, solange der Paketordner noch vorhanden ist. Fehlende
-Paketordner werden aus der Liste entfernt. Archive ist kein Dateibrowser: Die
+einem Neustart, solange die ZIP-Datei noch vorhanden ist. Fehlende ZIP-Dateien
+werden aus der Liste entfernt. Archive ist kein Dateibrowser: Die
 App durchsucht keine Zielordner und importiert keine Pakete, die CodexVault
-nicht zuvor selbst erstellt und registriert hat.
+nicht zuvor selbst erstellt und registriert hat. Jede Archivzeile bietet **Im
+Finder anzeigen**, **Integrität prüfen** und **Wiederherstellen**. Die
+Integritätsprüfung prüft ein normales Paket erneut und zeigt seine logischen
+Quellen; verschlüsselte Pakete werden nach Passworteingabe unter Wiederherstellen
+geprüft.
+
+![Leerer Archivzustand](docs/images/archive.png)
 
 ## Einstellungen
 
@@ -219,7 +261,8 @@ Sicherheitsentscheidungen bleiben unverändert.
 
 ### Appearance
 
-**Preview theme** ändert nur die aktuelle Darstellung der App. Quellen,
+Im Bereich Darstellung zeigen vier sichtbare Theme-Karten die Auswahl. Die
+Auswahl ändert nur die aktuelle Darstellung der App. Quellen,
 Backup-Inhalte, Sicherheitsentscheidungen und bestehende Pakete bleiben gleich.
 
 | Theme | Darstellung |
@@ -231,6 +274,14 @@ Backup-Inhalte, Sicherheitsentscheidungen und bestehende Pakete bleiben gleich.
 
 Das gewählte Theme ist derzeit eine Sitzungseinstellung; es ist nicht als
 dauerhaft gespeicherte Einstellung dokumentiert.
+
+![Einstellungen: Sprache und die vier Darstellungsvarianten](docs/images/settings.png)
+
+### Backup-Ansicht
+
+Mit **Kompakte Ansicht** oben auf der Backup-Seite bleiben Full-Backup- und
+Speicherbereiche eingeklappt, bis sie ausdrücklich ausgeklappt werden. Die
+Auswahl wird nur lokal gespeichert und ändert keine Backup-Inhalte.
 
 ### Privacy
 
@@ -257,8 +308,3 @@ Kanälen migriert.
 | Vollständiges ZIP-Backup fehlgeschlagen | Prüfen, ob das Ziel beschreibbar und die Quelle verfügbar ist, dann erneut versuchen. |
 | Ältere vollständige Backups sollen gelöscht werden | **Keep all** wählen, wenn die Aufbewahrungsentscheidung noch nicht geprüft wurde. |
 | Nicht zugeordnete Einträge werden gezeigt | Nicht nur nach Größe löschen; nur wirklich nicht mehr benötigte Einträge wählen. |
-
-## Regel für Funktionsdokumentation
-
-Bei jeder sichtbaren Funktionsänderung die Funktionslisten in beiden READMEs und
-die passenden Abschnitte in beiden Handbüchern im selben Auftrag aktualisieren.

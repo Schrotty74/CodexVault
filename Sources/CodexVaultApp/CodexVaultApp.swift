@@ -175,7 +175,9 @@ private struct CodexVaultRootView: View {
         case .restore:
             RestoreView(theme: selectedTheme, coordinator: backupCoordinator)
         case .archive:
-            ArchiveView(theme: selectedTheme, coordinator: backupCoordinator)
+            ArchiveView(theme: selectedTheme, coordinator: backupCoordinator) {
+                selectedSection = .restore
+            }
         case .settings:
             SettingsView(selectedTheme: $selectedTheme)
         }
@@ -557,11 +559,56 @@ private struct CodexVaultAIHelpCard: View {
 private struct BackupView: View {
     let theme: DisplayTheme
     @Bindable var coordinator: BackupCoordinator
+    @AppStorage("codexVault.backup.compactLayout") private var usesCompactLayout = false
+    @State private var profileName = ""
+    @State private var isFullBackupExpanded = false
+    @State private var isStorageExpanded = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Header(title: CodexVaultLocalization.text("Create a backup"), subtitle: CodexVaultLocalization.text("Choose exactly what you want to protect."))
+                HStack(alignment: .top) {
+                    Header(title: CodexVaultLocalization.text("Create a backup"), subtitle: CodexVaultLocalization.text("Choose exactly what you want to protect."))
+                    Spacer()
+                    Toggle(CodexVaultLocalization.text("Compact layout"), isOn: $usesCompactLayout)
+                        .toggleStyle(.switch)
+                        .fixedSize()
+                }
+
+                SurfaceCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Label(CodexVaultLocalization.text("Backup profiles"), systemImage: "bookmark")
+                            .font(.headline)
+                        Text(CodexVaultLocalization.text("Save selected sources and the destination locally as a reusable starting point. Applying a profile never starts a backup."))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        HStack {
+                            TextField(CodexVaultLocalization.text("Profile name"), text: $profileName)
+                            Button(CodexVaultLocalization.text("Save current selection")) {
+                                coordinator.saveCurrentBackupProfile(named: profileName)
+                                profileName = ""
+                            }
+                            .disabled(profileName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || coordinator.sources.isEmpty)
+                        }
+                        if !coordinator.backupProfiles.isEmpty {
+                            ForEach(coordinator.backupProfiles) { profile in
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(profile.name).font(.subheadline.weight(.medium))
+                                        Text("\(profile.sources.count) \(CodexVaultLocalization.text(profile.sources.count == 1 ? "source" : "sources")) · \(CodexVaultLocalization.text(profile.destinationPath == nil ? "No destination" : "Destination saved"))")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    Button(CodexVaultLocalization.text("Apply")) { coordinator.applyBackupProfile(profile) }
+                                    Button(CodexVaultLocalization.text("Remove"), role: .destructive) { coordinator.removeBackupProfile(profile) }
+                                        .controlSize(.small)
+                                }
+                            }
+                        }
+                    }
+                    .padding(20)
+                }
 
                 SurfaceCard {
                     VStack(alignment: .leading, spacing: 16) {
@@ -572,21 +619,18 @@ private struct BackupView: View {
                             Button("Add project") {
                                 coordinator.chooseSource(kind: .project)
                             }
-                            Button("Add folder") {
-                                coordinator.chooseSource(kind: .folder)
-                            }
                             Button("Import ChatGPT export") {
                                 coordinator.chooseChatGPTExport()
                             }
                         }
 
                         if coordinator.sources.isEmpty {
-                            Text("No folders selected. CodexVault reads only folders you explicitly choose.")
+                            Text("No sources selected. CodexVault reads only projects you explicitly choose.")
                                 .foregroundStyle(.secondary)
                         } else {
                             ForEach(coordinator.sources) { source in
                                 HStack(spacing: 12) {
-                                    Image(systemName: source.kind == .project ? "folder.fill" : (source.kind == .chatGPTExport ? "bubble.left.and.bubble.right" : "folder"))
+                                    Image(systemName: source.kind == .project ? "folder.fill" : "bubble.left.and.bubble.right")
                                         .foregroundStyle(theme.tint)
                                     VStack(alignment: .leading, spacing: 3) {
                                         Text(source.displayName)
@@ -611,6 +655,13 @@ private struct BackupView: View {
                                 }
                                 .padding(.vertical, 5)
                             }
+                            if coordinator.sources.count > 1 {
+                                Divider()
+                                TextField("Backup name (optional)", text: $coordinator.normalBackupCustomName)
+                                Text("If empty, the selected source names are used. The date and time are always added.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                     .padding(20)
@@ -628,7 +679,19 @@ private struct BackupView: View {
                         }
                         Text(coordinator.destinationURL?.lastPathComponent ?? "No destination selected")
                             .foregroundStyle(coordinator.destinationURL == nil ? .secondary : .primary)
-                        Text("A new portable CodexVault package is created inside this folder. Existing files are never overwritten.")
+                        if let health = coordinator.destinationHealth {
+                            HStack(spacing: 8) {
+                                Image(systemName: health.isReady ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                                    .foregroundStyle(health.isReady ? .green : .orange)
+                                Text(CodexVaultLocalization.text(health.isReady ? "Destination is reachable and writable" : "Destination is unavailable or not writable"))
+                                if let availableBytes = health.availableBytes {
+                                    Text("· \(ByteCountFormatter.string(fromByteCount: availableBytes, countStyle: .file)) \(CodexVaultLocalization.text("free"))")
+                                }
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+                        Text("A new verified CodexVault ZIP backup is created inside this folder. Existing files are never overwritten.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Toggle("Encrypt this backup with a password", isOn: $coordinator.encryptNormalBackup)
@@ -647,10 +710,18 @@ private struct BackupView: View {
                         HStack {
                             Label("CodexVault full backup", systemImage: "archivebox.fill")
                                 .font(.headline)
+                            Spacer()
+                            if usesCompactLayout {
+                                Button(CodexVaultLocalization.text(isFullBackupExpanded ? "Collapse" : "Expand")) {
+                                    isFullBackupExpanded.toggle()
+                                }
+                                .controlSize(.small)
+                            }
                         }
                         Text("Codex is detected automatically. Project folders and the destination are configured once for each macOS user, then used for every full backup.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                        if !usesCompactLayout || isFullBackupExpanded {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Label("Codex app data", systemImage: "gearshape.2")
@@ -779,7 +850,14 @@ private struct BackupView: View {
                                     }
                                 }
                                 .pickerStyle(.segmented)
-                                Text("CodexVault checks once per minute while it is open. It waits until the Codex desktop app is closed; it never launches in the background.")
+                                DatePicker(CodexVaultLocalization.text("Preferred time"), selection: Binding(
+                                    get: { coordinator.automaticFullBackupTime },
+                                    set: {
+                                        coordinator.automaticFullBackupTime = $0
+                                        coordinator.saveAutomaticBackupSettings()
+                                    }
+                                ), displayedComponents: .hourAndMinute)
+                                Text(CodexVaultLocalization.text("CodexVault checks once per minute while it is open. It runs after the chosen time only when the destination is reachable and the Codex desktop app is closed; it never launches in the background."))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -803,6 +881,7 @@ private struct BackupView: View {
                                     .foregroundStyle(.secondary)
                             }
                         }
+                        }
                     }
                     .padding(20)
                 }
@@ -813,7 +892,14 @@ private struct BackupView: View {
                             Label("Codex storage overview", systemImage: "externaldrive.badge.magnifyingglass")
                                 .font(.headline)
                             Spacer()
+                            if usesCompactLayout {
+                                Button(CodexVaultLocalization.text(isStorageExpanded ? "Collapse" : "Expand")) {
+                                    isStorageExpanded.toggle()
+                                }
+                                .controlSize(.small)
+                            }
                             Button(coordinator.isAnalyzingSessions ? "Analyzing…" : (coordinator.isSessionPreviewExpanded ? "Collapse" : "Check storage")) {
+                                if usesCompactLayout { isStorageExpanded = true }
                                 coordinator.toggleSessionPreview()
                             }
                             .disabled(coordinator.isAnalyzingSessions)
@@ -821,7 +907,7 @@ private struct BackupView: View {
                         Text("Shows which local Codex data uses space. This preview does not remove or change anything.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        if coordinator.isSessionPreviewExpanded, let preview = coordinator.sessionPreview {
+                        if (!usesCompactLayout || isStorageExpanded), coordinator.isSessionPreviewExpanded, let preview = coordinator.sessionPreview {
                             Text("\(preview.totalFileCount) local Codex records · \(ByteCountFormatter.string(fromByteCount: Int64(preview.totalBytes), countStyle: .file))")
                                 .font(.subheadline.weight(.medium))
                             ForEach(preview.storageCategories) { category in
@@ -895,10 +981,54 @@ private struct BackupView: View {
                     }
                 }
 
+                if let comparison = coordinator.currentBackupComparison {
+                    SurfaceCard {
+                        HStack(spacing: 12) {
+                            Image(systemName: "chart.bar.xaxis")
+                                .foregroundStyle(theme.tint)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(CodexVaultLocalization.text("Compared with the last normal backup"))
+                                    .font(.headline)
+                                Text("\(signedValue(comparison.fileDifference)) files · \(signedBytes(comparison.byteDifference)) since \(comparison.referenceDate.formatted(date: .abbreviated, time: .shortened))")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(20)
+                    }
+                }
+
                 if let statusMessage = coordinator.statusMessage {
                     Label(statusMessage, systemImage: coordinator.isWorking ? "arrow.triangle.2.circlepath" : "checkmark.circle")
                         .font(.subheadline)
                         .foregroundStyle(coordinator.isWorking ? Color.secondary : Color.green)
+                }
+
+                if !coordinator.latestCreatedBackupURLs.isEmpty,
+                   let backupDirectory = coordinator.latestCreatedBackupURLs.first?.deletingLastPathComponent() {
+                    SurfaceCard {
+                        HStack(spacing: 14) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(.green)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Backup created")
+                                    .font(.headline)
+                                Text(coordinator.latestCreatedBackupURLs.count == 1 ? coordinator.latestCreatedBackupURLs[0].lastPathComponent : "\(coordinator.latestCreatedBackupURLs.count) ZIP backups created")
+                                    .font(.subheadline)
+                                Text(backupDirectory.path)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            }
+                            Spacer()
+                            Button("Show in Finder") {
+                                coordinator.showLatestBackupsInFinder()
+                            }
+                        }
+                        .padding(20)
+                    }
                 }
 
                 SurfaceCard {
@@ -975,6 +1105,14 @@ private struct BackupView: View {
         } message: {
             Text("Keep CodexVault open. Close only the separate Codex desktop app first so its local data is not being written during the backup. Then return here and start the backup.")
         }
+    }
+
+    private func signedValue(_ value: Int) -> String {
+        value == 0 ? CodexVaultLocalization.text("No file change") : "\(value > 0 ? "+" : "")\(value)"
+    }
+
+    private func signedBytes(_ value: Int64) -> String {
+        value == 0 ? CodexVaultLocalization.text("No size change") : "\(value > 0 ? "+" : "")\(ByteCountFormatter.string(fromByteCount: abs(value), countStyle: .file))"
     }
 }
 
@@ -1085,6 +1223,28 @@ private struct RestoreView: View {
                         .foregroundStyle(coordinator.isWorking ? Color.secondary : Color.green)
                 }
 
+                if let restoredURL = coordinator.latestRestoreURL {
+                    SurfaceCard {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Label(CodexVaultLocalization.text("Restore created"), systemImage: "checkmark.circle.fill")
+                                    .font(.headline)
+                                    .foregroundStyle(.green)
+                                Text(restoredURL.path)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            }
+                            Spacer()
+                            Button("Show in Finder") {
+                                coordinator.showLatestRestoreInFinder()
+                            }
+                        }
+                        .padding(20)
+                    }
+                }
+
                 SurfaceCard {
                     Label("CodexVault always restores into a new folder. Existing destination files are never replaced.", systemImage: "lock.shield")
                         .foregroundStyle(.secondary)
@@ -1119,7 +1279,8 @@ private struct RestoreView: View {
 
 private struct ArchiveView: View {
     let theme: DisplayTheme
-    let coordinator: BackupCoordinator
+    @Bindable var coordinator: BackupCoordinator
+    let onRestore: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -1131,26 +1292,57 @@ private struct ArchiveView: View {
                 } else {
                     VStack(spacing: 0) {
                         ForEach(coordinator.archives) { archive in
-                            HStack(spacing: 14) {
-                                Image(systemName: archive.verified ? "checkmark.shield.fill" : "exclamationmark.shield")
-                                    .font(.title2)
-                                    .foregroundStyle(archive.verified ? .green : .orange)
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(archive.displayName)
-                                        .font(.headline)
-                                    Text("\(archive.fileCount) files · \(ByteCountFormatter.string(fromByteCount: Int64(archive.byteCount), countStyle: .file))")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack(spacing: 14) {
+                                    Image(systemName: archive.verified ? "checkmark.shield.fill" : "exclamationmark.shield")
+                                        .font(.title2)
+                                        .foregroundStyle(archive.verified ? .green : .orange)
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(archive.displayName)
+                                            .font(.headline)
+                                        Text("\(archive.fileCount) files · \(ByteCountFormatter.string(fromByteCount: Int64(archive.byteCount), countStyle: .file))")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    Text(archive.verified ? "Verified" : "Needs review")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(archive.verified ? .green : .orange)
                                 }
-                                Spacer()
-                                Text(archive.verified ? "Verified" : "Needs review")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(archive.verified ? .green : .orange)
+                                if let manifest = coordinator.archiveManifests[archive.id] {
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(CodexVaultLocalization.text("Contents"))
+                                            .font(.caption.weight(.semibold))
+                                        ForEach(manifest.sources ?? [], id: \.sourceID) { source in
+                                            let count = manifest.entries.filter { $0.sourceID == source.sourceID }.count
+                                            Text("\(source.archiveRootName) · \(count) files")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                }
+                                HStack {
+                                    Button(CodexVaultLocalization.text("Show in Finder")) { coordinator.showArchiveInFinder(archive) }
+                                    Button(CodexVaultLocalization.text("Check integrity")) { coordinator.inspectArchive(archive) }
+                                        .disabled(coordinator.isWorking)
+                                    Spacer()
+                                    Button(CodexVaultLocalization.text("Restore")) {
+                                        coordinator.prepareRestore(from: archive)
+                                        onRestore()
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                }
                             }
                             .padding(20)
+                            if archive.id != coordinator.archives.last?.id { Divider() }
                         }
                     }
                 }
+            }
+            if let message = coordinator.archiveInspectionMessage {
+                Label(message, systemImage: "checkmark.circle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             Spacer()
         }
@@ -1191,14 +1383,34 @@ private struct SettingsView: View {
                 }
 
                 settingsSection(title: "Appearance") {
-                Picker("Preview theme", selection: $selectedTheme) {
-                    ForEach(DisplayTheme.allCases) { theme in
-                        Text(theme.rawValue).tag(theme)
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                        ForEach(DisplayTheme.allCases) { theme in
+                            Button {
+                                selectedTheme = theme
+                            } label: {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .fill(themePreviewGradient(for: theme))
+                                        .frame(height: 52)
+                                        .overlay(alignment: .bottomLeading) {
+                                            Image(systemName: theme == selectedTheme ? "checkmark.circle.fill" : "circle")
+                                                .foregroundStyle(.white)
+                                                .padding(8)
+                                        }
+                                    Text(theme.rawValue)
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                }
+                                .padding(8)
+                                .background(selectedTheme == theme ? theme.tint.opacity(0.14) : .clear, in: RoundedRectangle(cornerRadius: 12))
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Use \(theme.rawValue)")
+                        }
                     }
-                }
-                Text("This only changes appearance. It never changes selected sources, backup contents, or security decisions.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    Text("This only changes appearance. It never changes selected sources, backup contents, or security decisions.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
                 settingsSection(title: "Privacy") {
@@ -1238,6 +1450,19 @@ private struct SettingsView: View {
                 }
                 .padding(18)
             }
+        }
+    }
+
+    private func themePreviewGradient(for theme: DisplayTheme) -> LinearGradient {
+        switch theme {
+        case .liquidGlass:
+            LinearGradient(colors: [.blue.opacity(0.66), .white.opacity(0.75), .cyan.opacity(0.5)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .fullGlass:
+            LinearGradient(colors: [.cyan.opacity(0.72), .blue.opacity(0.64), .purple.opacity(0.6), .pink.opacity(0.45)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .graphiteLime:
+            LinearGradient(colors: [.black.opacity(0.86), .gray.opacity(0.75), Color(red: 0.73, green: 0.91, blue: 0.20).opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .midnight:
+            LinearGradient(colors: [.black.opacity(0.86), .indigo.opacity(0.82), .blue.opacity(0.65)], startPoint: .topLeading, endPoint: .bottomTrailing)
         }
     }
 }

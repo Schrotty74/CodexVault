@@ -22,6 +22,12 @@ final class BackupCoordinator {
     var pendingCompleteBackupCleanup: [URL] = []
     var completeBackupProgress: Double = 0
     var completeBackupProgressMessage: String?
+    var latestCreatedBackupURLs: [URL] = []
+    var latestRestoreURL: URL?
+    var backupProfiles: [BackupProfile] = []
+    var destinationHealth: BackupDestinationHealth?
+    var archiveManifests: [UUID: ArchiveManifest] = [:]
+    var archiveInspectionMessage: String?
     var sessionPreview: SessionCleanupPreview?
     var isAnalyzingSessions = false
     var isSessionPreviewExpanded = false
@@ -30,8 +36,10 @@ final class BackupCoordinator {
     var isFullBackupStartConfirmationPresented = false
     var encryptNormalBackup = false
     var normalBackupPassword = ""
+    var normalBackupCustomName = ""
     var automaticFullBackupEnabled = false
     var automaticFullBackupInterval: FullBackupScheduleInterval = .weekly
+    var automaticFullBackupMinuteOfDay = 9 * 60
     var lastAutomaticFullBackupDate: Date?
 
     var completeBackupDestinationURL: URL
@@ -46,7 +54,9 @@ final class BackupCoordinator {
     private let archivesKey = "codexVault.archiveHistory"
     private let automaticFullBackupEnabledKey = "codexVault.fullBackup.automatic.enabled"
     private let automaticFullBackupIntervalKey = "codexVault.fullBackup.automatic.interval"
+    private let automaticFullBackupMinuteKey = "codexVault.fullBackup.automatic.minuteOfDay"
     private let automaticFullBackupDateKey = "codexVault.fullBackup.automatic.lastRun"
+    private let backupProfilesKey = "codexVault.normalBackup.profiles"
     private let defaults: UserDefaults
     @ObservationIgnored private var automaticBackupTimer: Timer?
 
@@ -78,7 +88,11 @@ final class BackupCoordinator {
         }
         automaticFullBackupEnabled = defaults.bool(forKey: automaticFullBackupEnabledKey)
         automaticFullBackupInterval = FullBackupScheduleInterval(rawValue: defaults.string(forKey: automaticFullBackupIntervalKey) ?? "") ?? .weekly
+        let storedMinute = defaults.object(forKey: automaticFullBackupMinuteKey) as? Int
+        automaticFullBackupMinuteOfDay = min(max(storedMinute ?? (9 * 60), 0), (24 * 60) - 1)
         lastAutomaticFullBackupDate = defaults.object(forKey: automaticFullBackupDateKey) as? Date
+        backupProfiles = (try? JSONDecoder().decode([BackupProfile].self, from: defaults.data(forKey: backupProfilesKey) ?? Data())) ?? []
+        refreshDestinationHealth()
         scheduleAutomaticBackupCheck()
     }
 
@@ -98,15 +112,32 @@ final class BackupCoordinator {
         UserDefaults.standard.bool(forKey: hasOwnContentKey) || !sources.isEmpty || !archives.isEmpty
     }
 
+    var automaticFullBackupTime: Date {
+        get {
+            Calendar.current.date(bySettingHour: automaticFullBackupMinuteOfDay / 60, minute: automaticFullBackupMinuteOfDay % 60, second: 0, of: .now) ?? .now
+        }
+        set {
+            let components = Calendar.current.dateComponents([.hour, .minute], from: newValue)
+            automaticFullBackupMinuteOfDay = (components.hour ?? 9) * 60 + (components.minute ?? 0)
+        }
+    }
+
+    var currentBackupComparison: BackupComparison? {
+        guard let archive = archives.first, totalFileCount > 0 else { return nil }
+        return BackupComparison(
+            referenceDate: archive.createdAt,
+            fileDifference: totalFileCount - archive.fileCount,
+            byteDifference: Int64(totalBytes) - Int64(archive.byteCount)
+        )
+    }
+
     func chooseSource(kind: BackupSourceKind) {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = true
         panel.prompt = CodexVaultLocalization.text("Add")
-        panel.message = kind == .project
-            ? CodexVaultLocalization.text("Choose the project folders you want to include.")
-            : CodexVaultLocalization.text("Choose the additional folders you want to include.")
+        panel.message = CodexVaultLocalization.text("Choose the project folders you want to include.")
 
         guard panel.runModal() == .OK else { return }
         for url in panel.urls where !sources.contains(where: { $0.url.standardizedFileURL == url.standardizedFileURL }) {
@@ -124,13 +155,6 @@ final class BackupCoordinator {
         panel.prompt = CodexVaultLocalization.text("Import ChatGPT export")
         panel.message = CodexVaultLocalization.text("Choose the conversations.json file or ZIP from a ChatGPT data export. It stays local and is included only in a backup you create.")
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        if EncryptedArchive.isEncrypted(packageURL: url) {
-            restorePackageURL = url
-            restoreManifest = nil
-            restoreRequiresPassword = true
-            restoreStatusMessage = CodexVaultLocalization.text("Enter the backup password to validate encrypted contents.")
-            return
-        }
         guard !sources.contains(where: { $0.url.standardizedFileURL == url.standardizedFileURL }) else { return }
         sources.append(BackupSource(kind: .chatGPTExport, url: url))
         refreshPreviews()
@@ -146,6 +170,7 @@ final class BackupCoordinator {
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
         destinationURL = url
+        refreshDestinationHealth()
         statusMessage = CodexVaultLocalization.text("Backup destination selected.")
     }
 
@@ -157,6 +182,7 @@ final class BackupCoordinator {
     func saveAutomaticBackupSettings() {
         defaults.set(automaticFullBackupEnabled, forKey: automaticFullBackupEnabledKey)
         defaults.set(automaticFullBackupInterval.rawValue, forKey: automaticFullBackupIntervalKey)
+        defaults.set(automaticFullBackupMinuteOfDay, forKey: automaticFullBackupMinuteKey)
         scheduleAutomaticBackupCheck()
     }
 
@@ -187,6 +213,7 @@ final class BackupCoordinator {
                 let size = ByteCountFormatter.string(fromByteCount: Int64(result.0.byteCount), countStyle: .file)
                 let skipped = result.0.skippedSourceNames.isEmpty ? "" : " \(CodexVaultLocalization.text("Missing:")) \(result.0.skippedSourceNames.joined(separator: ", "))."
                 statusMessage = "\(result.0.zipURLs.count) ZIP \(CodexVaultLocalization.text("backups verified:")) \(result.0.fileCount) \(CodexVaultLocalization.text("files")) · \(size).\(skipped)"
+                latestCreatedBackupURLs = result.0.zipURLs
                 pendingCompleteBackupCleanup = result.1
                 markOwnContent()
                 if isAutomatic {
@@ -214,8 +241,16 @@ final class BackupCoordinator {
 
     private func runAutomaticBackupIfDue() {
         guard automaticFullBackupEnabled, !isWorking else { return }
-        if let lastAutomaticFullBackupDate,
-           Date().timeIntervalSince(lastAutomaticFullBackupDate) < automaticFullBackupInterval.seconds {
+        guard FullBackupSchedule.isDue(
+            now: .now,
+            lastRun: lastAutomaticFullBackupDate,
+            interval: automaticFullBackupInterval,
+            minuteOfDay: automaticFullBackupMinuteOfDay
+        ) else {
+            return
+        }
+        guard Self.destinationHealth(for: completeBackupDestinationURL).isReady else {
+            statusMessage = CodexVaultLocalization.text("Automatic full backup is waiting for its destination to be available.")
             return
         }
         guard !codexDesktopAppIsRunning else {
@@ -326,6 +361,81 @@ final class BackupCoordinator {
         defaults.set(data, forKey: archivesKey)
     }
 
+    private func persistBackupProfiles() {
+        guard let data = try? JSONEncoder().encode(backupProfiles) else { return }
+        defaults.set(data, forKey: backupProfilesKey)
+    }
+
+    func saveCurrentBackupProfile(named name: String) {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty, !sources.isEmpty else { return }
+        let profile = BackupProfile(
+            name: trimmedName,
+            sources: sources.map { BackupProfileSource(kind: $0.kind, path: $0.url.path) },
+            destinationPath: destinationURL?.path
+        )
+        backupProfiles.removeAll { $0.name.localizedCaseInsensitiveCompare(trimmedName) == .orderedSame }
+        backupProfiles.insert(profile, at: 0)
+        persistBackupProfiles()
+        statusMessage = CodexVaultLocalization.text("Backup profile saved locally.")
+    }
+
+    func applyBackupProfile(_ profile: BackupProfile) {
+        let fileManager = FileManager.default
+        sources = profile.sources.compactMap { item in
+            let url = URL(fileURLWithPath: item.path)
+            guard fileManager.fileExists(atPath: url.path) else { return nil }
+            return BackupSource(kind: item.kind, url: url)
+        }
+        if let destinationPath = profile.destinationPath {
+            let candidate = URL(fileURLWithPath: destinationPath, isDirectory: true)
+            destinationURL = fileManager.fileExists(atPath: candidate.path) ? candidate : nil
+        } else {
+            destinationURL = nil
+        }
+        refreshDestinationHealth()
+        refreshPreviews()
+        statusMessage = sources.isEmpty
+            ? CodexVaultLocalization.text("The saved sources are no longer available. Choose new sources before creating a backup.")
+            : CodexVaultLocalization.text("Backup profile applied. Review it before creating a backup.")
+    }
+
+    func removeBackupProfile(_ profile: BackupProfile) {
+        backupProfiles.removeAll { $0.id == profile.id }
+        persistBackupProfiles()
+    }
+
+    func refreshDestinationHealth() {
+        guard let destinationURL else {
+            destinationHealth = nil
+            return
+        }
+        destinationHealth = Self.destinationHealth(for: destinationURL)
+    }
+
+    static func destinationHealth(for url: URL) -> BackupDestinationHealth {
+        let manager = FileManager.default
+        let reachable = manager.fileExists(atPath: url.path)
+        let values = try? url.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey, .volumeNameKey])
+        var writable = false
+        if reachable {
+            let probe = url.appendingPathComponent(".codexvault-write-check-\(UUID().uuidString)")
+            do {
+                try Data().write(to: probe, options: .atomic)
+                try manager.removeItem(at: probe)
+                writable = true
+            } catch {
+                writable = false
+            }
+        }
+        return BackupDestinationHealth(
+            isReachable: reachable,
+            isWritable: writable,
+            availableBytes: values?.volumeAvailableCapacityForImportantUsage,
+            volumeName: values?.volumeName
+        )
+    }
+
     private func addArchiveToHistory(_ summary: ArchiveSummary) {
         archives.removeAll { $0.packageURL.standardizedFileURL == summary.packageURL.standardizedFileURL }
         archives.insert(summary, at: 0)
@@ -420,29 +530,45 @@ final class BackupCoordinator {
 
     func chooseRestorePackage() {
         let panel = NSOpenPanel()
-        panel.canChooseFiles = false
+        panel.canChooseFiles = true
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [.zip]
         panel.prompt = CodexVaultLocalization.text("Open backup")
         panel.message = CodexVaultLocalization.text("Choose a CodexVault backup package to validate.")
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
+        loadRestorePackage(url)
+    }
+
+    func prepareRestore(from archive: ArchiveSummary) {
+        loadRestorePackage(archive.packageURL)
+    }
+
+    private func loadRestorePackage(_ url: URL) {
         isWorking = true
         errorMessage = nil
         restoreStatusMessage = CodexVaultLocalization.text("Validating backup…")
 
         Task {
             do {
-                let manifest = try await Task.detached(priority: .userInitiated) {
+                let result = try await Task.detached(priority: .userInitiated) {
                     let engine = BackupEngine()
-                    guard try engine.verify(packageURL: url) else { throw BackupError.invalidBackup }
-                    return try engine.manifest(in: url)
+                    if try engine.isEncryptedBackup(at: url) {
+                        return (true, Optional<ArchiveManifest>.none)
+                    }
+                    return (false, try engine.manifestForRestore(packageURL: url))
                 }.value
                 restorePackageURL = url
-                restoreManifest = manifest
-                restoreRequiresPassword = false
-                selectedRestoreSourceIDs = Set(manifest.entries.map(\.sourceID))
-                restoreStatusMessage = CodexVaultLocalization.text("Backup verified. Choose what to restore.")
+                restoreRequiresPassword = result.0
+                restoreManifest = result.1
+                if let manifest = result.1 {
+                    selectedRestoreSourceIDs = Set(manifest.entries.map(\.sourceID))
+                    restoreStatusMessage = CodexVaultLocalization.text("Backup verified. Choose what to restore.")
+                } else {
+                    selectedRestoreSourceIDs = []
+                    restoreStatusMessage = CodexVaultLocalization.text("Enter the backup password to validate encrypted contents.")
+                }
             } catch {
                 restorePackageURL = nil
                 restoreManifest = nil
@@ -473,10 +599,7 @@ final class BackupCoordinator {
         Task {
             do {
                 let manifest = try await Task.detached(priority: .userInitiated) {
-                    let unpacked = try EncryptedArchive.decryptedPackage(from: restorePackageURL, password: password)
-                    let engine = BackupEngine()
-                    guard try engine.verify(packageURL: unpacked) else { throw BackupError.invalidBackup }
-                    return try engine.manifest(in: unpacked)
+                    try BackupEngine().manifestForRestore(packageURL: restorePackageURL, password: password)
                 }.value
                 restoreManifest = manifest
                 selectedRestoreSourceIDs = Set(manifest.entries.map(\.sourceID))
@@ -511,19 +634,15 @@ final class BackupCoordinator {
         Task {
             do {
                 let summary = try await Task.detached(priority: .userInitiated) {
-                    let sourcePackage: URL
-                    if EncryptedArchive.isEncrypted(packageURL: restorePackageURL) {
-                        sourcePackage = try EncryptedArchive.decryptedPackage(from: restorePackageURL, password: password)
-                    } else {
-                        sourcePackage = restorePackageURL
-                    }
                     return try BackupEngine().restore(
-                        packageURL: sourcePackage,
+                        packageURL: restorePackageURL,
                         sourceIDs: sourceIDs,
-                        destination: restoreDestinationURL
+                        destination: restoreDestinationURL,
+                        password: password
                     )
                 }.value
                 restoreStatusMessage = "\(CodexVaultLocalization.text("Restored")) \(summary.restoredFileCount) \(CodexVaultLocalization.text("files into a new verified folder."))"
+                latestRestoreURL = summary.destinationURL
             } catch {
                 errorMessage = error.localizedDescription
                 restoreStatusMessage = nil
@@ -541,9 +660,15 @@ final class BackupCoordinator {
             errorMessage = CodexVaultLocalization.text("Choose where the backup package should be stored.")
             return
         }
+        refreshDestinationHealth()
+        guard destinationHealth?.isReady == true else {
+            errorMessage = CodexVaultLocalization.text("The backup destination is unavailable or not writable.")
+            return
+        }
 
         let selectedSources = sources
         let password = encryptNormalBackup ? normalBackupPassword : nil
+        let customName = normalBackupCustomName
         isWorking = true
         errorMessage = nil
         statusMessage = CodexVaultLocalization.text("Creating and verifying the backup…")
@@ -554,10 +679,12 @@ final class BackupCoordinator {
                     try BackupEngine().createBackup(
                         sources: selectedSources,
                         destination: destinationURL,
-                        password: password
+                        password: password,
+                        archiveBaseName: customName
                     )
                 }.value
                 addArchiveToHistory(summary)
+                latestCreatedBackupURLs = [summary.packageURL]
                 statusMessage = CodexVaultLocalization.text("Backup verified successfully.")
                 markOwnContent()
             } catch {
@@ -566,6 +693,45 @@ final class BackupCoordinator {
             }
             isWorking = false
         }
+    }
+
+    func showLatestBackupsInFinder() {
+        guard !latestCreatedBackupURLs.isEmpty else { return }
+        NSWorkspace.shared.activateFileViewerSelecting(latestCreatedBackupURLs)
+    }
+
+    func showLatestRestoreInFinder() {
+        guard let latestRestoreURL else { return }
+        NSWorkspace.shared.activateFileViewerSelecting([latestRestoreURL])
+    }
+
+    func inspectArchive(_ archive: ArchiveSummary) {
+        isWorking = true
+        archiveInspectionMessage = nil
+        Task {
+            do {
+                let manifest = try await Task.detached(priority: .userInitiated) {
+                    let engine = BackupEngine()
+                    if try engine.isEncryptedBackup(at: archive.packageURL) {
+                        throw BackupError.invalidBackup
+                    }
+                    return try engine.manifestForRestore(packageURL: archive.packageURL)
+                }.value
+                archiveManifests[archive.id] = manifest
+                if let index = archives.firstIndex(where: { $0.id == archive.id }) {
+                    archives[index].verified = true
+                    persistArchives()
+                }
+                archiveInspectionMessage = CodexVaultLocalization.text("Backup integrity was checked again successfully.")
+            } catch {
+                archiveInspectionMessage = CodexVaultLocalization.text("Encrypted archives can be checked after entering their password in Restore.")
+            }
+            isWorking = false
+        }
+    }
+
+    func showArchiveInFinder(_ archive: ArchiveSummary) {
+        NSWorkspace.shared.activateFileViewerSelecting([archive.packageURL])
     }
 
     private func refreshPreviews() {

@@ -41,13 +41,22 @@ struct BackupEngine {
         )
     }
 
-    func createBackup(sources: [BackupSource], destination: URL, password: String? = nil) throws -> ArchiveSummary {
+    func createBackup(
+        sources: [BackupSource],
+        destination: URL,
+        password: String? = nil,
+        archiveBaseName: String? = nil
+    ) throws -> ArchiveSummary {
         guard !sources.isEmpty else { throw BackupError.noSources }
         guard destination.hasDirectoryPath else { throw BackupError.destinationUnavailable }
 
         let createdAt = Date()
-        let packageURL = destination
-            .appendingPathComponent("CodexVault-\(Self.packageTimestamp.string(from: createdAt)).codexvault", isDirectory: true)
+        let packageName = "\(normalBackupBaseName(for: sources, customName: archiveBaseName))-\(Self.packageTimestamp.string(from: createdAt)).codexvault"
+        let archiveURL = destination.appendingPathComponent("\(packageName).zip", isDirectory: false)
+        let stagingRoot = fileManager.temporaryDirectory
+            .appendingPathComponent("CodexVault-Backup-\(UUID().uuidString)", isDirectory: true)
+        let packageURL = stagingRoot.appendingPathComponent(packageName, isDirectory: true)
+        defer { try? fileManager.removeItem(at: stagingRoot) }
         try fileManager.createDirectory(at: packageURL, withIntermediateDirectories: true)
 
         var entries: [ArchiveEntry] = []
@@ -141,10 +150,12 @@ struct BackupEngine {
         if let password, !password.isEmpty {
             try EncryptedArchive.encrypt(packageURL: packageURL, password: password)
         }
+        try createPackageZIP(packageURL: packageURL, archiveURL: archiveURL)
+        try runTool("/usr/bin/unzip", arguments: ["-tq", archiveURL.path])
 
         return ArchiveSummary(
             id: UUID(),
-            packageURL: packageURL,
+            packageURL: archiveURL,
             createdAt: createdAt,
             fileCount: entries.count,
             byteCount: entries.reduce(0) { $0 + $1.byteCount },
@@ -463,6 +474,25 @@ struct BackupEngine {
     }
 
     func verify(packageURL: URL) throws -> Bool {
+        try withResolvedPackage(from: packageURL) { package in
+            try verifyDirectory(packageURL: package)
+        }
+    }
+
+    func isEncryptedBackup(at packageURL: URL) throws -> Bool {
+        try withUnpackedPackage(from: packageURL) { package in
+            EncryptedArchive.isEncrypted(packageURL: package)
+        }
+    }
+
+    func manifestForRestore(packageURL: URL, password: String? = nil) throws -> ArchiveManifest {
+        try withResolvedPackage(from: packageURL, password: password) { package in
+            guard try verifyDirectory(packageURL: package) else { throw BackupError.invalidBackup }
+            return try manifest(in: package)
+        }
+    }
+
+    private func verifyDirectory(packageURL: URL) throws -> Bool {
         let manifest = try manifest(in: packageURL)
         guard [1, 2, 3].contains(manifest.schemaVersion) else { return false }
 
@@ -488,10 +518,25 @@ struct BackupEngine {
     func restore(
         packageURL: URL,
         sourceIDs: Set<String>,
-        destination: URL
+        destination: URL,
+        password: String? = nil
     ) throws -> RestoreSummary {
         guard !sourceIDs.isEmpty else { throw BackupError.noRestoreSelection }
-        guard try verify(packageURL: packageURL) else { throw BackupError.invalidBackup }
+        return try withResolvedPackage(from: packageURL, password: password) { resolvedPackage in
+            try restoreDirectory(
+                packageURL: resolvedPackage,
+                sourceIDs: sourceIDs,
+                destination: destination
+            )
+        }
+    }
+
+    private func restoreDirectory(
+        packageURL: URL,
+        sourceIDs: Set<String>,
+        destination: URL
+    ) throws -> RestoreSummary {
+        guard try verifyDirectory(packageURL: packageURL) else { throw BackupError.invalidBackup }
 
         let restoreRoot = destination
             .appendingPathComponent("CodexVault-Restore-\(Self.packageTimestamp.string(from: Date()))", isDirectory: true)
@@ -526,6 +571,56 @@ struct BackupEngine {
         }
 
         return RestoreSummary(destinationURL: restoreRoot, restoredFileCount: restoredFileCount, verified: true)
+    }
+
+    private func withResolvedPackage<T>(
+        from sourceURL: URL,
+        password: String? = nil,
+        operation: (URL) throws -> T
+    ) throws -> T {
+        try withUnpackedPackage(from: sourceURL) { unpackedPackage in
+            guard EncryptedArchive.isEncrypted(packageURL: unpackedPackage) else {
+                return try operation(unpackedPackage)
+            }
+            guard let password, !password.isEmpty else { throw BackupError.invalidBackup }
+            let decryptedPackage = try EncryptedArchive.decryptedPackage(from: unpackedPackage, password: password)
+            defer { try? fileManager.removeItem(at: decryptedPackage.deletingLastPathComponent()) }
+            return try operation(decryptedPackage)
+        }
+    }
+
+    private func withUnpackedPackage<T>(
+        from sourceURL: URL,
+        operation: (URL) throws -> T
+    ) throws -> T {
+        if sourceURL.pathExtension.lowercased() != "zip" {
+            return try operation(sourceURL)
+        }
+
+        let root = fileManager.temporaryDirectory
+            .appendingPathComponent("CodexVault-Unpack-\(UUID().uuidString)", isDirectory: true)
+        defer { try? fileManager.removeItem(at: root) }
+        try fileManager.createDirectory(at: root, withIntermediateDirectories: true)
+        try runTool("/usr/bin/ditto", arguments: ["-x", "-k", sourceURL.path, root.path])
+        let packages = try fileManager.contentsOfDirectory(
+            at: root,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        ).filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
+        guard packages.count == 1 else { throw BackupError.invalidBackup }
+        return try operation(packages[0])
+    }
+
+    private func createPackageZIP(packageURL: URL, archiveURL: URL) throws {
+        guard !fileManager.fileExists(atPath: archiveURL.path) else {
+            throw BackupError.destinationUnavailable
+        }
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/ditto")
+        process.arguments = ["-c", "-k", "--sequesterRsrc", "--keepParent", packageURL.path, archiveURL.path]
+        try process.run()
+        process.waitUntilExit()
+        guard process.terminationStatus == 0 else { throw BackupError.verificationFailed }
     }
 
     private func enumerate(
@@ -734,6 +829,27 @@ struct BackupEngine {
         }
         reservedNames.insert(candidate.localizedLowercase)
         return candidate
+    }
+
+    private func normalBackupBaseName(for sources: [BackupSource], customName: String?) -> String {
+        if let customName {
+            let sanitized = sanitizedBackupName(customName)
+            if !sanitized.isEmpty { return String(sanitized.prefix(96)) }
+        }
+        var seenNames: Set<String> = []
+        let names = sources.compactMap { source -> String? in
+            let name = sanitizedBackupName(source.displayName)
+            guard !name.isEmpty, seenNames.insert(name.localizedLowercase).inserted else { return nil }
+            return name
+        }
+        return String((names.isEmpty ? "Backup" : names.joined(separator: "-")) .prefix(96))
+    }
+
+    private func sanitizedBackupName(_ value: String) -> String {
+        let invalid = CharacterSet(charactersIn: "/:").union(.controlCharacters)
+        let normalized = String(value.unicodeScalars.map { invalid.contains($0) ? Character("-") : Character(String($0)) })
+        return normalized
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private enum ExclusionKind {

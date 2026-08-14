@@ -2,13 +2,11 @@ import Foundation
 
 enum BackupSourceKind: String, Codable, CaseIterable, Sendable {
     case project
-    case folder
     case chatGPTExport
 
     var title: String {
         switch self {
         case .project: CodexVaultLocalization.text("Project")
-        case .folder: CodexVaultLocalization.text("Additional folder")
         case .chatGPTExport: "ChatGPT export"
         }
     }
@@ -67,6 +65,24 @@ enum FullBackupScheduleInterval: String, CaseIterable, Codable, Identifiable, Se
     }
 }
 
+enum FullBackupSchedule {
+    static func isDue(
+        now: Date,
+        lastRun: Date?,
+        interval: FullBackupScheduleInterval,
+        minuteOfDay: Int,
+        calendar: Calendar = .current
+    ) -> Bool {
+        let boundedMinute = min(max(minuteOfDay, 0), (24 * 60) - 1)
+        let startOfToday = calendar.startOfDay(for: now)
+        guard let scheduledToday = calendar.date(byAdding: .minute, value: boundedMinute, to: startOfToday), now >= scheduledToday else {
+            return false
+        }
+        guard let lastRun else { return true }
+        return now.timeIntervalSince(lastRun) >= interval.seconds
+    }
+}
+
 struct SourcePreview: Sendable {
     let fileCount: Int
     let estimatedBytes: UInt64
@@ -110,7 +126,7 @@ struct ArchiveSummary: Codable, Equatable, Identifiable, Sendable {
     let createdAt: Date
     let fileCount: Int
     let byteCount: UInt64
-    let verified: Bool
+    var verified: Bool
 
     var displayName: String {
         "CodexVault Backup – " + Self.formatter.string(from: createdAt)
@@ -122,6 +138,40 @@ struct ArchiveSummary: Codable, Equatable, Identifiable, Sendable {
         formatter.timeStyle = .short
         return formatter
     }()
+}
+
+struct BackupProfileSource: Codable, Equatable, Sendable {
+    let kind: BackupSourceKind
+    let path: String
+}
+
+struct BackupProfile: Codable, Equatable, Identifiable, Sendable {
+    let id: UUID
+    var name: String
+    var sources: [BackupProfileSource]
+    var destinationPath: String?
+
+    init(id: UUID = UUID(), name: String, sources: [BackupProfileSource], destinationPath: String?) {
+        self.id = id
+        self.name = name
+        self.sources = sources
+        self.destinationPath = destinationPath
+    }
+}
+
+struct BackupDestinationHealth: Equatable, Sendable {
+    let isReachable: Bool
+    let isWritable: Bool
+    let availableBytes: Int64?
+    let volumeName: String?
+
+    var isReady: Bool { isReachable && isWritable }
+}
+
+struct BackupComparison: Equatable, Sendable {
+    let referenceDate: Date
+    let fileDifference: Int
+    let byteDifference: Int64
 }
 
 enum ArchiveHistory {
@@ -139,13 +189,7 @@ enum ArchiveHistory {
 
     static func existingSummaries(from summaries: [ArchiveSummary]) -> [ArchiveSummary] {
         summaries
-            .filter { summary in
-                var isDirectory: ObjCBool = false
-                return FileManager.default.fileExists(
-                    atPath: summary.packageURL.path,
-                    isDirectory: &isDirectory
-                ) && isDirectory.boolValue
-            }
+            .filter { FileManager.default.fileExists(atPath: $0.packageURL.path) }
             .sorted { $0.createdAt > $1.createdAt }
     }
 }

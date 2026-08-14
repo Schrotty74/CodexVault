@@ -12,13 +12,14 @@ overwriting existing files. It does not upload data or run silent backups.
 
 ## Features
 
-- Verified normal backups with source preview, SHA-256 integrity checks, and
-  selective restore into a new folder.
+- Verified ZIP backups with source preview, backup profiles, destination-health
+  checks, SHA-256 integrity checks, selective restore, and Finder links.
 - Password-protected normal backup packages; passwords are never stored.
 - Complete local ZIP backups for Codex data and selected projects, with progress,
-  verification, retention and optional in-app schedule.
+  verification, retention and an in-app schedule with a preferred time.
 - Local project suggestions and ChatGPT-export backup support.
-- Persistent Archive and local Codex storage review.
+- Persistent Archive with Finder, integrity-check and direct-restore actions,
+  plus local Codex storage review and an optional compact backup layout.
 - English and German interface, AI help, and four visual themes: Liquid Glass,
   Full Glass, Graphite & Lime, and Midnight.
 
@@ -26,16 +27,18 @@ overwriting existing files. It does not upload data or run silent backups.
 
 <table>
   <tr>
-    <td align="center"><a href="docs/images/overview.png"><img src="docs/images/overview.png" width="360" alt="CodexVault Overview"></a><br><sub>Overview</sub></td>
-    <td align="center"><a href="docs/images/backup.png"><img src="docs/images/backup.png" width="360" alt="CodexVault Backup"></a><br><sub>Backup</sub></td>
+    <td align="center"><a href="docs/images/overview.png"><img src="docs/images/overview.png" width="280" alt="CodexVault Overview"></a><br><sub>Overview and AI help</sub></td>
+    <td align="center"><a href="docs/images/backup.png"><img src="docs/images/backup.png" width="280" alt="CodexVault Backup"></a><br><sub>Normal backup</sub></td>
+    <td align="center"><a href="docs/images/full-backup.png"><img src="docs/images/full-backup.png" width="280" alt="CodexVault full backup"></a><br><sub>Full backup</sub></td>
   </tr>
   <tr>
-    <td align="center"><a href="docs/images/restore.png"><img src="docs/images/restore.png" width="360" alt="CodexVault Restore"></a><br><sub>Restore</sub></td>
-    <td align="center"><a href="docs/images/archive.png"><img src="docs/images/archive.png" width="360" alt="CodexVault Archive"></a><br><sub>Archive</sub></td>
+    <td align="center"><a href="docs/images/restore.png"><img src="docs/images/restore.png" width="280" alt="CodexVault Restore"></a><br><sub>Restore</sub></td>
+    <td align="center"><a href="docs/images/archive.png"><img src="docs/images/archive.png" width="280" alt="CodexVault Archive"></a><br><sub>Archive</sub></td>
+    <td align="center"><a href="docs/images/settings.png"><img src="docs/images/settings.png" width="280" alt="CodexVault Settings"></a><br><sub>Settings and themes</sub></td>
   </tr>
 </table>
 
-Select a preview to open the full-size original.
+Select a compact preview to open the privacy-clean original at full size.
 
 ## Documentation
 

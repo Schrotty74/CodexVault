@@ -31,10 +31,12 @@ The sidebar contains five sections:
 | Overview | Starting point and current status cards. The Activity area appears only after a backup has been created in the current app session. |
 | Backup | Normal backups, complete ZIP backups, and local Codex storage review. |
 | Restore | Validation and selective restoration of a normal backup package. |
-| Archive | Previously created, verified normal backups whose package folders still exist. |
+| Archive | Previously created, verified normal backup ZIPs that still exist. |
 | Settings | Appearance, privacy status, and build-channel information. |
 
 The **Start setup** button on Overview opens Backup.
+
+![Overview with local status and AI help](docs/images/overview.png)
 
 ## First-start help
 
@@ -64,9 +66,9 @@ Use a normal backup when you want a portable package for exactly the folders you
 choose.
 
 1. Open **Backup**.
-2. In **Sources**, click **Add project** for a project folder, **Add folder**
-   for any additional folder, or **Import ChatGPT export** for a local
-   `conversations.json` file or ChatGPT export ZIP. You can add more than one source.
+2. In **Sources**, click **Add project** for one or more project folders, or
+   **Import ChatGPT export** for a local `conversations.json` file or ChatGPT
+   export ZIP. You can add more than one source.
 3. Wait for the preview. It shows the number of included files and estimated
    size for each source. Use the remove button beside a source to remove it
    from this pending selection.
@@ -75,6 +77,21 @@ choose.
 5. Review the summary at the bottom. **Create verified backup** becomes
    available only when at least one source and a destination are selected.
 6. Click **Create verified backup** and wait for the success message.
+
+![Backup: profiles, selected sources, destination, and compact layout](docs/images/backup.png)
+
+### Backup profiles and destination check
+
+**Backup profiles** save the currently selected sources and destination locally
+under a name you choose. Use **Save current selection** after selecting at least
+one source, then use **Apply** later as a starting point. Applying a profile
+never creates a backup automatically. Passwords are deliberately never part of a
+profile and are never stored.
+
+After you choose a destination, CodexVault shows whether it is reachable and
+writable and, where macOS provides it, its available free space. A normal backup
+cannot start until the selected destination is writable. The summary can also
+compare the selected file count and size with the latest normal backup.
 
 ### Password protection
 
@@ -85,16 +102,24 @@ them normally. A lost password cannot be recovered.
 
 ### What is created
 
-CodexVault creates a new folder with the `.codexvault` extension inside the
-chosen destination. It includes:
+CodexVault always creates a new `.codexvault.zip` file inside the chosen
+destination. Its name uses the selected project or folder name followed by the
+creation date and time, for example `ProjectName-2026-08-14-103000.codexvault.zip`.
+When more than one source is selected, all selected names are included. The ZIP
+contains one `.codexvault` package folder with:
+
+When multiple sources are selected, **Backup name (optional)** is also shown.
+Enter a shared name there if you prefer one name instead of the source names;
+the creation date and time remain part of the ZIP filename.
 
 - `manifest.json` with the package schema, logical source names, relative file
   paths, exclusion counts, and SHA-256 checksums.
 - The selected source folders directly at the package root. There is no
   technical `payload` folder.
 
-The app verifies the package after creation. Existing files in the destination
-are not replaced.
+The app verifies the ZIP after creation. Existing files in the destination are
+not replaced. The completion card shows the exact backup location and offers
+**Show in Finder** to reveal the newly created ZIP.
 
 ### Normal-backup exclusions
 
@@ -124,16 +149,22 @@ automatically detected Codex app data and your configured project folders.
 6. Click **Create complete ZIP backup**. The progress bar and message show the
    current phase.
 
+After a successful run, the completion card shows the destination and offers
+**Show in Finder** to reveal all newly created dated ZIPs.
+
 Use **Search projects** to choose a local folder for a one-time scan. CodexVault
 shows only suggestions with recognizable project markers; nothing is added until
 you select it. Automatic full backups can be enabled daily or weekly while
-CodexVault is open. They do not run in the background and wait until the
-separate Codex desktop app is closed. Keep CodexVault open for the backup.
+CodexVault is open, with a preferred time. They do not run in the background,
+wait for their destination to be reachable, and wait until the separate Codex
+desktop app is closed. Keep CodexVault open for the backup.
 
 The project-folder choices and destination are stored locally for the current
 macOS user. Codex app data is detected automatically. A visible Codex workspace
 is detected only while a complete backup runs; it is not shown as a configured
 project folder on a fresh start. No external backup script must be selected.
+
+![Expanded full-backup controls and local storage overview](docs/images/full-backup.png)
 
 ### Files, verification, and retention
 
@@ -176,7 +207,8 @@ select them and confirm the destructive action.
 
 ## Restore a normal backup
 
-Restore works with a verified `.codexvault` package.
+Restore works with a verified `.codexvault.zip` backup. Older uncompressed
+`.codexvault` packages remain supported for compatibility.
 
 1. Open **Restore**.
 2. Click **Choose Backup** and select a backup package.
@@ -188,17 +220,25 @@ Restore works with a verified `.codexvault` package.
 
 CodexVault creates a new restore folder below the selected destination and
 verifies restored files against the package checksums. It never overwrites
-existing destination files. Packages with schema versions 1, 2, and 3 are
+existing destination files. After a successful restore, **Show in Finder**
+reveals the new restore folder. Packages with schema versions 1, 2, and 3 are
 accepted when they pass validation.
+
+![Restore: choose and validate a backup package](docs/images/restore.png)
 
 ## Archive
 
 Archive keeps a local list of normal backup packages that CodexVault created and
 verified. It shows their verification state, file count, and size across later
-app starts as long as the package folder still exists. Missing package folders
-are removed from the list. Archive is not a disk browser: it does not scan a
+app starts as long as the ZIP file still exists. Missing ZIP files are removed
+from the list. Archive is not a disk browser: it does not scan a
 destination folder or import packages that CodexVault has not previously
-created and registered.
+created and registered. Each archive row offers **Show in Finder**, **Check
+integrity**, and **Restore**. The integrity action verifies a normal package
+again and shows its logical sources; encrypted packages are verified after their
+password is entered in Restore.
+
+![Archive empty state](docs/images/archive.png)
 
 ## Settings
 
@@ -212,7 +252,8 @@ decisions.
 
 ### Appearance
 
-**Preview theme** changes only the current app appearance. It does not change
+The Appearance section shows four visible theme cards. Choosing a card changes
+only the current app appearance. It does not change
 selected sources, backup contents, security decisions, or an existing package.
 
 | Theme | Appearance |
@@ -224,6 +265,14 @@ selected sources, backup contents, security decisions, or an existing package.
 
 The selected theme is currently a session setting; it is not documented as a
 persisted preference.
+
+![Settings: language and the four appearance themes](docs/images/settings.png)
+
+### Backup layout
+
+Use **Compact layout** at the top of Backup to keep the full-backup and storage
+sections collapsed until you explicitly expand them. The choice is stored only
+locally and never changes the backup contents.
 
 ### Privacy
 
@@ -249,8 +298,3 @@ them.
 | Complete ZIP backup failed | Check that the destination is writable and sources are available, then retry. |
 | Older complete backups are offered for removal | Choose **Keep all** unless you have reviewed the retention decision. |
 | Unassigned records are listed | Do not delete by size alone; select only records you recognise as no longer needed. |
-
-## Feature documentation rule
-
-When a user-facing feature changes, update the feature lists in both READMEs
-and the matching sections of both manuals in the same change.

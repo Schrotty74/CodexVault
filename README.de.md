@@ -13,13 +13,15 @@ keinen Upload und keine stillen Backups.
 
 ## Funktionen
 
-- Geprüfte normale Backups mit Quellvorschau, SHA-256-Integritätsprüfung und
-  gezielter Wiederherstellung in einen neuen Ordner.
+- Geprüfte ZIP-Backups mit Quellvorschau, Backup-Profilen, Zielprüfung,
+  SHA-256-Integritätsprüfung, gezielter Wiederherstellung und Finder-Links.
 - Passwortgeschützte normale Backup-Pakete; Passwörter werden nie gespeichert.
 - Vollständige lokale ZIP-Backups für Codex-Daten und ausgewählte Projekte mit
-  Fortschritt, Prüfung, Aufbewahrung und optionalem In-App-Zeitplan.
+  Fortschritt, Prüfung, Aufbewahrung und In-App-Zeitplan mit Uhrzeit.
 - Lokale Projektvorschläge und Unterstützung für ChatGPT-Export-Backups.
-- Dauerhaftes Archiv und lokale Codex-Speicherübersicht.
+- Dauerhaftes Archiv mit Finder-, Integritäts- und direkter
+  Wiederherstellungsaktion sowie lokaler Codex-Speicherübersicht und optionaler
+  kompakter Backup-Ansicht.
 - Englische und deutsche Oberfläche, KI-Hilfe und vier Darstellungsvarianten:
   Liquid Glass, Full Glass, Graphite & Lime und Midnight.
 
@@ -27,16 +29,18 @@ keinen Upload und keine stillen Backups.
 
 <table>
   <tr>
-    <td align="center"><a href="docs/images/overview.png"><img src="docs/images/overview.png" width="360" alt="CodexVault Übersicht"></a><br><sub>Übersicht</sub></td>
-    <td align="center"><a href="docs/images/backup.png"><img src="docs/images/backup.png" width="360" alt="CodexVault Backup"></a><br><sub>Backup</sub></td>
+    <td align="center"><a href="docs/images/overview.png"><img src="docs/images/overview.png" width="280" alt="CodexVault Übersicht"></a><br><sub>Übersicht und KI-Hilfe</sub></td>
+    <td align="center"><a href="docs/images/backup.png"><img src="docs/images/backup.png" width="280" alt="CodexVault Backup"></a><br><sub>Normales Backup</sub></td>
+    <td align="center"><a href="docs/images/full-backup.png"><img src="docs/images/full-backup.png" width="280" alt="CodexVault Full Backup"></a><br><sub>Full Backup</sub></td>
   </tr>
   <tr>
-    <td align="center"><a href="docs/images/restore.png"><img src="docs/images/restore.png" width="360" alt="CodexVault Wiederherstellung"></a><br><sub>Wiederherstellung</sub></td>
-    <td align="center"><a href="docs/images/archive.png"><img src="docs/images/archive.png" width="360" alt="CodexVault Archiv"></a><br><sub>Archiv</sub></td>
+    <td align="center"><a href="docs/images/restore.png"><img src="docs/images/restore.png" width="280" alt="CodexVault Wiederherstellung"></a><br><sub>Wiederherstellung</sub></td>
+    <td align="center"><a href="docs/images/archive.png"><img src="docs/images/archive.png" width="280" alt="CodexVault Archiv"></a><br><sub>Archiv</sub></td>
+    <td align="center"><a href="docs/images/settings.png"><img src="docs/images/settings.png" width="280" alt="CodexVault Einstellungen"></a><br><sub>Einstellungen und Themes</sub></td>
   </tr>
 </table>
 
-Eine Vorschau anklicken, um das Original in voller Größe zu öffnen.
+Eine kompakte Vorschau anklicken, um das datenschutzbereinigte Original in voller Größe zu öffnen.
 
 ## Dokumentation
 

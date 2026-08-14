@@ -3,6 +3,44 @@ import XCTest
 @testable import CodexVaultApp
 
 final class BackupEngineTests: XCTestCase {
+    func testFullBackupScheduleWaitsForTheSelectedTimeAndInterval() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let morning = Date(timeIntervalSince1970: 1_775_000_000)
+        let startOfDay = calendar.startOfDay(for: morning)
+        let beforeNine = calendar.date(byAdding: .hour, value: 8, to: startOfDay)!
+        let afterNine = calendar.date(byAdding: .hour, value: 10, to: startOfDay)!
+
+        XCTAssertFalse(FullBackupSchedule.isDue(now: beforeNine, lastRun: nil, interval: .daily, minuteOfDay: 9 * 60, calendar: calendar))
+        XCTAssertTrue(FullBackupSchedule.isDue(now: afterNine, lastRun: nil, interval: .daily, minuteOfDay: 9 * 60, calendar: calendar))
+        XCTAssertFalse(FullBackupSchedule.isDue(now: afterNine, lastRun: afterNine.addingTimeInterval(-3_600), interval: .daily, minuteOfDay: 9 * 60, calendar: calendar))
+        XCTAssertTrue(FullBackupSchedule.isDue(now: afterNine, lastRun: afterNine.addingTimeInterval(-86_401), interval: .daily, minuteOfDay: 9 * 60, calendar: calendar))
+    }
+
+    func testBackupProfileKeepsOnlyLocalPathsAndNeverStoresAPassword() throws {
+        let profile = BackupProfile(
+            name: "Projects",
+            sources: [BackupProfileSource(kind: .project, path: "/example/project")],
+            destinationPath: "/example/backups"
+        )
+        let encoded = try JSONEncoder().encode(profile)
+        let decoded = try JSONDecoder().decode(BackupProfile.self, from: encoded)
+        XCTAssertEqual(decoded, profile)
+        XCTAssertFalse(String(data: encoded, encoding: .utf8)!.localizedCaseInsensitiveContains("password"))
+    }
+
+    @MainActor
+    func testDestinationHealthReportsWritableTemporaryFolder() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let health = BackupCoordinator.destinationHealth(for: root)
+        XCTAssertTrue(health.isReachable)
+        XCTAssertTrue(health.isWritable)
+        XCTAssertTrue(health.isReady)
+    }
+
     func testSelectedAppLanguageControlsManualPromptAndLocalizedText() {
         let defaults = UserDefaults.standard
         let previous = defaults.object(forKey: CodexVaultLanguage.storageKey)
@@ -132,20 +170,18 @@ final class BackupEngineTests: XCTestCase {
 
         let summary = try engine.createBackup(sources: [sourceDefinition], destination: destination)
         XCTAssertTrue(summary.verified)
+        XCTAssertEqual(summary.packageURL.pathExtension, "zip")
+        XCTAssertTrue(summary.packageURL.lastPathComponent.hasPrefix("source-"))
+        XCTAssertTrue(summary.packageURL.lastPathComponent.hasSuffix(".codexvault.zip"))
         XCTAssertTrue(try engine.verify(packageURL: summary.packageURL))
 
-        let manifestURL = summary.packageURL.appendingPathComponent("manifest.json")
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let manifest = try decoder.decode(ArchiveManifest.self, from: Data(contentsOf: manifestURL))
+        let manifest = try engine.manifestForRestore(packageURL: summary.packageURL)
         XCTAssertEqual(manifest.entries.count, 1)
         XCTAssertEqual(manifest.sources?.first?.archiveRootName, "source")
         XCTAssertEqual(manifest.entries.first?.relativePath, "notes.txt")
         XCTAssertEqual(manifest.entries.first?.archiveRelativePath, "source/notes.txt")
         XCTAssertFalse(manifest.entries.contains { $0.relativePath.contains(source.path) })
         XCTAssertEqual(manifest.exclusionCounts["sensitive-files"], 1)
-        XCTAssertFalse(FileManager.default.fileExists(atPath: summary.packageURL.appendingPathComponent("source/.env").path))
-
         let restoreDestination = root.appendingPathComponent("restore", isDirectory: true)
         try FileManager.default.createDirectory(at: restoreDestination, withIntermediateDirectories: true)
         let restore = try engine.restore(
@@ -164,9 +200,10 @@ final class BackupEngineTests: XCTestCase {
     func testArchiveHistoryRetainsOnlyExistingPackages() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
-        let existingPackage = root.appendingPathComponent("kept.codexvault", isDirectory: true)
-        let missingPackage = root.appendingPathComponent("missing.codexvault", isDirectory: true)
-        try FileManager.default.createDirectory(at: existingPackage, withIntermediateDirectories: true)
+        let existingPackage = root.appendingPathComponent("kept.codexvault.zip")
+        let missingPackage = root.appendingPathComponent("missing.codexvault.zip")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        try Data().write(to: existingPackage)
         defer { try? FileManager.default.removeItem(at: root) }
 
         let retained = ArchiveSummary(
@@ -223,7 +260,28 @@ final class BackupEngineTests: XCTestCase {
         XCTAssertEqual(preview.fileCount, 1)
         let backup = try BackupEngine().createBackup(sources: [source], destination: destination)
         XCTAssertTrue(try BackupEngine().verify(packageURL: backup.packageURL))
-        XCTAssertTrue(FileManager.default.fileExists(atPath: backup.packageURL.appendingPathComponent("conversations.json/conversations.json").path))
+        let manifest = try BackupEngine().manifestForRestore(packageURL: backup.packageURL)
+        XCTAssertEqual(manifest.entries.first?.archiveRelativePath, "conversations.json/conversations.json")
+    }
+
+    func testNormalBackupUsesAnOptionalCustomNameAndKeepsTheTimestamp() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let source = root.appendingPathComponent("First Project", isDirectory: true)
+        let destination = root.appendingPathComponent("destination", isDirectory: true)
+        try FileManager.default.createDirectory(at: source, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data("content".utf8).write(to: source.appendingPathComponent("notes.txt"))
+
+        let summary = try BackupEngine().createBackup(
+            sources: [BackupSource(kind: .project, url: source)],
+            destination: destination,
+            archiveBaseName: "Combined backup"
+        )
+
+        XCTAssertTrue(summary.packageURL.lastPathComponent.hasPrefix("Combined backup-"))
+        XCTAssertTrue(summary.packageURL.lastPathComponent.hasSuffix(".codexvault.zip"))
+        XCTAssertTrue(try BackupEngine().verify(packageURL: summary.packageURL))
     }
 
     func testEncryptedBackupCanBeDecryptedVerifiedAndRestored() throws {
@@ -239,11 +297,11 @@ final class BackupEngineTests: XCTestCase {
 
         let engine = BackupEngine()
         let backup = try engine.createBackup(sources: [BackupSource(kind: .project, url: source)], destination: destination, password: "test-password")
-        XCTAssertTrue(EncryptedArchive.isEncrypted(packageURL: backup.packageURL))
-        let decrypted = try EncryptedArchive.decryptedPackage(from: backup.packageURL, password: "test-password")
-        XCTAssertTrue(try engine.verify(packageURL: decrypted))
-        let restored = try engine.restore(packageURL: decrypted, sourceIDs: ["source-001"], destination: restoreDestination)
+        XCTAssertEqual(backup.packageURL.pathExtension, "zip")
+        XCTAssertTrue(try engine.isEncryptedBackup(at: backup.packageURL))
+        XCTAssertEqual(try engine.manifestForRestore(packageURL: backup.packageURL, password: "test-password").entries.count, 1)
+        let restored = try engine.restore(packageURL: backup.packageURL, sourceIDs: ["source-001"], destination: restoreDestination, password: "test-password")
         XCTAssertTrue(FileManager.default.fileExists(atPath: restored.destinationURL.appendingPathComponent("source/notes.txt").path))
-        XCTAssertThrowsError(try EncryptedArchive.decryptedPackage(from: backup.packageURL, password: "wrong-password"))
+        XCTAssertThrowsError(try engine.manifestForRestore(packageURL: backup.packageURL, password: "wrong-password"))
     }
 }

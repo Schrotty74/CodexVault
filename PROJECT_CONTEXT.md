@@ -1,7 +1,7 @@
 # CodexVault – Projektkontext
 
-Stand: 31. Juli 2026
-Status: Öffentlicher Quellcode-Upload und erste Beta-Veröffentlichung `v1.0.0-beta.1` erfolgt. Es gibt noch keine Final-Veröffentlichung.
+Stand: 14. August 2026
+Status: Öffentlicher Quellcode-Upload und drei Beta-Veröffentlichungen erfolgt. Es gibt noch keine Final-Veröffentlichung.
 
 ## Zuerst lesen
 
@@ -11,7 +11,8 @@ Status: Öffentlicher Quellcode-Upload und erste Beta-Veröffentlichung `v1.0.0-
 4. [PHASE_0_DISCOVERY.md](PHASE_0_DISCOVERY.md) – historische Bestandsaufnahme; bei Abweichungen hat diese Datei keinen Vorrang.
 5. Vor einer Beta- oder Final-Veröffentlichung zusätzlich [docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md](docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md) lesen und einen konkreten Bericht daraus erstellen.
 
-Öffentliche Nutzerdokumentation liegt zweisprachig in `README.md`, `README.de.md`, `docs/CodexVault-Manual-EN.pdf` und `docs/CodexVault-Handbuch-DE.pdf`. Die PDF-Handbücher werden mit `Scripts/generate-manual-pdfs.py` aus den Textquellen unter `Scripts/ManualSources/` erzeugt. Bei jeder sichtbaren Funktions- oder Einstellungsänderung müssen die Feature-Listen, die passenden Handbuchquellen und die daraus erzeugten PDFs im selben Auftrag aktualisiert werden.
+Öffentliche Nutzerdokumentation liegt zweisprachig in `README.md`, `README.de.md`, `docs/CodexVault-Manual-EN.pdf` und `docs/CodexVault-Handbuch-DE.pdf`. Die PDF-Handbücher werden mit `Scripts/generate-manual-pdfs.py` aus den Textquellen unter `Scripts/ManualSources/` erzeugt. Die öffentlichen UI-Screenshots liegen unter `docs/images/`; sie dürfen nur datenschutzbereinigte Ansichten ohne lokale Pfade, Backup-Namen, Dateizahlen oder Größen enthalten. Bei jeder sichtbaren Funktions- oder Einstellungsänderung müssen die Feature-Listen, die passenden Handbuchquellen und die daraus erzeugten PDFs im selben Auftrag aktualisiert werden.
+Der Generator verwendet eine kontrastreiche CodexVault-PDF-Gestaltung mit einer ruhigen Blau-Cyan-Kopfzeile, dunklen Inhaltsflächen und klaren Tabellen; Lesbarkeit hat vor dekorativen Effekten Vorrang.
 
 Bei einer inhaltlichen Änderung an Funktionen, Datenformaten, Build-Abläufen oder offenen Punkten sind diese Datei und `NEXT_STEPS.md` im selben Arbeitsauftrag zu aktualisieren.
 
@@ -43,11 +44,13 @@ Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoK
 
 ### Normales Backup
 
-- Erstellt einen Ordner mit der Endung `.codexvault`.
-- Enthält `manifest.json` und die ausgewählten Quellordner direkt an der Paketwurzel; es gibt keinen `payload`-Zwischenordner.
+- Erstellt immer eine ZIP-Datei mit der Endung `.codexvault.zip`.
+- Der Dateiname besteht standardmäßig aus den Namen der ausgewählten Quelle oder Quellen und einem Zeitstempel, zum Beispiel `Projektname-2026-08-14-103000.codexvault.zip`. Bei mehreren Quellen kann ein optionaler eigener Basisname eingegeben werden; der Zeitstempel bleibt immer erhalten.
+- Die ZIP enthält einen Ordner mit `manifest.json` und den ausgewählten Quellordnern direkt an der Paketwurzel; es gibt keinen `payload`-Zwischenordner.
 - Das Manifest hat aktuell Schema-Version 3, enthält nur relative Pfade sowie SHA-256-Prüfsummen und speichert keine absoluten Quellpfade.
-- Die Prüfung akzeptiert aus Kompatibilitätsgründen Schema-Versionen 1 bis 3.
-- Wiederherstellungen werden nur aus einem vollständig geprüften Paket erstellt und landen immer in einem neuen Restore-Ordner. Vorhandene Dateien im Ziel werden nicht überschrieben.
+- Die Prüfung akzeptiert aus Kompatibilitätsgründen Schema-Versionen 1 bis 3; ältere unkomprimierte `.codexvault`-Pakete bleiben lesbar.
+- Wiederherstellungen werden nur aus einer vollständig geprüften ZIP erstellt und landen immer in einem neuen Restore-Ordner. Vorhandene Dateien im Ziel werden nicht überschrieben.
+- Nach jedem normalen oder vollständigen Backup zeigt die App den Zielordner und kann die erzeugte ZIP-Datei auf Wunsch im Finder markieren.
 
 ### Vollständiges Backup
 
@@ -65,16 +68,16 @@ Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoK
 
 ## Umgesetzte Funktionen
 
-- Auswahl mehrerer Projekt- und Zusatzordner samt lokaler Größen- und Ausschlussvorschau.
-- Normales, verifiziertes Backup mit SHA-256-Prüfung und lokal gespeicherter Archivliste: Beim nächsten Start bleiben zuvor von CodexVault erstellte Pakete sichtbar, sofern ihr Paketordner noch vorhanden ist. Unbekannte Pakete werden nicht automatisch gesucht oder importiert.
-- Selektive Wiederherstellung geprüfter Quellen ohne Überschreiben vorhandener Dateien.
-- Konfigurierbares vollständiges ZIP-Backup mit sichtbarer Mehrfach-Projektliste, Fortschritt und auf Wunsch bestätigter Aufbewahrung.
+- Auswahl mehrerer Projektordner samt lokaler Größen- und Ausschlussvorschau, lokal gespeicherten wiederverwendbaren Backup-Profilen ohne Passwort sowie Zielordner-Prüfung auf Erreichbarkeit, Schreibbarkeit und freien Speicher.
+- Normales, verifiziertes ZIP-Backup mit SHA-256-Prüfung und lokal gespeicherter Archivliste: Beim nächsten Start bleiben zuvor von CodexVault erstellte ZIP-Backups sichtbar, sofern die Datei noch vorhanden ist. Das Archiv kann die Integrität erneut prüfen, Inhalte anzeigen, den Finder öffnen und eine Wiederherstellung vorbereiten. Unbekannte Pakete werden nicht automatisch gesucht oder importiert.
+- Selektive Wiederherstellung geprüfter Quellen ohne Überschreiben vorhandener Dateien; nach Erfolg kann der neue Wiederherstellungsordner im Finder geöffnet werden.
+- Konfigurierbares vollständiges ZIP-Backup mit sichtbarer Mehrfach-Projektliste, Fortschritt, auf Wunsch bestätigter Aufbewahrung und lokalem täglichen oder wöchentlichen Zeitplan mit bevorzugter Uhrzeit.
 - Lokale Projektvorschau nach sichtbarer Auswahl eines Suchordners, zeitgesteuerte Full Backups ausschließlich bei geöffneter CodexVault-App sowie ein eindeutiger Hinweis, die separate Codex-Desktop-App vor einem Full Backup zu schließen.
 - ChatGPT-Exporte als ausdrücklich ausgewählte normale Backup-Quelle und optionaler Passwortschutz für normale Pakete. Passwörter werden nicht gespeichert; verschlüsselte Pakete werden vor der Wiederherstellung lokal entschlüsselt und geprüft.
 - Lokale Codex-Speicherübersicht einschließlich gruppierter Sitzungsdaten und kontrollierter Entfernung nicht zugeordneter Datensätze.
 - Freundliche Erststart-Ansicht bei noch fehlenden eigenen Inhalten sowie dauerhaft erreichbare KI-Hilfe auf Overview mit Handbuch-Schaltfläche und bestätigter Kopier-und-Öffnen-Hilfe für ChatGPT, Google Gemini und Claude. Die statischen Prompts enthalten ausschließlich den passenden öffentlichen Handbuch-Link und bestätigte öffentliche App-Fakten; sie verbieten erfundene Funktionen.
 - Getrennte lokale Dev-, Beta- und Final-Bundles mit eigenen Bundle-IDs und Datencontainern.
-- Vier Designs: Liquid Glass, Full Glass, Graphite & Lime und Midnight. Full Glass nutzt eine einzige milchige Glasoberfläche im gesamten Fenster mit ruhigem, diagonal wanderndem Farbglow und zufällig auftauchenden Lichtpunkten; Liquid Glass beschränkt Glas auf die linke Navigation. Bei „Reduce Motion“ und während Backup-, Wiederherstellungs- oder Speicheranalyse-Abläufen pausiert die Full-Glass-Animation deutlich.
+- Vier Designs: Liquid Glass, Full Glass, Graphite & Lime und Midnight. Die Auswahl erfolgt über sichtbare Vorschaukarten. Full Glass nutzt eine einzige milchige Glasoberfläche im gesamten Fenster mit ruhigem, diagonal wanderndem Farbglow und zufällig auftauchenden Lichtpunkten; Liquid Glass beschränkt Glas auf die linke Navigation. Bei „Reduce Motion“ und während Backup-, Wiederherstellungs- oder Speicheranalyse-Abläufen pausiert die Full-Glass-Animation deutlich. Die Backup-Seite bietet zusätzlich eine lokale kompakte Ansicht.
 - Zweisprachige sichtbare Oberfläche mit Englisch als Standard und Deutsch als auswählbarer Sprache. Dieselbe Einstellung steuert auch KI-Hilfe und Handbuch-Link.
 - App-Icon als Icon-Composer-Ressource mit Liquid-Glass-Effekten und freigestelltem PNG-Quellmotiv; macOS erzeugt fehlende Erscheinungsvarianten aus der gemeinsamen Icon-Struktur.
 - GitHub- und Discord-Schaltflächen in der Seitenleiste verwenden lokal eingebundene offizielle Marken und öffnen ausschließlich die öffentlichen CodexVault- bzw. Community-Seiten nach einem Klick.
@@ -127,15 +130,15 @@ Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Jede spätere Beta
 
 - Der vollständige, datenschutzgeprüfte Quellcode ist im öffentlichen Repository `Schrotty74/CodexVault` auf dem Branch `main` veröffentlicht.
 - Die GPL-3.0-Lizenz liegt als `LICENSE` im Projektstamm. Ihre rechtliche Auswirkung wurde nicht gesondert geprüft.
-- Die erste öffentliche Beta ist [CodexVault 1.0 Beta 1](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.1). Sie enthält `CodexVault-1.0-Beta-1.dmg` (mit `Applications`-Link), `CodexVault-1.0-Beta-1.zip` und den separaten Datenschutzbericht. Es gibt keine Final- oder Dev-App-Veröffentlichung; Dev wird nie veröffentlicht.
-- Der Beta-Build hat die Bundle-ID `com.codexvault.beta`, Version `1.0.0` und Build `1`. Er ist ad-hoc signiert und nicht notarisiert; Gatekeeper kann deshalb eine ausdrückliche Freigabe verlangen.
-- Der Datenschutzbericht dieser Beta liegt unter `docs/releases/CodexVault-1.0-Beta-1-Privacy-Report.md` und ist zusätzlich als Release-Anhang veröffentlicht.
+- Die aktuellen öffentlichen Beta-Artefakte sind [CodexVault 1.0 Beta 3](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.3): DMG mit `Applications`-Link, ZIP und separater Datenschutzbericht. Es gibt keine Final- oder Dev-App-Veröffentlichung; Dev wird nie veröffentlicht.
+- Beta-Builds verwenden die Bundle-ID `com.codexvault.beta`. Sie sind ad-hoc signiert und nicht notarisiert; Gatekeeper kann deshalb eine ausdrückliche Freigabe verlangen.
+- Der Datenschutzbericht der aktuellen Beta liegt unter `docs/releases/CodexVault-1.0-Beta-3-Privacy-Report.md` und ist zusätzlich als Release-Anhang veröffentlicht.
 - Der Bericht zur ersten Quellcode-Veröffentlichung liegt unter `docs/PRIVACY_REPORT_SOURCE_PUBLICATION_2026-07-24.md`.
 - Die öffentlichen README- und Handbuchdateien sind zweisprachig. Ihre Feature-Listen dürfen nur tatsächlich umgesetzte Funktionen enthalten.
 
 ## Bekannte Einschränkungen
 
-- Die Archivansicht ist kein Dateibrowser: Sie zeigt nur die lokal gespeicherten, zuvor von CodexVault erstellten und noch vorhandenen Paketordner. Sie durchsucht keine Zielordner und importiert keine unbekannten Pakete automatisch.
+- Die Archivansicht ist kein Dateibrowser: Sie zeigt nur die lokal gespeicherten, zuvor von CodexVault erstellten und noch vorhandenen ZIP-Backups. Sie durchsucht keine Zielordner und importiert keine unbekannten Pakete automatisch.
 - Weitere Sprachen über Englisch und Deutsch hinaus sind nicht umgesetzt.
 - Die Vollständigkeit der automatischen Erkennung von Projektordnern ist bewusst begrenzt und kann eine manuelle Konfiguration erfordern.
 - Die Icon-Composer-Ressource verwendet eine gemeinsame Liquid-Glass-Struktur mit freigestelltem Quellmotiv. Spezifische grafische Überarbeitungen für Dark oder Mono sind noch nicht manuell angelegt; macOS erzeugt diese Erscheinungsvarianten aus der gemeinsamen Struktur.

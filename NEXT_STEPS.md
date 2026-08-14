@@ -1,16 +1,16 @@
 # Nächste Schritte – CodexVault
 
-Stand: 31. Juli 2026
+Stand: 14. August 2026
 
 Dieses Dokument enthält nur Punkte, die aus dem aktuellen Quellcode oder der bereits getroffenen Produktentscheidung ableitbar sind. Bei größeren Änderungen aktualisieren.
 
 ## Priorität 1
 
-- Rückmeldungen zur öffentlichen Beta `v1.0.0-beta.1` sammeln und nur bestätigte Fehler oder Verbesserungen aufnehmen.
+- Rückmeldungen zur öffentlichen Beta `v1.0.0-beta.3` sammeln und nur bestätigte Fehler oder Verbesserungen aufnehmen.
 
 ## Priorität 2
 
-- Die Testabdeckung für Wiederherstellung, ältere Manifest-Schemata, Aufbewahrung und die ausgewählte Entfernung nicht zugeordneter lokaler Datensätze weiter ausbauen.
+- Die Testabdeckung für Wiederherstellung, ältere Manifest-Schemata, Aufbewahrung und die ausgewählte Entfernung nicht zugeordneter lokaler Datensätze weiter ausbauen. Zeitplan, Profil-Codierung und Zielordner-Prüfung sind automatisiert geprüft.
 - Die Erststart-Ansicht manuell mit einer leeren lokalen Konfiguration testen, einschließlich fehlender konfigurierter Projektpfade, Logo-Darstellung, Zwischenablage und der sichtbaren Bestätigung vor dem Öffnen eines externen Dienstes. Ein Ergebnis ist nicht dokumentiert.
 
 ## Nicht entschieden oder nicht implementiert
