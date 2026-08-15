@@ -2,13 +2,11 @@
   <img src="Assets/AppIcon/CodexVault-Transparent-Large.png" width="180" alt="CodexVault app icon">
 </p>
 
-# CodexVault
+# CodexVault for macOS – Verified Local Codex & Project Backups
 
 [Deutsch](README.de.md)
 
-CodexVault is a local macOS app for creating verified backups of selected work
-folders and Codex-related data, then restoring them into new folders without
-overwriting existing files. It does not upload data or run silent backups.
+CodexVault is a local macOS backup and restore app for creating verified backups of selected work folders, OpenAI Codex-related data and ChatGPT exports, then restoring them into new folders without overwriting existing files. It does not upload data or run silent backups.
 
 ## Features
 
