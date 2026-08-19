@@ -95,6 +95,10 @@ ZIP, plus a completed privacy report with both SHA-256 checksums as a separate
 release attachment. See
 [the release privacy-report template](docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md).
 
+## Repo activity
+
+![Repobeats analytics image](https://repobeats.axiom.co/api/embed/b65ca8b64e053d898277ea35a3e896e0fa193e64.svg "Repobeats analytics image")
+
 ## License
 
 CodexVault is licensed under the [GNU GPL v3.0](LICENSE).
