@@ -3,14 +3,6 @@
 Stand: 14. August 2026
 Status: Öffentlicher Quellcode-Upload und drei Beta-Veröffentlichungen erfolgt. Es gibt noch keine Final-Veröffentlichung.
 
-## Zuerst lesen
-
-1. Diese Datei – aktuelle technische und fachliche Grundlage.
-2. [NEXT_STEPS.md](NEXT_STEPS.md) – nur die tatsächlich noch offenen Arbeiten.
-3. [README.md](README.md) – kurze Startanleitung.
-4. [PHASE_0_DISCOVERY.md](PHASE_0_DISCOVERY.md) – historische Bestandsaufnahme; bei Abweichungen hat diese Datei keinen Vorrang.
-5. Vor einer Beta- oder Final-Veröffentlichung zusätzlich [docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md](docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md) lesen und einen konkreten Bericht daraus erstellen.
-
 Öffentliche Nutzerdokumentation liegt zweisprachig in `README.md`, `README.de.md`, `docs/CodexVault-Manual-EN.pdf` und `docs/CodexVault-Handbuch-DE.pdf`. Die PDF-Handbücher werden mit `Scripts/generate-manual-pdfs.py` aus den Textquellen unter `Scripts/ManualSources/` erzeugt. Die öffentlichen UI-Screenshots liegen unter `docs/images/`; sie dürfen nur datenschutzbereinigte Ansichten ohne lokale Pfade, Backup-Namen, Dateizahlen oder Größen enthalten. Bei jeder sichtbaren Funktions- oder Einstellungsänderung müssen die Feature-Listen, die passenden Handbuchquellen und die daraus erzeugten PDFs im selben Auftrag aktualisiert werden.
 Der Generator verwendet eine kontrastreiche CodexVault-PDF-Gestaltung mit einer ruhigen Blau-Cyan-Kopfzeile, dunklen Inhaltsflächen und klaren Tabellen; Lesbarkeit hat vor dekorativen Effekten Vorrang.
 
