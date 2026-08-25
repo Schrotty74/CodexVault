@@ -3,6 +3,8 @@
 Stand: 14. August 2026
 Status: Öffentlicher Quellcode-Upload und drei Beta-Veröffentlichungen erfolgt. Es gibt noch keine Final-Veröffentlichung.
 
+Die allgemeinen Arbeits-, Git-, Veröffentlichungs- und Repository-Datenschutzregeln stehen verbindlich in `AGENTS.md`. Diese Datei enthält den projektspezifischen technischen und funktionalen Kontext.
+
 Öffentliche Nutzerdokumentation liegt zweisprachig in `README.md`, `README.de.md`, `docs/CodexVault-Manual-EN.pdf` und `docs/CodexVault-Handbuch-DE.pdf`. Die PDF-Handbücher werden mit `Scripts/generate-manual-pdfs.py` aus den Textquellen unter `Scripts/ManualSources/` erzeugt. Die öffentlichen UI-Screenshots liegen unter `docs/images/`; sie dürfen nur datenschutzbereinigte Ansichten ohne lokale Pfade, Backup-Namen, Dateizahlen oder Größen enthalten. Bei jeder sichtbaren Funktions- oder Einstellungsänderung müssen die Feature-Listen, die passenden Handbuchquellen und die daraus erzeugten PDFs im selben Auftrag aktualisiert werden.
 Der Generator verwendet eine kontrastreiche CodexVault-PDF-Gestaltung mit einer ruhigen Blau-Cyan-Kopfzeile, dunklen Inhaltsflächen und klaren Tabellen; Lesbarkeit hat vor dekorativen Effekten Vorrang.
 
@@ -84,9 +86,9 @@ Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoK
 - Bei vollständigen Backups gilt die definierte Vollständigkeit vor der Namensfilterung: Sie sind deshalb als vertrauliche lokale Sicherungen zu behandeln.
 - Löschvorgänge brauchen eine sichtbare Auswahl und Bestätigung.
 - Dev, Beta und Final sind getrennte Build-Kanäle. Ein lokaler Build bedeutet weder Commit noch Release noch Upload.
-- Der vollständige Quellcode darf auf GitHub bereitgestellt werden, jedoch erst nach einer Datenschutzprüfung. Private Inhalte, lokale Pfade, Backups, Build-Ausgaben und Zugangsdaten sind ausgeschlossen.
-- Dev-Bundles werden nie veröffentlicht. Ausschließlich Beta- oder Final-Bundles dürfen auf ausdrücklichen Auftrag veröffentlicht werden.
-- Jede ausdrücklich beauftragte Beta- oder Final-Veröffentlichung enthält immer **beide** Formate: eine DMG und ein ZIP. Die DMG enthält zusätzlich den Finder-Link `Applications` auf `/Applications`, damit die App dorthin gezogen werden kann. Dev wird weder verpackt noch veröffentlicht.
+- Der vollständige Quellcode darf auf GitHub bereitgestellt werden, jedoch erst nach einer Datenschutzprüfung gemäß den Repository-Regeln in `AGENTS.md`.
+- Dev-Bundles werden nie veröffentlicht.
+- Jede Beta- oder Final-Veröffentlichung enthält immer **beide** Formate: eine DMG und ein ZIP. Die DMG enthält zusätzlich den Finder-Link `Applications` auf `/Applications`, damit die App dorthin gezogen werden kann.
 - Zu jeder Beta- oder Final-Veröffentlichung wird ein versionierter Datenschutzbericht aus `docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md` erstellt und als eigenständiger Release-Anhang mit veröffentlicht. Er enthält die SHA-256-Prüfsummen von DMG und ZIP.
 
 ## Build-, Test- und Release-Workflow
@@ -105,18 +107,16 @@ Scripts/build-beta.sh
 Scripts/build-final.sh
 ```
 
-Für ein ausdrücklich beauftragtes Beta- oder Final-Release werden die beiden
-Artefakte lokal und überprüft erzeugt (dies veröffentlicht nichts):
+Für ein Beta- oder Final-Release werden die beiden Artefakte lokal und überprüft erzeugt:
 
 ```zsh
 Scripts/package-release-artifacts.sh beta CodexVault-<VERSION>
 Scripts/package-release-artifacts.sh final CodexVault-<VERSION>
 ```
 
-Das Skript lehnt Dev ab, erstellt ausschließlich DMG und ZIP, prüft beide und
-stellt sicher, dass die DMG neben der App einen `Applications`-Link enthält.
+Das Skript lehnt Dev ab, erstellt ausschließlich DMG und ZIP, prüft beide und stellt sicher, dass die DMG neben der App einen `Applications`-Link enthält.
 
-Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Jede spätere Beta- oder Final-Veröffentlichung braucht einen separaten Auftrag sowie einen angehängten Datenschutzbericht. Für die Veröffentlichung bleibt die App ad-hoc signiert; die einmalige, app-spezifische Gatekeeper-Freigabe ist vorgesehen. Einen Apple-Developer-Account, Zertifikate oder eine Notarisierung darf die Projektarbeit nicht anlegen oder voraussetzen.
+Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Jede spätere Beta- oder Final-Veröffentlichung braucht einen angehängten Datenschutzbericht. Für die Veröffentlichung bleibt die App ad-hoc signiert; die einmalige, app-spezifische Gatekeeper-Freigabe ist vorgesehen. Einen Apple-Developer-Account, Zertifikate oder eine Notarisierung setzt der aktuelle Workflow nicht voraus.
 
 ## Quellcode und Veröffentlichungsstand
 
@@ -136,10 +136,10 @@ Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Jede spätere Beta
 - Die Icon-Composer-Ressource verwendet eine gemeinsame Liquid-Glass-Struktur mit freigestelltem Quellmotiv. Spezifische grafische Überarbeitungen für Dark oder Mono sind noch nicht manuell angelegt; macOS erzeugt diese Erscheinungsvarianten aus der gemeinsamen Struktur.
 - Die Veröffentlichung verwendet bewusst keine Notarisierung. Die einmalige Gatekeeper-Freigabe ist für Beta- und Final-Artefakte Teil des vorgesehenen Installationsablaufs.
 
-## Datenschutz und Veröffentlichungen
+## Projektspezifischer Datenschutz und Veröffentlichungen
 
-- Niemals private Inhalte, absolute Benutzerpfade, Zugangsdaten, Tokens, Backups oder Testdaten in Git, Dokumentation, Screenshots oder Veröffentlichungen aufnehmen.
-- Keine Commits, Pushes, Tags, Versionsänderungen oder Releases ohne ausdrücklichen Auftrag.
-- Öffentliche Nennungen verwenden ausschließlich den Namen `Schrotty74`.
 - Vor jeder späteren Veröffentlichung müssen Datenschutz, Inhaltsausschlüsse, Verpackung und die sichtbaren Produktnamen erneut geprüft werden.
-- Quellcode-Pushes erfolgen nur nach einer Datenschutzprüfung. Dev-Bundles werden nie veröffentlicht. Jeder Beta- und Final-Release enthält DMG, ZIP und einen aktuellen Datenschutzbericht als separaten Anhang.
+- Quellcode-Pushes erfolgen nur nach einer Datenschutzprüfung.
+- Dev-Bundles werden nie veröffentlicht.
+- Jeder Beta- und Final-Release enthält DMG, ZIP und einen aktuellen Datenschutzbericht als separaten Anhang.
+- Für alle Repository-Inhalte und öffentlichen Materialien gelten zusätzlich die Datenschutz- und Namensregeln aus `AGENTS.md`.
