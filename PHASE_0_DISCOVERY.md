@@ -1,6 +1,6 @@
 # CodexVault – Phase 0: Discovery
 
-> Historische Bestandsaufnahme vom 22. Juli 2026. Der aktuelle Produktname ist CodexVault. Für den heutigen technischen Stand zuerst [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) und [NEXT_STEPS.md](NEXT_STEPS.md) lesen; bei Abweichungen gelten diese aktuellen Dokumente.
+> Historische Bestandsaufnahme vom 22. Juli 2026. Der aktuelle Produktname ist CodexVault. Für den heutigen technischen Stand zuerst [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) und [NEXT_STEPS.md](NEXT_STEPS.md) lesen; bei Abweichungen gelten diese aktuellen Dokumente. Die allgemeinen Repository-Datenschutzregeln stehen in `AGENTS.md`.
 
 Stand: 22. Juli 2026
 Status: Bestandsaufnahme abgeschlossen; Phase-1-Backup-Grundlage lokal implementiert
@@ -13,15 +13,9 @@ Zum Zeitpunkt dieser Bestandsaufnahme war CodexVault ein lokales Git-Repository 
 
 ## Entwicklungsumgebung
 
-| Bereich | Ergebnis |
-| --- | --- |
-| Plattform | Apple Silicon, macOS 26.5.2 |
-| Xcode | 26.6 mit macOS SDK 26.5 |
-| Swift | 6.3.3 |
-| Versionsverwaltung | Git 2.50.1, lokal initialisiert |
-| Zusätzliche Laufzeiten | Python 3.14.6, Node 26.5.0 vorhanden |
+Die Bestandsaufnahme erfolgte auf einem Apple-Silicon-Mac mit einer macOS-26-/Xcode-/Swift-Entwicklungsumgebung. Die damals installierten exakten Tool-Versionen sind keine dauerhafte Projekteigenschaft und werden hier nicht als Anforderung festgeschrieben.
 
-Für den MVP sind keine externen Bibliotheken erforderlich oder vorgeschlagen. SwiftUI, Foundation, CryptoKit und Security-Scoped Bookmarks decken die geplante Basis ab. Python und Node sind keine CodexVault-Abhängigkeiten.
+Für den MVP sind keine externen Bibliotheken erforderlich oder vorgeschlagen. SwiftUI, Foundation, CryptoKit und Security-Scoped Bookmarks decken die geplante Basis ab. Andere lokal vorhandene Laufzeiten sind keine CodexVault-Abhängigkeiten.
 
 ## Lesende Codex-Inventarisierung
 
@@ -56,7 +50,7 @@ Die Inventarisierung bestätigt damit den Grundsatz aus dem Briefing: Codex ben�
 2. **Passwortschutz für Backups:** Noch offen. Gemeint ist nur: Soll ein portables Backup auf Wunsch mit einem Passwort geschützt werden? Das Passwort würde nie gespeichert und bei einer Wiederherstellung erneut abgefragt.
 3. **Git und Quellcode:** Der vollständige CodexVault-Quellcode wird später in Git bereitgestellt. Private Inhalte, Zugangsdaten, lokale Pfade, Build-Ausgaben und Backup-Pakete bleiben ausgeschlossen. Davon getrennt wird die Sicherung eines versteckten Git-Ordners innerhalb eines Benutzerprojekts später als sichtbare Auswahl angeboten.
 4. **Automatische Backups:** Geplant. Benutzer wählen selbst, wann gesichert wird, wohin gesichert wird und welche Module oder Ordner dazugehören. Es gibt keine stillen, voreingestellten Sicherungen.
-5. **Startdesign:** Noch offen; der Benutzer legt das Standarddesign später fest. Alle vier Designs bleiben ausschließlich Darstellungsschichten.
+5. **Startdesign:** Noch offen; das Standarddesign wird später festgelegt. Alle vier Designs bleiben ausschließlich Darstellungsschichten.
 
 ## Designzerlegung der Master-Mockups
 
@@ -92,6 +86,6 @@ Eine App-Target plus drei lokale Swift-Package-Targets halten die Dateizugriffe 
 ## Nächste sichere Schritte
 
 1. Phase 1 ist lokal vorhanden: Auswahl von Projekten und Zusatzordnern, Manifest, SHA-256-Prüfung und Archivliste. Die Sicherung wird nur nach expliziter Quellen- und Zielwahl erstellt.
-2. Bei Bedarf die noch offenen Produktentscheidungen in einfacher Sprache festlegen.
+2. Bei Bedarf die noch offenen Produktentscheidungen festlegen.
 3. Eine Positivliste für portable Codex-Bestandteile ausarbeiten, ohne Zugangsdaten, Sitzungen oder private Inhalte zu übernehmen.
 4. Ein künstliches Projekt- und Chat-Export-Fixture definieren, bevor diese Module umgesetzt werden.
