@@ -12,5 +12,6 @@ main description, status, screenshots, supported platforms, repository URL,
 download URL or privacy documentation. The project needs matching English and
 German detail pages, and the GitHub profile should link to the English page.
 
-Never use private data, user backups, logs, local paths, credentials or real
-test data in public portfolio assets or text.
+The repository-wide privacy and publication rules in `AGENTS.md` apply to all
+portfolio material. Public screenshots and example data must use only synthetic,
+anonymized or clearly fictional data.
