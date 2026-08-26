@@ -51,8 +51,12 @@ Eine kompakte Vorschau anklicken, um das datenschutzbereinigte Original in volle
 
 ## Voraussetzungen und lokaler Start
 
-CodexVault benötigt macOS 26. Zum lokalen Starten des Swift Packages werden
-Xcode 26.6 oder neuer benötigt:
+CodexVault benötigt macOS 26 und Xcode 26.6 oder neuer. App, lokale
+Bundle-Skripte und Verpackung verwenden nur macOS-/Xcode-Werkzeuge einschließlich
+`/bin/bash`; Homebrew ist nicht erforderlich. Nur der optionale PDF-Handbuch-
+Generator benötigt zusätzlich Python 3 mit `reportlab`.
+
+Zum lokalen Starten des Swift Packages:
 
 ```zsh
 swift run
