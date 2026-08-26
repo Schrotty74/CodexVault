@@ -1,7 +1,7 @@
 # CodexVault – Projektkontext
 
-Stand: 14. August 2026
-Status: Öffentlicher Quellcode-Upload und drei Beta-Veröffentlichungen erfolgt. Es gibt noch keine Final-Veröffentlichung.
+Stand: 26. August 2026
+Status: Öffentlicher Quellcode-Upload und vier Beta-Veröffentlichungen erfolgt. Es gibt noch keine Final-Veröffentlichung.
 
 Die allgemeinen Arbeits-, Git-, Veröffentlichungs- und Repository-Datenschutzregeln stehen verbindlich in `AGENTS.md`. Diese Datei enthält den projektspezifischen technischen und funktionalen Kontext.
 
@@ -122,9 +122,9 @@ Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Jede spätere Beta
 
 - Der vollständige, datenschutzgeprüfte Quellcode ist im öffentlichen Repository `Schrotty74/CodexVault` auf dem Branch `main` veröffentlicht.
 - Die GPL-3.0-Lizenz liegt als `LICENSE` im Projektstamm. Ihre rechtliche Auswirkung wurde nicht gesondert geprüft.
-- Die aktuellen öffentlichen Beta-Artefakte sind [CodexVault 1.0 Beta 3](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.3): DMG mit `Applications`-Link, ZIP und separater Datenschutzbericht. Es gibt keine Final- oder Dev-App-Veröffentlichung; Dev wird nie veröffentlicht.
+- Die aktuellen öffentlichen Beta-Artefakte sind [CodexVault 1.0 Beta 4](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.4): DMG mit `Applications`-Link, ZIP und separater Datenschutzbericht. Es gibt keine Final- oder Dev-App-Veröffentlichung; Dev wird nie veröffentlicht.
 - Beta-Builds verwenden die Bundle-ID `com.codexvault.beta`. Sie sind ad-hoc signiert und nicht notarisiert; Gatekeeper kann deshalb eine ausdrückliche Freigabe verlangen.
-- Der Datenschutzbericht der aktuellen Beta liegt unter `docs/releases/CodexVault-1.0-Beta-3-Privacy-Report.md` und ist zusätzlich als Release-Anhang veröffentlicht.
+- Der Datenschutzbericht der aktuellen Beta liegt unter `docs/releases/CodexVault-1.0-Beta-4-Privacy-Report.md` und ist zusätzlich als Release-Anhang veröffentlicht.
 - Der Bericht zur ersten Quellcode-Veröffentlichung liegt unter `docs/PRIVACY_REPORT_SOURCE_PUBLICATION_2026-07-24.md`.
 - Die öffentlichen README- und Handbuchdateien sind zweisprachig. Ihre Feature-Listen dürfen nur tatsächlich umgesetzte Funktionen enthalten.
 

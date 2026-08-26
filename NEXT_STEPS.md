@@ -6,7 +6,7 @@ Dieses Dokument enthält nur Punkte, die aus dem aktuellen Quellcode oder der be
 
 ## Priorität 1
 
-- Rückmeldungen zur öffentlichen Beta `v1.0.0-beta.3` sammeln und nur bestätigte Fehler oder Verbesserungen aufnehmen.
+- Rückmeldungen zur öffentlichen Beta `v1.0.0-beta.4` sammeln und nur bestätigte Fehler oder Verbesserungen aufnehmen.
 
 ## Priorität 2
 

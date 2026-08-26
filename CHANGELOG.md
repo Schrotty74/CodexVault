@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0 Beta 4 — 26 August 2026
+
+### Build portability
+
+- Build and packaging scripts now use the macOS-provided `/bin/bash` instead
+  of a Homebrew-specific Bash path.
+- The English and German setup instructions now state that Homebrew is not
+  required for app builds or packaging; `reportlab` is only needed when
+  regenerating the optional PDF manuals.
+
+### Verification
+
+- `swift test`: 15 passing tests.
+- Verified Dev and Beta builds, ZIP, and DMG packaging after the portability
+  update. The DMG contains `CodexVault Beta.app` and an `Applications` link.
+- A fresh public-repository clone was built and started with an isolated empty
+  local configuration; generated bundles were scanned for local paths and
+  credential markers.
+
 ## 1.0 Beta 3 — 14 August 2026
 
 ### New and improved
