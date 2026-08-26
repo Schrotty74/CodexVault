@@ -99,6 +99,10 @@ ZIP, plus a completed privacy report with both SHA-256 checksums as a separate
 release attachment. See
 [the release privacy-report template](docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md).
 
+## Community
+
+Questions, feedback and discussions are welcome on [Discord](https://discord.gg/Zy93AaYFaj).
+
 ## Repo activity
 
 ![Repobeats analytics image](https://repobeats.axiom.co/api/embed/b65ca8b64e053d898277ea35a3e896e0fa193e64.svg "Repobeats analytics image")
