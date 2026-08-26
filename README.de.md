@@ -105,6 +105,10 @@ beauftragte Beta- oder Final-Veröffentlichung enthält immer DMG (mit
 SHA-256-Prüfsummen als separaten Release-Anhang. Die Vorlage steht in
 [docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md](docs/RELEASE_PRIVACY_REPORT_TEMPLATE.md).
 
+## Community
+
+Fragen, Feedback und Diskussionen sind auf [Discord](https://discord.gg/Zy93AaYFaj) willkommen.
+
 ## Lizenz
 
 CodexVault steht unter der [GNU GPL v3.0](LICENSE).
