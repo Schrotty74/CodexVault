@@ -1,7 +1,7 @@
 # CodexVault – Projektkontext
 
-Stand: 26. August 2026
-Status: Öffentlicher Quellcode-Upload und vier Beta-Veröffentlichungen erfolgt. Es gibt noch keine Final-Veröffentlichung.
+Stand: 30. August 2026
+Status: Die erste Final-Veröffentlichung 1.0 ist geprüft und wird veröffentlicht. Der öffentliche Quellcode und vier vorherige Beta-Veröffentlichungen liegen vor.
 
 Die allgemeinen Arbeits-, Git-, Veröffentlichungs- und Repository-Datenschutzregeln stehen verbindlich in `AGENTS.md`. Diese Datei enthält den projektspezifischen technischen und funktionalen Kontext.
 
@@ -70,7 +70,7 @@ Die App verwendet Swift Package Manager, SwiftUI, AppKit, Foundation und CryptoK
 - ChatGPT-Exporte als ausdrücklich ausgewählte normale Backup-Quelle und optionaler Passwortschutz für normale Pakete. Passwörter werden nicht gespeichert; verschlüsselte Pakete werden vor der Wiederherstellung lokal entschlüsselt und geprüft.
 - Lokale Codex-Speicherübersicht einschließlich gruppierter Sitzungsdaten und kontrollierter Entfernung nicht zugeordneter Datensätze.
 - Freundliche Erststart-Ansicht bei noch fehlenden eigenen Inhalten sowie dauerhaft erreichbare KI-Hilfe auf Overview mit Handbuch-Schaltfläche und bestätigter Kopier-und-Öffnen-Hilfe für ChatGPT, Google Gemini und Claude. Die statischen Prompts enthalten ausschließlich den passenden öffentlichen Handbuch-Link und bestätigte öffentliche App-Fakten; sie verbieten erfundene Funktionen.
-- Getrennte lokale Dev-, Beta- und Final-Bundles mit eigenen Bundle-IDs und Datencontainern.
+- Getrennte lokale Dev-, Beta- und Final-Bundles mit eigenen Bundle-IDs und Datencontainern. Jeder lokale Beta- oder Final-Build setzt vor dem Build ausschließlich die gespeicherten Einstellungen seines eigenen Kanals zurück, damit der anschließende Start ohne übernommene Quellen, Archive oder Ziele erfolgt; Dev-Daten bleiben unangetastet.
 - Vier Designs: Liquid Glass, Full Glass, Graphite & Lime und Midnight. Die Auswahl erfolgt über sichtbare Vorschaukarten. Full Glass nutzt eine einzige milchige Glasoberfläche im gesamten Fenster mit ruhigem, diagonal wanderndem Farbglow und zufällig auftauchenden Lichtpunkten; Liquid Glass beschränkt Glas auf die linke Navigation. Bei „Reduce Motion“ und während Backup-, Wiederherstellungs- oder Speicheranalyse-Abläufen pausiert die Full-Glass-Animation deutlich. Die Backup-Seite bietet zusätzlich eine lokale kompakte Ansicht.
 - Zweisprachige sichtbare Oberfläche mit Englisch als Standard und Deutsch als auswählbarer Sprache. Dieselbe Einstellung steuert auch KI-Hilfe und Handbuch-Link.
 - App-Icon als Icon-Composer-Ressource mit Liquid-Glass-Effekten und freigestelltem PNG-Quellmotiv; macOS erzeugt fehlende Erscheinungsvarianten aus der gemeinsamen Icon-Struktur.
@@ -122,9 +122,9 @@ Die Tests prüfen derzeit zentrale Backup- und ZIP-Verhalten. Jede spätere Beta
 
 - Der vollständige, datenschutzgeprüfte Quellcode ist im öffentlichen Repository `Schrotty74/CodexVault` auf dem Branch `main` veröffentlicht.
 - Die GPL-3.0-Lizenz liegt als `LICENSE` im Projektstamm. Ihre rechtliche Auswirkung wurde nicht gesondert geprüft.
-- Die aktuellen öffentlichen Beta-Artefakte sind [CodexVault 1.0 Beta 4](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0-beta.4): DMG mit `Applications`-Link, ZIP und separater Datenschutzbericht. Es gibt keine Final- oder Dev-App-Veröffentlichung; Dev wird nie veröffentlicht.
-- Beta-Builds verwenden die Bundle-ID `com.codexvault.beta`. Sie sind ad-hoc signiert und nicht notarisiert; Gatekeeper kann deshalb eine ausdrückliche Freigabe verlangen.
-- Der Datenschutzbericht der aktuellen Beta liegt unter `docs/releases/CodexVault-1.0-Beta-4-Privacy-Report.md` und ist zusätzlich als Release-Anhang veröffentlicht.
+- Die aktuellen öffentlichen Final-Artefakte sind [CodexVault 1.0](https://github.com/Schrotty74/CodexVault/releases/tag/v1.0.0): DMG mit `Applications`-Link, ZIP und separater Datenschutzbericht. Dev wird nie veröffentlicht.
+- Final-Builds verwenden die Bundle-ID `com.codexvault`. Sie sind ad-hoc signiert und nicht notarisiert; Gatekeeper kann deshalb eine ausdrückliche Freigabe verlangen.
+- Der Datenschutzbericht der ersten Final liegt unter `docs/releases/CodexVault-1.0-Privacy-Report.md` und ist zusätzlich als Release-Anhang veröffentlicht.
 - Der Bericht zur ersten Quellcode-Veröffentlichung liegt unter `docs/PRIVACY_REPORT_SOURCE_PUBLICATION_2026-07-24.md`.
 - Die öffentlichen README- und Handbuchdateien sind zweisprachig. Ihre Feature-Listen dürfen nur tatsächlich umgesetzte Funktionen enthalten.
 

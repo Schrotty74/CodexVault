@@ -14,13 +14,15 @@ case "$channel" in
     beta)
         display_name="CodexVault Beta"
         bundle_identifier="com.codexvault.beta"
+        preferences_domain="com.codexvault.beta"
         marketing_version="1.0.0"
         output_directory="$project_root/Build/beta"
         ;;
     final)
         display_name="CodexVault"
         bundle_identifier="com.codexvault"
-        marketing_version="0.1.0"
+        preferences_domain="com.codexvault"
+        marketing_version="1.0.0"
         output_directory="$project_root/Build/final"
         ;;
     *)
@@ -28,6 +30,13 @@ case "$channel" in
         exit 64
         ;;
 esac
+
+# Build artifacts never include macOS user defaults. Clear the local release
+# channel state as well so each Beta or Final build is tested from the same
+# empty first-launch state. Development data intentionally remains untouched.
+if [[ "$channel" == "beta" || "$channel" == "final" ]]; then
+    /usr/bin/defaults delete "$preferences_domain" >/dev/null 2>&1 || true
+fi
 
 scratch_directory="$project_root/.build/channels/$channel"
 app_bundle="$output_directory/$display_name.app"

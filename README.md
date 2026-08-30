@@ -76,7 +76,7 @@ notarized. macOS may therefore block their first launch. Download the DMG
 Open the DMG and drag the app onto its included **Applications** link, then use
 one of these one-time, app-specific approvals:
 
-1. In Finder, Control-click `CodexVault Beta.app`, choose **Open**, then choose
+1. In Finder, Control-click `CodexVault.app`, choose **Open**, then choose
    **Open** again in the confirmation dialog.
 2. If macOS still blocks it, try opening the app once, then open **System
    Settings > Privacy & Security**, scroll to the security message for

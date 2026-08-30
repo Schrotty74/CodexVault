@@ -1,5 +1,62 @@
 # Changelog
 
+## 1.0 Final — 30 August 2026
+
+### Backup and restore
+
+- Create verified local ZIP backups from one or more explicitly selected project
+  folders. Every package has a relative-path manifest and SHA-256 integrity
+  information; existing files are never overwritten during restore.
+- Review known backup packages in Archive, reveal them in Finder, check their
+  integrity, inspect contents, and restore selected sources into a new folder.
+- Save reusable local backup profiles, check a destination for availability,
+  write access, and free space, and assign a custom name to multi-source
+  backups while retaining the date and time.
+- Include a selected ChatGPT export as a normal backup source. Password-protect
+  normal packages when wanted; passwords are never saved and packages are
+  verified before restore.
+
+### Complete Codex backups
+
+- Create local complete ZIP backups for detected Codex app data, an available
+  visible Codex workspace, and explicitly configured project folders.
+- Offer project discovery after a visible folder selection, progress feedback,
+  an optional daily or weekly schedule while CodexVault is open, and confirmed
+  retention of older dated backups.
+- Provide a local Codex storage overview with grouped session records and a
+  controlled removal flow for selected unassigned records.
+
+### Privacy and guidance
+
+- Keep the app local-first: no automatic network activity, no silent backup,
+  and no automatic transfer of app data to AI services.
+- Show a privacy-clean first start and permanent AI help. ChatGPT, Google
+  Gemini, and Claude open only after confirmation and receive only a static,
+  language-appropriate getting-started prompt with the public manual link.
+- Provide English and German interface and manual support, official GitHub and
+  Discord links, and public screenshots without local paths or backup metadata.
+
+### Appearance and packaging
+
+- Offer Liquid Glass, Full Glass, Graphite & Lime, and Midnight themes,
+  including the calm animated Full Glass surface and a compact Backup layout.
+- Separate Dev, Beta, and Final app identities and local data. Beta and Final
+  builds start from cleared channel-specific local settings; Dev data remains
+  separate.
+- Build and package with macOS and Xcode tools without a Homebrew requirement.
+  Final artifacts are ad-hoc signed and include a ZIP plus a DMG with an
+  `Applications` link and a separate privacy report.
+
+### Verification
+
+- `swift test`: 15 passing tests.
+- Final app build, ZIP, and DMG passed their build, signature, archive, and
+  disk-image integrity checks. The DMG contains only `CodexVault.app` and an
+  `Applications` link.
+- Final builds start without persisted Final-channel sources, archives, or
+  backup destinations. The release source and generated app bundle were
+  checked for local project paths and credential markers.
+
 ## 1.0 Beta 4 — 26 August 2026
 
 ### Build portability

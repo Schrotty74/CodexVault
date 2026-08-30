@@ -81,7 +81,7 @@ offiziellen Release laden. Die DMG öffnen, die App auf den enthaltenen Link
 **Applications** ziehen und eine dieser einmaligen, nur für diese App geltenden
 Freigaben verwenden:
 
-1. Im Finder mit gedrückter Control-Taste auf `CodexVault Beta.app` klicken,
+1. Im Finder mit gedrückter Control-Taste auf `CodexVault.app` klicken,
    **Öffnen** wählen und im folgenden Dialog nochmals **Öffnen** wählen.
 2. Falls macOS die App weiter blockiert: Die App einmal zu öffnen versuchen,
    dann **Systemeinstellungen > Datenschutz & Sicherheit** öffnen, bis zur
