@@ -10,16 +10,21 @@ CodexVault is a local macOS backup and restore app for creating verified backups
 
 ## Features
 
-- Verified ZIP backups with source preview, backup profiles, destination-health
-  checks, SHA-256 integrity checks, selective restore, and Finder links.
+- Verified ZIP backups for one or more selected projects, with source previews,
+  reusable profiles, custom multi-source names, destination-health checks,
+  SHA-256 integrity checks, selective restore, and Finder links.
+- Local ChatGPT-export backup support for `conversations.json` files and ZIP
+  exports, plus project suggestions that never add a folder without confirmation.
 - Password-protected normal backup packages; passwords are never stored.
-- Complete local ZIP backups for Codex data and selected projects, with progress,
-  verification, retention and an in-app schedule with a preferred time.
-- Local project suggestions and ChatGPT-export backup support.
-- Persistent Archive with Finder, integrity-check and direct-restore actions,
-  plus local Codex storage review and an optional compact backup layout.
-- English and German interface, AI help, and four visual themes: Liquid Glass,
-  Full Glass, Graphite & Lime, and Midnight.
+- Complete local ZIP backups for detected Codex app data, the visible workspace,
+  and selected project roots, with progress, verification, retention, project
+  search, and an optional daily or weekly schedule while CodexVault is open.
+- Persistent Archive with Finder, integrity-check, and direct-restore actions,
+  plus local Codex storage review and confirmation-based cleanup of selected
+  unassigned records.
+- English and German interface; permanent, data-minimizing AI help; official
+  GitHub and Discord links; compact backup layout; and four visual themes:
+  Liquid Glass, Full Glass, Graphite & Lime, and Midnight.
 
 ## Screenshots
 

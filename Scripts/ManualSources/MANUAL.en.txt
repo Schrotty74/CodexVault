@@ -7,6 +7,8 @@ English and German; English is the default. This manual describes the
 functionality that is implemented now; it does not describe planned features as
 if they already existed.
 
+This edition documents the CodexVault 1.0 Final release.
+
 ## Before you begin
 
 - CodexVault requires macOS 26.

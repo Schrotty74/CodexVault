@@ -18,7 +18,7 @@ Die verbindlichen allgemeinen Arbeits-, Git-, Veröffentlichungs- und Repository
 
 Prüfe danach die tatsächlich betroffenen Dateien, bevor du Änderungen vorschlägst oder ausführst. Bei wichtigen Änderungen an Funktionen, Datenformaten, Build-Abläufen oder offenen Aufgaben aktualisiere `PROJECT_CONTEXT.md` und `NEXT_STEPS.md` im selben Auftrag.
 
-Bei sichtbaren Funktions- oder Einstellungsänderungen zusätzlich die Feature-Listen in `README.md` und `README.de.md`, die passenden Textquellen in `Scripts/ManualSources/` sowie die daraus erzeugten PDF-Handbücher in `docs/` aktualisieren. Nur bereits umgesetzte Funktionen dokumentieren.
+Bei sichtbaren Funktions- oder Einstellungsänderungen zusätzlich die Feature-Listen in `README.md` und `README.de.md` sowie die passenden Textquellen in `Scripts/ManualSources/` aktualisieren. Vor jedem Beta- oder Final-Build die Handbuchquellen und die daraus erzeugten PDFs in `docs/` verbindlich gegen den aktuellen Stand prüfen, bei Bedarf aktualisieren und die PDFs visuell kontrollieren; für Dev-Builds ist diese Handbuchprüfung nicht erforderlich. Nur bereits umgesetzte Funktionen dokumentieren.
 
 CodexVault-spezifisch:
 

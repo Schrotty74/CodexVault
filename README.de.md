@@ -13,17 +13,23 @@ keinen Upload und keine stillen Backups.
 
 ## Funktionen
 
-- Geprüfte ZIP-Backups mit Quellvorschau, Backup-Profilen, Zielprüfung,
-  SHA-256-Integritätsprüfung, gezielter Wiederherstellung und Finder-Links.
+- Geprüfte ZIP-Backups für einen oder mehrere ausgewählte Projekte mit
+  Quellvorschau, wiederverwendbaren Profilen, eigenem Namen für mehrere Quellen,
+  Zielprüfung, SHA-256-Integritätsprüfung, gezielter Wiederherstellung und
+  Finder-Links.
+- Lokale Unterstützung für ChatGPT-Exporte als `conversations.json`-Datei oder
+  ZIP sowie Projektvorschläge, die erst nach Bestätigung übernommen werden.
 - Passwortgeschützte normale Backup-Pakete; Passwörter werden nie gespeichert.
-- Vollständige lokale ZIP-Backups für Codex-Daten und ausgewählte Projekte mit
-  Fortschritt, Prüfung, Aufbewahrung und In-App-Zeitplan mit Uhrzeit.
-- Lokale Projektvorschläge und Unterstützung für ChatGPT-Export-Backups.
+- Vollständige lokale ZIP-Backups für erkannte Codex-App-Daten, den sichtbaren
+  Arbeitsbereich und ausgewählte Projektordner mit Fortschritt, Prüfung,
+  Aufbewahrung, Projektsuche und optionalem täglichen oder wöchentlichen
+  Zeitplan, solange CodexVault geöffnet ist.
 - Dauerhaftes Archiv mit Finder-, Integritäts- und direkter
-  Wiederherstellungsaktion sowie lokaler Codex-Speicherübersicht und optionaler
-  kompakter Backup-Ansicht.
-- Englische und deutsche Oberfläche, KI-Hilfe und vier Darstellungsvarianten:
-  Liquid Glass, Full Glass, Graphite & Lime und Midnight.
+  Wiederherstellungsaktion sowie lokaler Codex-Speicherübersicht und einer
+  bestätigungspflichtigen Bereinigung ausgewählter nicht zugeordneter Einträge.
+- Englische und deutsche Oberfläche, dauerhafte datensparsame KI-Hilfe,
+  offizielle GitHub- und Discord-Links, kompakte Backup-Ansicht und vier
+  Darstellungsvarianten: Liquid Glass, Full Glass, Graphite & Lime und Midnight.
 
 ## Screenshots
 

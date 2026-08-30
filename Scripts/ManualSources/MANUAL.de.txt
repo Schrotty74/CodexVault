@@ -7,6 +7,8 @@ Oberfläche unterstützt Englisch und Deutsch; Englisch ist der Standard. Dieses
 Handbuch beschreibt nur Funktionen, die bereits umgesetzt sind, und stellt
 keine geplanten Funktionen als vorhanden dar.
 
+Diese Ausgabe dokumentiert die CodexVault-Final-Version 1.0.
+
 ## Vor dem Start
 
 - CodexVault benötigt macOS 26.

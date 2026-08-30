@@ -7,6 +7,7 @@ Vor jeder Projektarbeit zuerst `PROJECT_CONTEXT.md` und `NEXT_STEPS.md` lesen.
 - `PROJECT_CONTEXT.md` ist die dauerhafte Quelle für den aktuellen Projektkontext.
 - `NEXT_STEPS.md` enthält nur tatsächlich offene Aufgaben, bestätigte Bugs und konkrete nächste Schritte.
 - Bei relevanten Änderungen an Funktionen, Architektur, Datenformaten, Datenschutz, Build/Release oder offenen Aufgaben die betroffenen Kontextdateien im selben Auftrag aktualisieren.
+- Vor jedem Beta- oder Final-Build die beiden Handbuchquellen in `Scripts/ManualSources/` und die daraus erzeugten PDF-Handbücher in `docs/` gegen die aktuelle Benutzeroberfläche, Funktionen, Einstellungen, Datenschutztexte und Screenshots prüfen. Bei Abweichungen die Quellen aktualisieren, beide PDFs neu erzeugen und ihre Lesbarkeit visuell prüfen. Diese verpflichtende Handbuchprüfung gilt nicht für Dev-Builds.
 - Erledigte Punkte aus `NEXT_STEPS.md` entfernen oder nach vorhandenen Projektregeln archivieren.
 - Weitere projektspezifische Regeln und Dokumente beachten.
 - Bestehende Architektur, Datenformate, Einstellungen und Benutzerabläufe erhalten, sofern eine Änderung nicht ausdrücklich verlangt oder technisch notwendig ist.
