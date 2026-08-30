@@ -1,7 +1,7 @@
 # CodexVault – Projektkontext
 
 Stand: 30. August 2026
-Status: Die erste Final-Veröffentlichung 1.0 ist geprüft und wird veröffentlicht. Der öffentliche Quellcode und vier vorherige Beta-Veröffentlichungen liegen vor.
+Status: Die erste Final-Veröffentlichung 1.0 ist erfolgt. Der öffentliche Quellcode und vier vorherige Beta-Veröffentlichungen liegen vor.
 
 Die allgemeinen Arbeits-, Git-, Veröffentlichungs- und Repository-Datenschutzregeln stehen verbindlich in `AGENTS.md`. Diese Datei enthält den projektspezifischen technischen und funktionalen Kontext.
 
