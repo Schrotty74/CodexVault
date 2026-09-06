@@ -4,7 +4,12 @@
 
 ## Supported Versions
 
-Security reports are accepted for the current CodexVault release.
+| Version | Supported |
+| --- | --- |
+| 1.0.x | Yes |
+| Earlier versions | No |
+
+The current stable release is 1.0.0.
 
 ## Reporting a Vulnerability
 
@@ -14,8 +19,6 @@ Please do not publish sensitive vulnerability details in a public GitHub issue. 
 
 Relevant reports include project and Codex-data backup, ZIP creation and extraction, SHA-256 verification, password-protected backup packages, selective restore, destination and path handling, retention/cleanup operations, scheduled backups while CodexVault is open, and handling of ChatGPT export files.
 
-CodexVault works locally and does not upload backup contents. Complete backups can contain sensitive local Codex and project data, so unintended disclosure, overwrite, archive traversal, incomplete exclusion of secrets or integrity-check failures are especially important to report.
-
-Restores are designed to use new destinations rather than silently overwrite existing files.
+CodexVault works locally and does not upload backup contents. Reports about unintended disclosure, overwrite, archive traversal, incomplete exclusion of secrets or integrity-check failures are especially important.
 
 Thank you for helping keep CodexVault and its users secure.
