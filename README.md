@@ -78,17 +78,18 @@ The scripts build locally only. They do not publish an app.
 CodexVault Beta and Final builds are deliberately ad-hoc signed and not
 notarized. macOS may therefore block their first launch. Download the DMG
 (recommended) or ZIP only from the official release.
-Open the DMG and drag the app onto its included **Applications** link, then use
-one of these one-time, app-specific approvals:
+Open the DMG and drag the app onto its included **Applications** link.
 
-1. In Finder, Control-click `CodexVault.app`, choose **Open**, then choose
-   **Open** again in the confirmation dialog.
-2. If macOS still blocks it, try opening the app once, then open **System
-   Settings > Privacy & Security**, scroll to the security message for
-   CodexVault, select **Open Anyway**, and confirm with **Open**.
+On current macOS versions, if Gatekeeper blocks CodexVault:
 
-Do not disable Gatekeeper globally. See
-[Apple's instructions for safely opening apps](https://support.apple.com/102445).
+1. Try to open `CodexVault.app` normally once so macOS registers the blocked launch.
+2. Open **System Settings → Privacy & Security** and scroll down to **Security**.
+3. Click **Open Anyway** for CodexVault.
+4. Confirm the warning by clicking **Open** and authenticate if macOS asks you to.
+
+The **Open Anyway** option is only shown for a limited time after the blocked launch attempt. Only override Gatekeeper for a CodexVault build obtained from the official GitHub release. This creates an exception for that specific app and does not disable Gatekeeper system-wide.
+
+See [Apple's instructions for safely opening apps](https://support.apple.com/102445).
 Each release includes its own privacy report with SHA-256 checksums for both
 artifacts.
 
