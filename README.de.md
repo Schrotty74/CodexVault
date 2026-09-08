@@ -82,20 +82,19 @@ Die Skripte bauen ausschließlich lokal und veröffentlichen keine App.
 
 CodexVault-Beta- und -Final-Builds sind bewusst ad-hoc signiert und nicht
 notarisiert. macOS kann den ersten Start deshalb blockieren. Die DMG (empfohlen)
-oder das ZIP nur aus dem
-offiziellen Release laden. Die DMG öffnen, die App auf den enthaltenen Link
-**Applications** ziehen und eine dieser einmaligen, nur für diese App geltenden
-Freigaben verwenden:
+oder das ZIP nur aus dem offiziellen Release laden. Die DMG öffnen und die App
+auf den enthaltenen Link **Applications** ziehen.
 
-1. Im Finder mit gedrückter Control-Taste auf `CodexVault.app` klicken,
-   **Öffnen** wählen und im folgenden Dialog nochmals **Öffnen** wählen.
-2. Falls macOS die App weiter blockiert: Die App einmal zu öffnen versuchen,
-   dann **Systemeinstellungen > Datenschutz & Sicherheit** öffnen, bis zur
-   Sicherheitsmeldung für CodexVault scrollen, **Dennoch öffnen** wählen und
-   mit **Öffnen** bestätigen.
+Wenn Gatekeeper CodexVault auf einer aktuellen macOS-Version blockiert:
 
-Gatekeeper nicht global deaktivieren. Siehe
-[Apples Anleitung zum sicheren Öffnen von Apps](https://support.apple.com/102445).
+1. `CodexVault.app` einmal normal zu öffnen versuchen, damit macOS den blockierten Start registriert.
+2. **Systemeinstellungen → Datenschutz & Sicherheit** öffnen und zum Bereich **Sicherheit** scrollen.
+3. Bei CodexVault auf **Dennoch öffnen** klicken.
+4. Die Warnung mit **Öffnen** bestätigen und bei Bedarf authentifizieren.
+
+Die Option **Dennoch öffnen** wird nach einem blockierten Startversuch nur für begrenzte Zeit angezeigt. Gatekeeper nur für eine CodexVault-Version übersteuern, die aus dem offiziellen GitHub-Release stammt. Dadurch wird nur für diese konkrete App eine Ausnahme angelegt; Gatekeeper wird nicht systemweit deaktiviert.
+
+Siehe [Apples Anleitung zum sicheren Öffnen von Apps](https://support.apple.com/102445).
 Jede Veröffentlichung enthält einen eigenen Datenschutzbericht mit den
 SHA-256-Prüfsummen beider Release-Artefakte.
 
