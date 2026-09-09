@@ -64,6 +64,20 @@ Sobald eine eigene Auswahl oder Konfiguration vorhanden ist oder ein Backup
 erstellt wurde, erscheint stattdessen die normale Overview-Ansicht. Deren Karte
 **KI-Hilfe** hält dieselben Handbuch- und Diensttasten dauerhaft bereit.
 
+## CodexVault installieren und öffnen
+
+Die DMG oder das ZIP nur aus dem offiziellen CodexVault-GitHub-Release laden.
+Wenn macOS CodexVault beim ersten Start blockiert:
+
+1. `CodexVault.app` einmal normal öffnen. macOS blockiert den Start.
+2. **Systemeinstellungen → Datenschutz & Sicherheit** öffnen.
+3. Zum Bereich **Sicherheit** scrollen und bei CodexVault **Dennoch öffnen** wählen.
+4. Die Warnung mit **Öffnen** bestätigen und bei Bedarf authentifizieren.
+
+**Dennoch öffnen** erscheint nur für begrenzte Zeit nach dem blockierten
+Startversuch. Dadurch wird nur für CodexVault eine Ausnahme angelegt;
+Gatekeeper wird nicht systemweit deaktiviert.
+
 ## Normales Backup
 
 Ein normales Backup eignet sich für ein portables Paket mit genau den Ordnern,

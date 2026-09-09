@@ -62,6 +62,20 @@ Once you add your own selection or configuration, or create a backup, the
 regular Overview is shown instead. Its **AI help** card keeps the same manual
 and service buttons permanently available.
 
+## Installing and opening CodexVault
+
+Download the DMG or ZIP only from the official CodexVault GitHub release. If
+macOS blocks CodexVault on first launch:
+
+1. Open `CodexVault.app` normally once. macOS blocks the launch.
+2. Open **System Settings → Privacy & Security**.
+3. Scroll to **Security** and choose **Open Anyway** for CodexVault.
+4. Confirm the warning with **Open** and authenticate if macOS asks you to.
+
+**Open Anyway** is shown only for a limited time after the blocked launch
+attempt. This creates an exception only for CodexVault and does not disable
+Gatekeeper system-wide.
+
 ## Normal backup
 
 Use a normal backup when you want a portable package for exactly the folders you
