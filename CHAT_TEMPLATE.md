@@ -22,11 +22,8 @@ Bei sichtbaren Funktions- oder Einstellungsänderungen zusätzlich die Feature-L
 
 CodexVault-spezifisch:
 
-- GitHub-Quellcode darf nur nach der dokumentierten Datenschutzprüfung veröffentlicht werden.
-- Dev-Bundles werden nie verpackt oder veröffentlicht.
-- Jede Beta- oder Final-Veröffentlichung benötigt eine DMG mit `Applications`-Link, ein ZIP und den vorgesehenen aktuellen Datenschutzbericht mit beiden Prüfsummen als Release-Anhang.
-- Keine stillen Sicherungen oder Löschungen: Auswahl, Ziel und Bestätigung müssen sichtbar bleiben.
-- Bestehende Datenformate und die Trennung von Dev, Beta und Final nur bewusst und mit Prüfung ändern.
+
+- Die verbindlichen Regeln für Veröffentlichung, Datenformate, Sicherungen und Löschungen stehen in `PROJECT_CONTEXT.md`.
 
 Aktueller Auftrag:
 
